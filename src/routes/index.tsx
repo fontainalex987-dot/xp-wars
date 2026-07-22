@@ -10,7 +10,7 @@ export const Route = createFileRoute("/")({
       { title: "Accueil — Task Battle" },
       { name: "description", content: "Ton résumé du jour, ta progression et tes objectifs." },
       { property: "og:title", content: "Accueil — Task Battle" },
-      { property: "og:description", content: "Ton résumé du jour et ta progression gamifiée." },
+      { property: "og:description", content: "Ton résumé du jour, ta progression et tes objectifs." },
     ],
   }),
   component: HomePage,
