@@ -14,16 +14,144 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      group_members: {
+        Row: {
+          group_id: string
+          joined_at: string
+          user_id: string
+        }
+        Insert: {
+          group_id: string
+          joined_at?: string
+          user_id: string
+        }
+        Update: {
+          group_id?: string
+          joined_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      groups: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          name: string
+          owner_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          name: string
+          owner_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          name?: string
+          owner_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar: string
+          created_at: string
+          goal: string | null
+          id: string
+          level: number
+          pseudo: string
+          streak: number
+          total_points: number
+          updated_at: string
+          xp: number
+        }
+        Insert: {
+          avatar?: string
+          created_at?: string
+          goal?: string | null
+          id: string
+          level?: number
+          pseudo: string
+          streak?: number
+          total_points?: number
+          updated_at?: string
+          xp?: number
+        }
+        Update: {
+          avatar?: string
+          created_at?: string
+          goal?: string | null
+          id?: string
+          level?: number
+          pseudo?: string
+          streak?: number
+          total_points?: number
+          updated_at?: string
+          xp?: number
+        }
+        Relationships: []
+      }
+      tasks: {
+        Row: {
+          created_at: string
+          description: string
+          difficulty: Database["public"]["Enums"]["difficulty"]
+          done: boolean
+          done_at: string | null
+          id: string
+          points: number
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          difficulty: Database["public"]["Enums"]["difficulty"]
+          done?: boolean
+          done_at?: string | null
+          id?: string
+          points: number
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          difficulty?: Database["public"]["Enums"]["difficulty"]
+          done?: boolean
+          done_at?: string | null
+          id?: string
+          points?: number
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_group_code: { Args: never; Returns: string }
+      is_group_member: {
+        Args: { _group: string; _user: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      difficulty: "facile" | "moyenne" | "difficile"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +278,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      difficulty: ["facile", "moyenne", "difficile"],
+    },
   },
 } as const
