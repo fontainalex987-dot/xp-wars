@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Flame, Trophy, Zap } from "lucide-react";
+import { Bell, Flame, Trophy, Zap } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { XpBar } from "@/components/XpBar";
 import { useStore } from "@/lib/store";
+import { useDailyReminder } from "@/lib/daily-reminder";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({
