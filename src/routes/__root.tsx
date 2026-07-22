@@ -127,9 +127,11 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <StoreProvider>
-        <Outlet />
-        <PointsBurst />
-        <Toaster theme="dark" position="top-center" richColors />
+        <DailyReminderProvider>
+          <Outlet />
+          <PointsBurst />
+          <Toaster theme="dark" position="top-center" richColors />
+        </DailyReminderProvider>
       </StoreProvider>
     </QueryClientProvider>
   );
