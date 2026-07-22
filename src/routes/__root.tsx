@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { StoreProvider } from "@/lib/store";
+import { DailyReminderProvider } from "@/lib/daily-reminder";
 import { PointsBurst } from "@/components/PointsBurst";
 import { Toaster } from "sonner";
 
