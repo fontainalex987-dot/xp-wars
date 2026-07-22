@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Flame, Trophy, Zap } from "lucide-react";
+import { Bell, Flame, Trophy, Zap } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { XpBar } from "@/components/XpBar";
 import { useStore } from "@/lib/store";
+import { useDailyReminder } from "@/lib/daily-reminder";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({
@@ -18,6 +19,7 @@ export const Route = createFileRoute("/profile")({
 
 function ProfilePage() {
   const { profile, badges, tasks, xpPerLevel } = useStore();
+  const reminder = useDailyReminder();
 
   return (
     <AppShell>
@@ -50,6 +52,41 @@ function ProfilePage() {
         <StatBox icon={<Zap className="size-4" />} label="Points" value={profile.totalPoints.toLocaleString("fr-FR")} />
         <StatBox icon={<Flame className="size-4" />} label="Streak" value={`${profile.streak}j`} />
         <StatBox icon={<Trophy className="size-4" />} label="Badges" value={`${badges.filter((b) => b.unlocked).length}/${badges.length}`} />
+      </section>
+
+      {/* Daily reminder */}
+      <section className="px-5 py-4">
+        <div className="p-4 rounded-2xl bg-card ring-1 ring-white/5 flex items-center gap-3">
+          <div className={`size-10 rounded-full flex items-center justify-center ${reminder.enabled ? "bg-brand/20 text-brand xp-glow" : "bg-zinc-800 text-muted-foreground"}`}>
+            <Bell className="size-5" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold">Rappel quotidien</p>
+            <p className="text-xs text-muted-foreground">
+              {reminder.permission === "unsupported"
+                ? "Notifications non supportées sur cet appareil"
+                : reminder.permission === "denied"
+                ? "Notifications bloquées — active-les dans les réglages du navigateur"
+                : `Alerte chaque jour à ${reminder.reminderLabel} pour ton bilan`}
+            </p>
+          </div>
+          <button
+            role="switch"
+            aria-checked={reminder.enabled}
+            aria-label="Activer le rappel quotidien"
+            disabled={reminder.permission === "unsupported"}
+            onClick={() => reminder.toggle(!reminder.enabled)}
+            className={`relative w-12 h-7 rounded-full transition-colors shrink-0 disabled:opacity-40 disabled:cursor-not-allowed ${
+              reminder.enabled ? "bg-brand" : "bg-zinc-700"
+            }`}
+          >
+            <span
+              className={`absolute top-0.5 size-6 rounded-full bg-white transition-transform ${
+                reminder.enabled ? "translate-x-[22px]" : "translate-x-0.5"
+              }`}
+            />
+          </button>
+        </div>
       </section>
 
       {/* Badges */}
