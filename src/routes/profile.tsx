@@ -19,6 +19,7 @@ export const Route = createFileRoute("/profile")({
 
 function ProfilePage() {
   const { profile, badges, tasks, xpPerLevel } = useStore();
+  const reminder = useDailyReminder();
 
   return (
     <AppShell>
