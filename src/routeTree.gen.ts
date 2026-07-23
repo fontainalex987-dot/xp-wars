@@ -9,123 +9,27 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TasksRouteImport } from './routes/tasks'
-import { Route as ProfileRouteImport } from './routes/profile'
-import { Route as LeaderboardRouteImport } from './routes/leaderboard'
-import { Route as GroupRouteImport } from './routes/group'
-import { Route as IndexRouteImport } from './routes/index'
 
-const TasksRoute = TasksRouteImport.update({
-  id: '/tasks',
-  path: '/tasks',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProfileRoute = ProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LeaderboardRoute = LeaderboardRouteImport.update({
-  id: '/leaderboard',
-  path: '/leaderboard',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const GroupRoute = GroupRouteImport.update({
-  id: '/group',
-  path: '/group',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-
-export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/group': typeof GroupRoute
-  '/leaderboard': typeof LeaderboardRoute
-  '/profile': typeof ProfileRoute
-  '/tasks': typeof TasksRoute
-}
-export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/group': typeof GroupRoute
-  '/leaderboard': typeof LeaderboardRoute
-  '/profile': typeof ProfileRoute
-  '/tasks': typeof TasksRoute
-}
+export interface FileRoutesByFullPath {}
+export interface FileRoutesByTo {}
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/group': typeof GroupRoute
-  '/leaderboard': typeof LeaderboardRoute
-  '/profile': typeof ProfileRoute
-  '/tasks': typeof TasksRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/group' | '/leaderboard' | '/profile' | '/tasks'
+  fullPaths: never
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/group' | '/leaderboard' | '/profile' | '/tasks'
-  id: '__root__' | '/' | '/group' | '/leaderboard' | '/profile' | '/tasks'
+  to: never
+  id: '__root__'
   fileRoutesById: FileRoutesById
 }
-export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  GroupRoute: typeof GroupRoute
-  LeaderboardRoute: typeof LeaderboardRoute
-  ProfileRoute: typeof ProfileRoute
-  TasksRoute: typeof TasksRoute
-}
+export interface RootRouteChildren {}
 
 declare module '@tanstack/react-router' {
-  interface FileRoutesByPath {
-    '/tasks': {
-      id: '/tasks'
-      path: '/tasks'
-      fullPath: '/tasks'
-      preLoaderRoute: typeof TasksRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/profile': {
-      id: '/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof ProfileRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/leaderboard': {
-      id: '/leaderboard'
-      path: '/leaderboard'
-      fullPath: '/leaderboard'
-      preLoaderRoute: typeof LeaderboardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/group': {
-      id: '/group'
-      path: '/group'
-      fullPath: '/group'
-      preLoaderRoute: typeof GroupRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-  }
+  interface FileRoutesByPath {}
 }
 
-const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  GroupRoute: GroupRoute,
-  LeaderboardRoute: LeaderboardRoute,
-  ProfileRoute: ProfileRoute,
-  TasksRoute: TasksRoute,
-}
+const rootRouteChildren: RootRouteChildren = {}
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
