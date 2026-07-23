@@ -5,14 +5,14 @@ import { Plus, X } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { TaskCard } from "@/components/TaskCard";
 import { triggerBurst } from "@/components/PointsBurst";
-import { useStore, type Difficulty, DIFFICULTY_POINTS } from "@/lib/store";
+import { useAddTask, useCompleteTask, useTodayTasks, type Difficulty, DIFFICULTY_POINTS, type Task } from "@/lib/store";
 
-export const Route = createFileRoute("/tasks")({
+export const Route = createFileRoute("/_authenticated/tasks")({
   head: () => ({
     meta: [
-      { title: "Mes tâches — Task Battle" },
+      { title: "Mes tâches — XP Wars" },
       { name: "description", content: "Gère tes 3 tâches quotidiennes et valide-les pour gagner des points." },
-      { property: "og:title", content: "Mes tâches — Task Battle" },
+      { property: "og:title", content: "Mes tâches — XP Wars" },
       { property: "og:description", content: "Tes 3 quêtes du jour. Valide, gagne des points, grimpe au classement." },
     ],
   }),
@@ -20,19 +20,37 @@ export const Route = createFileRoute("/tasks")({
 });
 
 function TasksPage() {
-  const { tasks, addTask, completeTask } = useStore();
+  const { data: tasks = [] } = useTodayTasks();
+  const addTask = useAddTask();
+  const completeTask = useCompleteTask();
   const [open, setOpen] = useState(false);
   const done = tasks.filter((t) => t.done).length;
   const totalPossible = tasks.reduce((s, t) => s + t.points, 0);
   const earned = tasks.filter((t) => t.done).reduce((s, t) => s + t.points, 0);
   const pct = totalPossible ? Math.round((earned / totalPossible) * 100) : 0;
 
-  const handleComplete = (id: string) => {
+  const handleComplete = async (id: string) => {
     const t = tasks.find((x) => x.id === id);
-    if (!t) return;
-    completeTask(id);
+    if (!t || t.done) return;
     triggerBurst(t.points);
-    toast.success(`Tâche accomplie ! +${t.points} pts`);
+    try {
+      await completeTask.mutateAsync(t);
+      toast.success(`Tâche accomplie ! +${t.points} pts`);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Erreur";
+      toast.error(message);
+    }
+  };
+
+  const handleAdd = async (t: { title: string; description: string; difficulty: Difficulty }) => {
+    try {
+      await addTask.mutateAsync(t);
+      setOpen(false);
+      toast.success("Nouvelle quête ajoutée");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Erreur";
+      toast.error(message);
+    }
   };
 
   return (
@@ -74,7 +92,7 @@ function TasksPage() {
             Aucune quête. Ajoute jusqu'à 3 tâches pour aujourd'hui.
           </div>
         )}
-        {tasks.map((t) => (
+        {tasks.map((t: Task) => (
           <TaskCard key={t.id} task={t} onComplete={handleComplete} />
         ))}
         {Array.from({ length: Math.max(0, 3 - tasks.length) }).map((_, i) => (
@@ -88,7 +106,7 @@ function TasksPage() {
         ))}
       </section>
 
-      {open && <NewTaskSheet onClose={() => setOpen(false)} onAdd={(t) => { addTask(t); setOpen(false); toast.success("Nouvelle quête ajoutée"); }} />}
+      {open && <NewTaskSheet onClose={() => setOpen(false)} onAdd={handleAdd} />}
     </AppShell>
   );
 }
@@ -166,10 +184,7 @@ function NewTaskSheet({
           </div>
         </div>
 
-        <button
-          type="submit"
-          className="w-full py-3 rounded-xl bg-brand text-primary-foreground font-bold active:scale-95 transition-transform"
-        >
+        <button type="submit" className="w-full py-3 rounded-xl bg-brand text-primary-foreground font-bold active:scale-95 transition-transform">
           Ajouter la quête
         </button>
       </form>

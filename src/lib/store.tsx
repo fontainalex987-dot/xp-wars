@@ -1,4 +1,6 @@
-import { createContext, useContext, useState, useCallback, useMemo, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 export type Difficulty = "facile" | "moyenne" | "difficile";
 
@@ -7,6 +9,10 @@ export const DIFFICULTY_POINTS: Record<Difficulty, number> = {
   moyenne: 20,
   difficile: 30,
 };
+
+export const XP_PER_LEVEL = 500;
+
+export const AVATARS = ["🥷", "🦁", "🐉", "⚡", "🧿", "🦊", "🐺", "🦅", "🐯", "🐼", "🦄", "👾"];
 
 export type Task = {
   id: string;
@@ -18,12 +24,15 @@ export type Task = {
   createdAt: number;
 };
 
-export type Badge = {
+export type Profile = {
   id: string;
-  label: string;
-  description: string;
-  unlocked: boolean;
-  icon: string;
+  pseudo: string;
+  avatar: string;
+  goal: string | null;
+  level: number;
+  totalPoints: number;
+  xp: number;
+  streak: number;
 };
 
 export type Friend = {
@@ -36,166 +45,354 @@ export type Friend = {
   pointsMonth: number;
 };
 
-export type Profile = {
-  pseudo: string;
-  avatar: string;
-  level: number;
-  totalPoints: number;
-  xp: number; // xp in current level (0-500)
-  streak: number;
-};
+export type Group = { id: string; name: string; code: string; owner_id: string };
 
-const XP_PER_LEVEL = 500;
+export type Badge = { id: string; label: string; description: string; unlocked: boolean; icon: string };
 
-const initialTasks: Task[] = [
-  {
-    id: "t1",
-    title: "Séance de HIIT intense",
-    description: "45 minutes d'effort cardio pur.",
-    difficulty: "difficile",
-    points: 30,
-    done: false,
-    createdAt: Date.now(),
-  },
-  {
-    id: "t2",
-    title: "Lire 10 pages",
-    description: "Continuer le chapitre en cours.",
-    difficulty: "facile",
-    points: 10,
-    done: true,
-    createdAt: Date.now(),
-  },
-  {
-    id: "t3",
-    title: "Réviser cours anglais",
-    description: "30 minutes de vocabulaire.",
-    difficulty: "moyenne",
-    points: 20,
-    done: true,
-    createdAt: Date.now(),
-  },
-];
+// ------- Auth ---------
+type AuthCtx = { userId: string | null; email: string | null; loading: boolean; signOut: () => Promise<void> };
+const AuthContext = createContext<AuthCtx>({ userId: null, email: null, loading: true, signOut: async () => {} });
 
-const initialProfile: Profile = {
-  pseudo: "Alex_Strike",
-  avatar: "🥷",
-  level: 24,
-  totalPoints: 4820,
-  xp: 330,
-  streak: 12,
-};
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [userId, setUserId] = useState<string | null>(null);
+  const [email, setEmail] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const qc = useQueryClient();
 
-const initialFriends: Friend[] = [
-  { id: "u0", pseudo: "Alex_Strike", avatar: "🥷", level: 24, pointsToday: 30, pointsWeek: 240, pointsMonth: 890 },
-  { id: "u1", pseudo: "Marcus_V8", avatar: "🦁", level: 27, pointsToday: 60, pointsWeek: 320, pointsMonth: 1120 },
-  { id: "u2", pseudo: "Sarah.Code", avatar: "🐉", level: 22, pointsToday: 50, pointsWeek: 280, pointsMonth: 980 },
-  { id: "u3", pseudo: "Nina_Volt", avatar: "⚡", level: 19, pointsToday: 20, pointsWeek: 180, pointsMonth: 640 },
-  { id: "u4", pseudo: "Kaï_Zen", avatar: "🧿", level: 15, pointsToday: 10, pointsWeek: 110, pointsMonth: 420 },
-];
-
-const initialBadges: Badge[] = [
-  { id: "b1", label: "Première semaine", description: "7 jours consécutifs terminés", unlocked: true, icon: "🔥" },
-  { id: "b2", label: "Combo x3", description: "3 tâches en une journée", unlocked: true, icon: "⚡" },
-  { id: "b3", label: "100 tâches", description: "100 tâches terminées au total", unlocked: false, icon: "💯" },
-  { id: "b4", label: "Mode Difficile", description: "10 tâches difficiles réussies", unlocked: true, icon: "🔺" },
-  { id: "b5", label: "Roi du groupe", description: "1er du classement mensuel", unlocked: false, icon: "👑" },
-  { id: "b6", label: "Marathonien", description: "30 jours consécutifs", unlocked: false, icon: "🏃" },
-];
-
-type StoreValue = {
-  profile: Profile;
-  tasks: Task[];
-  friends: Friend[];
-  badges: Badge[];
-  groupName: string;
-  groupCode: string;
-  xpPerLevel: number;
-  addTask: (t: Omit<Task, "id" | "points" | "done" | "createdAt">) => void;
-  completeTask: (id: string) => void;
-  removeTask: (id: string) => void;
-  updateProfile: (p: Partial<Profile>) => void;
-};
-
-const StoreContext = createContext<StoreValue | null>(null);
-
-export function StoreProvider({ children }: { children: ReactNode }) {
-  const [profile, setProfile] = useState<Profile>(initialProfile);
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
-  const [friends, setFriends] = useState<Friend[]>(initialFriends);
-  const [badges] = useState<Badge[]>(initialBadges);
-
-  const addTask = useCallback((t: Omit<Task, "id" | "points" | "done" | "createdAt">) => {
-    setTasks((prev) => {
-      if (prev.length >= 3) return prev;
-      return [
-        ...prev,
-        {
-          ...t,
-          id: `t${Date.now()}`,
-          points: DIFFICULTY_POINTS[t.difficulty],
-          done: false,
-          createdAt: Date.now(),
-        },
-      ];
+  useEffect(() => {
+    let mounted = true;
+    supabase.auth.getSession().then(({ data }) => {
+      if (!mounted) return;
+      setUserId(data.session?.user.id ?? null);
+      setEmail(data.session?.user.email ?? null);
+      setLoading(false);
     });
-  }, []);
-
-  const completeTask = useCallback((id: string) => {
-    setTasks((prev) => {
-      const task = prev.find((t) => t.id === id);
-      if (!task || task.done) return prev;
-      setProfile((p) => {
-        const newXp = p.xp + task.points;
-        const levelsGained = Math.floor(newXp / XP_PER_LEVEL);
-        return {
-          ...p,
-          totalPoints: p.totalPoints + task.points,
-          xp: newXp % XP_PER_LEVEL,
-          level: p.level + levelsGained,
-        };
-      });
-      setFriends((fs) =>
-        fs.map((f) =>
-          f.pseudo === "Alex_Strike"
-            ? { ...f, pointsToday: f.pointsToday + task.points, pointsWeek: f.pointsWeek + task.points, pointsMonth: f.pointsMonth + task.points }
-            : f
-        )
-      );
-      return prev.map((t) => (t.id === id ? { ...t, done: true } : t));
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
+      setUserId(session?.user.id ?? null);
+      setEmail(session?.user.email ?? null);
+      if (event === "SIGNED_OUT") qc.clear();
+      else qc.invalidateQueries();
     });
-  }, []);
+    return () => {
+      mounted = false;
+      sub.subscription.unsubscribe();
+    };
+  }, [qc]);
 
-  const removeTask = useCallback((id: string) => {
-    setTasks((prev) => prev.filter((t) => t.id !== id));
-  }, []);
+  const signOut = useCallback(async () => {
+    await qc.cancelQueries();
+    qc.clear();
+    await supabase.auth.signOut();
+  }, [qc]);
 
-  const updateProfile = useCallback((p: Partial<Profile>) => {
-    setProfile((prev) => ({ ...prev, ...p }));
-  }, []);
-
-  const value = useMemo<StoreValue>(
-    () => ({
-      profile,
-      tasks,
-      friends,
-      badges,
-      groupName: "Elite Alpha",
-      groupCode: "BATTLE-7F3K",
-      xpPerLevel: XP_PER_LEVEL,
-      addTask,
-      completeTask,
-      removeTask,
-      updateProfile,
-    }),
-    [profile, tasks, friends, badges, addTask, completeTask, removeTask, updateProfile]
-  );
-
-  return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
+  return <AuthContext.Provider value={{ userId, email, loading, signOut }}>{children}</AuthContext.Provider>;
 }
 
-export function useStore() {
-  const ctx = useContext(StoreContext);
-  if (!ctx) throw new Error("useStore must be used within StoreProvider");
-  return ctx;
+export function useAuth() {
+  return useContext(AuthContext);
+}
+
+// ------- Profile ---------
+export function useProfile() {
+  const { userId } = useAuth();
+  return useQuery({
+    queryKey: ["profile", userId],
+    enabled: !!userId,
+    queryFn: async (): Promise<Profile | null> => {
+      const { data, error } = await supabase.from("profiles").select("*").eq("id", userId!).maybeSingle();
+      if (error) throw error;
+      if (!data) return null;
+      return {
+        id: data.id,
+        pseudo: data.pseudo,
+        avatar: data.avatar,
+        goal: data.goal,
+        level: data.level,
+        totalPoints: data.total_points,
+        xp: data.xp,
+        streak: data.streak,
+      };
+    },
+  });
+}
+
+export function useCreateProfile() {
+  const { userId } = useAuth();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: { pseudo: string; avatar: string; goal: string | null }) => {
+      if (!userId) throw new Error("Not authenticated");
+      const { error } = await supabase.from("profiles").insert({
+        id: userId,
+        pseudo: input.pseudo,
+        avatar: input.avatar,
+        goal: input.goal,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["profile"] }),
+  });
+}
+
+export function useUpdateProfile() {
+  const { userId } = useAuth();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: Partial<{ pseudo: string; avatar: string; goal: string | null }>) => {
+      if (!userId) throw new Error("Not authenticated");
+      const { error } = await supabase.from("profiles").update({ ...input, updated_at: new Date().toISOString() }).eq("id", userId);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["profile"] }),
+  });
+}
+
+// ------- Tasks ---------
+function startOfToday() {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+export function useTodayTasks() {
+  const { userId } = useAuth();
+  return useQuery({
+    queryKey: ["tasks", "today", userId],
+    enabled: !!userId,
+    queryFn: async (): Promise<Task[]> => {
+      const { data, error } = await supabase
+        .from("tasks")
+        .select("*")
+        .eq("user_id", userId!)
+        .gte("created_at", startOfToday().toISOString())
+        .order("created_at", { ascending: true });
+      if (error) throw error;
+      return (data ?? []).map((t) => ({
+        id: t.id,
+        title: t.title,
+        description: t.description ?? "",
+        difficulty: t.difficulty as Difficulty,
+        points: t.points,
+        done: t.done,
+        createdAt: new Date(t.created_at).getTime(),
+      }));
+    },
+  });
+}
+
+export function useAddTask() {
+  const { userId } = useAuth();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: { title: string; description: string; difficulty: Difficulty }) => {
+      if (!userId) throw new Error("Not authenticated");
+      const { error } = await supabase.from("tasks").insert({
+        user_id: userId,
+        title: input.title,
+        description: input.description,
+        difficulty: input.difficulty,
+        points: DIFFICULTY_POINTS[input.difficulty],
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["tasks"] }),
+  });
+}
+
+export function useCompleteTask() {
+  const { userId } = useAuth();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (task: Task) => {
+      if (!userId) throw new Error("Not authenticated");
+      const { error: tErr } = await supabase
+        .from("tasks")
+        .update({ done: true, done_at: new Date().toISOString() })
+        .eq("id", task.id)
+        .eq("done", false);
+      if (tErr) throw tErr;
+
+      const { data: prof } = await supabase.from("profiles").select("xp, level, total_points").eq("id", userId).maybeSingle();
+      if (prof) {
+        const newXpRaw = prof.xp + task.points;
+        const gained = Math.floor(newXpRaw / XP_PER_LEVEL);
+        await supabase
+          .from("profiles")
+          .update({
+            xp: newXpRaw % XP_PER_LEVEL,
+            level: prof.level + gained,
+            total_points: prof.total_points + task.points,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", userId);
+      }
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["tasks"] });
+      qc.invalidateQueries({ queryKey: ["profile"] });
+      qc.invalidateQueries({ queryKey: ["members"] });
+    },
+  });
+}
+
+export function useRemoveTask() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("tasks").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["tasks"] }),
+  });
+}
+
+// ------- Groups ---------
+export function useMyGroup() {
+  const { userId } = useAuth();
+  return useQuery({
+    queryKey: ["myGroup", userId],
+    enabled: !!userId,
+    queryFn: async (): Promise<Group | null> => {
+      const { data: gm, error } = await supabase.from("group_members").select("group_id").eq("user_id", userId!).maybeSingle();
+      if (error) throw error;
+      if (!gm) return null;
+      const { data: g, error: gErr } = await supabase.from("groups").select("*").eq("id", gm.group_id).maybeSingle();
+      if (gErr) throw gErr;
+      return (g as Group) ?? null;
+    },
+  });
+}
+
+export function useGroupMembers(groupId: string | undefined) {
+  return useQuery({
+    queryKey: ["members", groupId],
+    enabled: !!groupId,
+    queryFn: async (): Promise<Friend[]> => {
+      const { data: members, error } = await supabase.from("group_members").select("user_id").eq("group_id", groupId!);
+      if (error) throw error;
+      const ids = (members ?? []).map((m) => m.user_id);
+      if (!ids.length) return [];
+      const { data: profs, error: pErr } = await supabase.from("profiles").select("*").in("id", ids);
+      if (pErr) throw pErr;
+
+      const today = startOfToday();
+      const weekStart = new Date(today);
+      const dow = today.getDay(); // 0 sun ... 6 sat
+      const diff = (dow + 6) % 7; // shift so Monday=0
+      weekStart.setDate(today.getDate() - diff);
+      const monthStart = new Date();
+      monthStart.setDate(1);
+      monthStart.setHours(0, 0, 0, 0);
+
+      const { data: doneTasks } = await supabase
+        .from("tasks")
+        .select("user_id, points, done_at")
+        .in("user_id", ids)
+        .eq("done", true)
+        .gte("done_at", monthStart.toISOString());
+
+      const sum = (uid: string, since: Date) =>
+        (doneTasks ?? [])
+          .filter((t) => t.user_id === uid && t.done_at && new Date(t.done_at) >= since)
+          .reduce((s, t) => s + (t.points ?? 0), 0);
+
+      return (profs ?? []).map((p) => ({
+        id: p.id,
+        pseudo: p.pseudo,
+        avatar: p.avatar,
+        level: p.level,
+        pointsToday: sum(p.id, today),
+        pointsWeek: sum(p.id, weekStart),
+        pointsMonth: sum(p.id, monthStart),
+      }));
+    },
+  });
+}
+
+export function useCreateGroup() {
+  const { userId } = useAuth();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (name: string) => {
+      if (!userId) throw new Error("Not authenticated");
+      // generate a unique code (retry a couple of times)
+      for (let attempt = 0; attempt < 5; attempt++) {
+        const { data: codeRes, error: codeErr } = await supabase.rpc("generate_group_code");
+        if (codeErr) throw codeErr;
+        const code = codeRes as unknown as string;
+        const { data: g, error } = await supabase
+          .from("groups")
+          .insert({ name, code, owner_id: userId })
+          .select()
+          .maybeSingle();
+        if (!error && g) {
+          const { error: mErr } = await supabase.from("group_members").insert({ group_id: g.id, user_id: userId });
+          if (mErr) throw mErr;
+          return g as Group;
+        }
+        // if uniqueness collision, retry; otherwise throw
+        if (error && !`${error.message}`.toLowerCase().includes("unique")) throw error;
+      }
+      throw new Error("Impossible de générer un code unique");
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["myGroup"] });
+      qc.invalidateQueries({ queryKey: ["members"] });
+    },
+  });
+}
+
+export function useJoinGroup() {
+  const { userId } = useAuth();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (code: string) => {
+      if (!userId) throw new Error("Not authenticated");
+      const { data: g, error } = await supabase.from("groups").select("*").eq("code", code.trim().toUpperCase()).maybeSingle();
+      if (error) throw error;
+      if (!g) throw new Error("Code invalide");
+      // leave previous group first (optional single-group model)
+      await supabase.from("group_members").delete().eq("user_id", userId);
+      const { error: mErr } = await supabase.from("group_members").insert({ group_id: g.id, user_id: userId });
+      if (mErr) throw mErr;
+      return g as Group;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["myGroup"] });
+      qc.invalidateQueries({ queryKey: ["members"] });
+    },
+  });
+}
+
+export function useLeaveGroup() {
+  const { userId } = useAuth();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      if (!userId) throw new Error("Not authenticated");
+      const { error } = await supabase.from("group_members").delete().eq("user_id", userId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["myGroup"] });
+      qc.invalidateQueries({ queryKey: ["members"] });
+    },
+  });
+}
+
+// ------- Badges (derived, local) ---------
+export function useBadges(): Badge[] {
+  const { data: profile } = useProfile();
+  const { data: tasks } = useTodayTasks();
+  const doneToday = (tasks ?? []).filter((t) => t.done).length;
+  const total = profile?.totalPoints ?? 0;
+  return [
+    { id: "b1", label: "Première quête", description: "Termine ta première tâche", unlocked: total >= 10, icon: "🎯" },
+    { id: "b2", label: "Combo x3", description: "3 tâches en une journée", unlocked: doneToday >= 3, icon: "⚡" },
+    { id: "b3", label: "500 pts", description: "500 points cumulés", unlocked: total >= 500, icon: "💯" },
+    { id: "b4", label: "1000 pts", description: "1000 points cumulés", unlocked: total >= 1000, icon: "🔺" },
+    { id: "b5", label: "Niveau 5", description: "Atteins le niveau 5", unlocked: (profile?.level ?? 1) >= 5, icon: "👑" },
+    { id: "b6", label: "Niveau 10", description: "Atteins le niveau 10", unlocked: (profile?.level ?? 1) >= 10, icon: "🏆" },
+  ];
 }

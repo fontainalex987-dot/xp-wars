@@ -11,7 +11,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { StoreProvider } from "@/lib/store";
+import { AuthProvider } from "@/lib/store";
 import { DailyReminderProvider } from "@/lib/daily-reminder";
 import { PointsBurst } from "@/components/PointsBurst";
 import { Toaster } from "sonner";
@@ -81,18 +81,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { title: "Accueil — Task Battle" },
-      { name: "description", content: "Ton résumé du jour, ta progression et tes objectifs." },
-      { name: "author", content: "Task Battle" },
+      { title: "XP Wars — Défie tes amis" },
+      { name: "description", content: "Transforme tes objectifs quotidiens en défi entre amis." },
+      { name: "author", content: "XP Wars" },
       { name: "theme-color", content: "#0a0a0b" },
-      { property: "og:title", content: "Accueil — Task Battle" },
-      { property: "og:description", content: "Ton résumé du jour, ta progression et tes objectifs." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Accueil — Task Battle" },
-      { name: "twitter:description", content: "Ton résumé du jour, ta progression et tes objectifs." },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/b8078152-006b-421f-87cb-2cb89915776a" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/b8078152-006b-421f-87cb-2cb89915776a" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -132,13 +126,13 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <StoreProvider>
+      <AuthProvider>
         <DailyReminderProvider>
           <Outlet />
           <PointsBurst />
           <Toaster theme="dark" position="top-center" richColors />
         </DailyReminderProvider>
-      </StoreProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
