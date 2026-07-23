@@ -5,7 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { AVATARS, useProfile, useUpdateProfile } from "@/lib/store";
 
-export const Route = createFileRoute("/_authenticated/profile/edit")({
+export const Route = createFileRoute("/_authenticated/edit-profile")({
   head: () => ({
     meta: [
       { title: "Modifier mon profil — XP Wars" },
