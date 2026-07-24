@@ -206,27 +206,9 @@ export function useCompleteTask() {
   return useMutation({
     mutationFn: async (task: Task) => {
       if (!userId) throw new Error("Not authenticated");
-      const { error: tErr } = await supabase
-        .from("tasks")
-        .update({ done: true, done_at: new Date().toISOString() })
-        .eq("id", task.id)
-        .eq("done", false);
-      if (tErr) throw tErr;
-
-      const { data: prof } = await supabase.from("profiles").select("xp, level, total_points").eq("id", userId).maybeSingle();
-      if (prof) {
-        const newXpRaw = prof.xp + task.points;
-        const gained = Math.floor(newXpRaw / XP_PER_LEVEL);
-        await supabase
-          .from("profiles")
-          .update({
-            xp: newXpRaw % XP_PER_LEVEL,
-            level: prof.level + gained,
-            total_points: prof.total_points + task.points,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", userId);
-      }
+      // Atomic server-side completion: handles XP, level, total_points and streak in a single transaction.
+      const { error } = await supabase.rpc("complete_task", { _task_id: task.id });
+      if (error) throw error;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["tasks"] });
@@ -235,6 +217,7 @@ export function useCompleteTask() {
     },
   });
 }
+
 
 export function useRemoveTask() {
   const qc = useQueryClient();
