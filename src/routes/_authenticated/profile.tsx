@@ -23,6 +23,12 @@ function ProfilePage() {
   const badges = useBadges();
   const reminder = useDailyReminder();
   const { signOut } = useAuth();
+  const navigate = useNavigate();
+  const handleSignOut = async () => {
+    await signOut();
+    navigate({ to: "/auth", replace: true });
+  };
+
 
   if (!profile) return null;
 
