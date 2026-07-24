@@ -70,6 +70,7 @@ export type Database = {
           created_at: string
           goal: string | null
           id: string
+          last_task_date: string | null
           level: number
           pseudo: string
           streak: number
@@ -82,6 +83,7 @@ export type Database = {
           created_at?: string
           goal?: string | null
           id: string
+          last_task_date?: string | null
           level?: number
           pseudo: string
           streak?: number
@@ -94,6 +96,7 @@ export type Database = {
           created_at?: string
           goal?: string | null
           id?: string
+          last_task_date?: string | null
           level?: number
           pseudo?: string
           streak?: number
@@ -144,10 +147,51 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      complete_task: {
+        Args: { _task_id: string }
+        Returns: {
+          level: number
+          streak: number
+          total_points: number
+          xp: number
+        }[]
+      }
+      create_group: {
+        Args: { _name: string }
+        Returns: {
+          code: string
+          created_at: string
+          id: string
+          name: string
+          owner_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "groups"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       generate_group_code: { Args: never; Returns: string }
       is_group_member: {
         Args: { _group: string; _user: string }
         Returns: boolean
+      }
+      join_group: {
+        Args: { _code: string }
+        Returns: {
+          code: string
+          created_at: string
+          id: string
+          name: string
+          owner_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "groups"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
     }
     Enums: {
