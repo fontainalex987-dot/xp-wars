@@ -206,27 +206,9 @@ export function useCompleteTask() {
   return useMutation({
     mutationFn: async (task: Task) => {
       if (!userId) throw new Error("Not authenticated");
-      const { error: tErr } = await supabase
-        .from("tasks")
-        .update({ done: true, done_at: new Date().toISOString() })
-        .eq("id", task.id)
-        .eq("done", false);
-      if (tErr) throw tErr;
-
-      const { data: prof } = await supabase.from("profiles").select("xp, level, total_points").eq("id", userId).maybeSingle();
-      if (prof) {
-        const newXpRaw = prof.xp + task.points;
-        const gained = Math.floor(newXpRaw / XP_PER_LEVEL);
-        await supabase
-          .from("profiles")
-          .update({
-            xp: newXpRaw % XP_PER_LEVEL,
-            level: prof.level + gained,
-            total_points: prof.total_points + task.points,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", userId);
-      }
+      // Atomic server-side completion: handles XP, level, total_points and streak in a single transaction.
+      const { error } = await supabase.rpc("complete_task", { _task_id: task.id });
+      if (error) throw error;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["tasks"] });
@@ -235,6 +217,7 @@ export function useCompleteTask() {
     },
   });
 }
+
 
 export function useRemoveTask() {
   const qc = useQueryClient();
@@ -311,30 +294,15 @@ export function useGroupMembers(groupId: string | undefined) {
 }
 
 export function useCreateGroup() {
+
   const { userId } = useAuth();
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (name: string) => {
+    mutationFn: async (name: string): Promise<Group> => {
       if (!userId) throw new Error("Not authenticated");
-      // generate a unique code (retry a couple of times)
-      for (let attempt = 0; attempt < 5; attempt++) {
-        const { data: codeRes, error: codeErr } = await supabase.rpc("generate_group_code");
-        if (codeErr) throw codeErr;
-        const code = codeRes as unknown as string;
-        const { data: g, error } = await supabase
-          .from("groups")
-          .insert({ name, code, owner_id: userId })
-          .select()
-          .maybeSingle();
-        if (!error && g) {
-          const { error: mErr } = await supabase.from("group_members").insert({ group_id: g.id, user_id: userId });
-          if (mErr) throw mErr;
-          return g as Group;
-        }
-        // if uniqueness collision, retry; otherwise throw
-        if (error && !`${error.message}`.toLowerCase().includes("unique")) throw error;
-      }
-      throw new Error("Impossible de générer un code unique");
+      const { data, error } = await supabase.rpc("create_group", { _name: name });
+      if (error) throw error;
+      return data as unknown as Group;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["myGroup"] });
@@ -347,16 +315,11 @@ export function useJoinGroup() {
   const { userId } = useAuth();
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (code: string) => {
+    mutationFn: async (code: string): Promise<Group> => {
       if (!userId) throw new Error("Not authenticated");
-      const { data: g, error } = await supabase.from("groups").select("*").eq("code", code.trim().toUpperCase()).maybeSingle();
+      const { data, error } = await supabase.rpc("join_group", { _code: code.trim().toUpperCase() });
       if (error) throw error;
-      if (!g) throw new Error("Code invalide");
-      // leave previous group first (optional single-group model)
-      await supabase.from("group_members").delete().eq("user_id", userId);
-      const { error: mErr } = await supabase.from("group_members").insert({ group_id: g.id, user_id: userId });
-      if (mErr) throw mErr;
-      return g as Group;
+      return data as unknown as Group;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["myGroup"] });
@@ -364,6 +327,7 @@ export function useJoinGroup() {
     },
   });
 }
+
 
 export function useLeaveGroup() {
   const { userId } = useAuth();
