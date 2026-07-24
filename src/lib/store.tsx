@@ -280,44 +280,15 @@ export function useGroupMembers(groupId: string | undefined) {
           .filter((t) => t.user_id === uid && t.done_at && new Date(t.done_at) >= since)
           .reduce((s, t) => s + (t.points ?? 0), 0);
 
-      return (profs ?? []).map((p) => ({
-        id: p.id,
-        pseudo: p.pseudo,
-        avatar: p.avatar,
-        level: p.level,
-        pointsToday: sum(p.id, today),
-        pointsWeek: sum(p.id, weekStart),
-        pointsMonth: sum(p.id, monthStart),
-      }));
-    },
-  });
-}
-
 export function useCreateGroup() {
   const { userId } = useAuth();
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (name: string) => {
+    mutationFn: async (name: string): Promise<Group> => {
       if (!userId) throw new Error("Not authenticated");
-      // generate a unique code (retry a couple of times)
-      for (let attempt = 0; attempt < 5; attempt++) {
-        const { data: codeRes, error: codeErr } = await supabase.rpc("generate_group_code");
-        if (codeErr) throw codeErr;
-        const code = codeRes as unknown as string;
-        const { data: g, error } = await supabase
-          .from("groups")
-          .insert({ name, code, owner_id: userId })
-          .select()
-          .maybeSingle();
-        if (!error && g) {
-          const { error: mErr } = await supabase.from("group_members").insert({ group_id: g.id, user_id: userId });
-          if (mErr) throw mErr;
-          return g as Group;
-        }
-        // if uniqueness collision, retry; otherwise throw
-        if (error && !`${error.message}`.toLowerCase().includes("unique")) throw error;
-      }
-      throw new Error("Impossible de générer un code unique");
+      const { data, error } = await supabase.rpc("create_group", { _name: name });
+      if (error) throw error;
+      return data as unknown as Group;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["myGroup"] });
@@ -330,16 +301,11 @@ export function useJoinGroup() {
   const { userId } = useAuth();
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (code: string) => {
+    mutationFn: async (code: string): Promise<Group> => {
       if (!userId) throw new Error("Not authenticated");
-      const { data: g, error } = await supabase.from("groups").select("*").eq("code", code.trim().toUpperCase()).maybeSingle();
+      const { data, error } = await supabase.rpc("join_group", { _code: code.trim().toUpperCase() });
       if (error) throw error;
-      if (!g) throw new Error("Code invalide");
-      // leave previous group first (optional single-group model)
-      await supabase.from("group_members").delete().eq("user_id", userId);
-      const { error: mErr } = await supabase.from("group_members").insert({ group_id: g.id, user_id: userId });
-      if (mErr) throw mErr;
-      return g as Group;
+      return data as unknown as Group;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["myGroup"] });
@@ -347,6 +313,7 @@ export function useJoinGroup() {
     },
   });
 }
+
 
 export function useLeaveGroup() {
   const { userId } = useAuth();
