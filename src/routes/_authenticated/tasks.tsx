@@ -32,15 +32,16 @@ function TasksPage() {
   const handleComplete = async (id: string) => {
     const t = tasks.find((x) => x.id === id);
     if (!t || t.done) return;
-    triggerBurst(t.points);
     try {
       await completeTask.mutateAsync(t);
+      triggerBurst(t.points);
       toast.success(`Tâche accomplie ! +${t.points} pts`);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Erreur";
       toast.error(message);
     }
   };
+
 
   const handleAdd = async (t: { title: string; description: string; difficulty: Difficulty }) => {
     try {
