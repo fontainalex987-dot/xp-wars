@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Bell, Flame, LogOut, Pencil, Target, Trophy, Zap } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { XpBar } from "@/components/XpBar";
