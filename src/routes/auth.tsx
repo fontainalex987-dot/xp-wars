@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/store";
 import { useEffect } from "react";
 
 export const Route = createFileRoute("/auth")({
+  ssr: false,
   head: () => ({
     meta: [
       { title: "Connexion — XP Wars" },
@@ -16,6 +17,7 @@ export const Route = createFileRoute("/auth")({
   }),
   component: AuthPage,
 });
+
 
 function AuthPage() {
   const [mode, setMode] = useState<"login" | "signup">("signup");
