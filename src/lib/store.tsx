@@ -280,7 +280,21 @@ export function useGroupMembers(groupId: string | undefined) {
           .filter((t) => t.user_id === uid && t.done_at && new Date(t.done_at) >= since)
           .reduce((s, t) => s + (t.points ?? 0), 0);
 
+      return (profs ?? []).map((p) => ({
+        id: p.id,
+        pseudo: p.pseudo,
+        avatar: p.avatar,
+        level: p.level,
+        pointsToday: sum(p.id, today),
+        pointsWeek: sum(p.id, weekStart),
+        pointsMonth: sum(p.id, monthStart),
+      }));
+    },
+  });
+}
+
 export function useCreateGroup() {
+
   const { userId } = useAuth();
   const qc = useQueryClient();
   return useMutation({
