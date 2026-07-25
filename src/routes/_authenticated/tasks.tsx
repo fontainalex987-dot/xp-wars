@@ -43,11 +43,11 @@ function TasksPage() {
   };
 
 
-  const handleAdd = async (t: { title: string; description: string; difficulty: Difficulty }) => {
+  const handleAdd = async (t: { title: string; description: string; difficulty: Difficulty; recurrence: "unique" | "daily" }) => {
     try {
       await addTask.mutateAsync(t);
       setOpen(false);
-      toast.success("Nouvelle quête ajoutée");
+      toast.success(t.recurrence === "daily" ? "Quête quotidienne créée" : "Nouvelle quête ajoutée");
     } catch (err) {
       const message = err instanceof Error ? err.message : "Erreur";
       toast.error(message);
