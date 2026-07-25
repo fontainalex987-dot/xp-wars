@@ -149,10 +149,24 @@ export function useUpdateProfile() {
 }
 
 // ------- Tasks ---------
-function startOfToday() {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  return d;
+export type TaskTemplate = {
+  id: string;
+  title: string;
+  description: string;
+  difficulty: Difficulty;
+  points: number;
+  active: boolean;
+};
+
+// Today in America/Guadeloupe (UTC-4, no DST) — used only for client-side filters
+// on historical rows. The source of truth for "today" is the server RPC.
+function todayGuadeloupe(): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Guadeloupe",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
 }
 
 export function useTodayTasks() {
@@ -160,13 +174,9 @@ export function useTodayTasks() {
   return useQuery({
     queryKey: ["tasks", "today", userId],
     enabled: !!userId,
+    // Idempotent server sync: materialises daily templates for today, then returns instances.
     queryFn: async (): Promise<Task[]> => {
-      const { data, error } = await supabase
-        .from("tasks")
-        .select("*")
-        .eq("user_id", userId!)
-        .gte("created_at", startOfToday().toISOString())
-        .order("created_at", { ascending: true });
+      const { data, error } = await supabase.rpc("sync_today_tasks");
       if (error) throw error;
       return (data ?? []).map((t) => ({
         id: t.id,
@@ -178,6 +188,8 @@ export function useTodayTasks() {
         createdAt: new Date(t.created_at).getTime(),
       }));
     },
+    refetchOnWindowFocus: true,
+    refetchOnMount: "always",
   });
 }
 
@@ -185,16 +197,36 @@ export function useAddTask() {
   const { userId } = useAuth();
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (input: { title: string; description: string; difficulty: Difficulty }) => {
+    mutationFn: async (input: {
+      title: string;
+      description: string;
+      difficulty: Difficulty;
+      recurrence: "unique" | "daily";
+    }) => {
       if (!userId) throw new Error("Not authenticated");
-      const { error } = await supabase.from("tasks").insert({
-        user_id: userId,
-        title: input.title,
-        description: input.description,
-        difficulty: input.difficulty,
-        points: DIFFICULTY_POINTS[input.difficulty],
-      });
-      if (error) throw error;
+      const points = DIFFICULTY_POINTS[input.difficulty];
+      if (input.recurrence === "daily") {
+        const { error: tErr } = await supabase.from("task_templates").insert({
+          user_id: userId,
+          title: input.title,
+          description: input.description,
+          difficulty: input.difficulty,
+          points,
+        });
+        if (tErr) throw tErr;
+        const { error: sErr } = await supabase.rpc("sync_today_tasks");
+        if (sErr) throw sErr;
+      } else {
+        // Unique: bound to today via task_date default in Guadeloupe TZ.
+        const { error } = await supabase.from("tasks").insert({
+          user_id: userId,
+          title: input.title,
+          description: input.description,
+          difficulty: input.difficulty,
+          points,
+        });
+        if (error) throw error;
+      }
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["tasks"] }),
   });
