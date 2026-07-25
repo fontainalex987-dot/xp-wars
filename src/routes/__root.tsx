@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "@/lib/store";
 import { DailyReminderProvider } from "@/lib/daily-reminder";
+import { DailyResetProvider } from "@/lib/daily-reset";
 import { PointsBurst } from "@/components/PointsBurst";
 import { Toaster } from "sonner";
 
@@ -127,11 +128,13 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <DailyReminderProvider>
-          <Outlet />
-          <PointsBurst />
-          <Toaster theme="dark" position="top-center" richColors />
-        </DailyReminderProvider>
+        <DailyResetProvider>
+          <DailyReminderProvider>
+            <Outlet />
+            <PointsBurst />
+            <Toaster theme="dark" position="top-center" richColors />
+          </DailyReminderProvider>
+        </DailyResetProvider>
       </AuthProvider>
     </QueryClientProvider>
   );
