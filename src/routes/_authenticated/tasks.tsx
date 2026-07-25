@@ -43,11 +43,11 @@ function TasksPage() {
   };
 
 
-  const handleAdd = async (t: { title: string; description: string; difficulty: Difficulty }) => {
+  const handleAdd = async (t: { title: string; description: string; difficulty: Difficulty; recurrence: "unique" | "daily" }) => {
     try {
       await addTask.mutateAsync(t);
       setOpen(false);
-      toast.success("Nouvelle quête ajoutée");
+      toast.success(t.recurrence === "daily" ? "Quête quotidienne créée" : "Nouvelle quête ajoutée");
     } catch (err) {
       const message = err instanceof Error ? err.message : "Erreur";
       toast.error(message);
@@ -117,16 +117,17 @@ function NewTaskSheet({
   onAdd,
 }: {
   onClose: () => void;
-  onAdd: (t: { title: string; description: string; difficulty: Difficulty }) => void;
+  onAdd: (t: { title: string; description: string; difficulty: Difficulty; recurrence: "unique" | "daily" }) => void;
 }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [difficulty, setDifficulty] = useState<Difficulty>("moyenne");
+  const [recurrence, setRecurrence] = useState<"unique" | "daily">("unique");
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
-    onAdd({ title: title.trim(), description: description.trim(), difficulty });
+    onAdd({ title: title.trim(), description: description.trim(), difficulty, recurrence });
   };
 
   return (
@@ -162,6 +163,30 @@ function NewTaskSheet({
             placeholder="Courte description"
             className="mt-1 w-full bg-black/40 rounded-xl px-4 py-3 ring-1 ring-white/10 focus:ring-brand focus:outline-none"
           />
+        </div>
+
+        <div>
+          <label className="text-xs uppercase tracking-widest text-muted-foreground">Récurrence</label>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            {([
+              { key: "unique", label: "Unique", hint: "Aujourd'hui seulement" },
+              { key: "daily", label: "Quotidienne", hint: "Recréée chaque jour" },
+            ] as const).map((r) => (
+              <button
+                type="button"
+                key={r.key}
+                onClick={() => setRecurrence(r.key)}
+                className={`p-3 rounded-xl text-sm font-semibold uppercase tracking-wide transition-all ${
+                  recurrence === r.key
+                    ? "bg-brand text-primary-foreground ring-2 ring-brand"
+                    : "bg-black/40 text-muted-foreground ring-1 ring-white/10"
+                }`}
+              >
+                <div>{r.label}</div>
+                <div className="text-[10px] mt-0.5 opacity-70 normal-case tracking-normal">{r.hint}</div>
+              </button>
+            ))}
+          </div>
         </div>
 
         <div>

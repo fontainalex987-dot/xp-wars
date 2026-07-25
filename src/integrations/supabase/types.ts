@@ -106,6 +106,39 @@ export type Database = {
         }
         Relationships: []
       }
+      task_templates: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string
+          difficulty: Database["public"]["Enums"]["difficulty"]
+          id: string
+          points: number
+          title: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description?: string
+          difficulty: Database["public"]["Enums"]["difficulty"]
+          id?: string
+          points: number
+          title: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string
+          difficulty?: Database["public"]["Enums"]["difficulty"]
+          id?: string
+          points?: number
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       tasks: {
         Row: {
           created_at: string
@@ -115,6 +148,8 @@ export type Database = {
           done_at: string | null
           id: string
           points: number
+          task_date: string
+          template_id: string | null
           title: string
           user_id: string
         }
@@ -126,6 +161,8 @@ export type Database = {
           done_at?: string | null
           id?: string
           points: number
+          task_date?: string
+          template_id?: string | null
           title: string
           user_id: string
         }
@@ -137,10 +174,20 @@ export type Database = {
           done_at?: string | null
           id?: string
           points?: number
+          task_date?: string
+          template_id?: string | null
           title?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "tasks_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "task_templates"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -191,6 +238,28 @@ export type Database = {
           to: "groups"
           isOneToOne: true
           isSetofReturn: false
+        }
+      }
+      sync_today_tasks: {
+        Args: never
+        Returns: {
+          created_at: string
+          description: string
+          difficulty: Database["public"]["Enums"]["difficulty"]
+          done: boolean
+          done_at: string | null
+          id: string
+          points: number
+          task_date: string
+          template_id: string | null
+          title: string
+          user_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "tasks"
+          isOneToOne: false
+          isSetofReturn: true
         }
       }
     }
