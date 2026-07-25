@@ -291,7 +291,8 @@ export function useGroupMembers(groupId: string | undefined) {
       const { data: profs, error: pErr } = await supabase.from("profiles").select("*").in("id", ids);
       if (pErr) throw pErr;
 
-      const today = startOfToday();
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
       const weekStart = new Date(today);
       const dow = today.getDay(); // 0 sun ... 6 sat
       const diff = (dow + 6) % 7; // shift so Monday=0
