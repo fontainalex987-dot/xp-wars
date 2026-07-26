@@ -61,14 +61,22 @@ function TasksPage() {
           <p className="text-[10px] text-zinc-400 uppercase tracking-widest font-medium">Aujourd'hui</p>
           <h1 className="text-3xl font-semibold tracking-tight">Mes quêtes</h1>
         </div>
-        <button
-          onClick={() => setOpen(true)}
-          disabled={tasks.length >= 3}
-          className="flex items-center gap-1.5 bg-brand text-primary-foreground text-sm font-bold py-2 px-3 rounded-full active:scale-95 transition-transform disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          <Plus className="size-4" strokeWidth={3} />
-          Ajouter
-        </button>
+        <div className="flex items-center gap-2">
+          <Link
+            to="/history"
+            className="text-xs font-semibold uppercase tracking-wide text-muted-foreground hover:text-brand py-2 px-3 rounded-full ring-1 ring-white/10"
+          >
+            Historique
+          </Link>
+          <button
+            onClick={() => setOpen(true)}
+            disabled={tasks.length >= 3}
+            className="flex items-center gap-1.5 bg-brand text-primary-foreground text-sm font-bold py-2 px-3 rounded-full active:scale-95 transition-transform disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <Plus className="size-4" strokeWidth={3} />
+            Ajouter
+          </button>
+        </div>
       </header>
 
       <section className="px-5 pb-4">
