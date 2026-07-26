@@ -1,6 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Check, ChevronLeft, X } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Calendar as CalendarIcon, Check, ChevronLeft, X } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 import { useTaskHistory } from "@/lib/store";
 
 export const Route = createFileRoute("/_authenticated/history")({
@@ -28,8 +33,28 @@ function formatDay(iso: string) {
   return label.charAt(0).toUpperCase() + label.slice(1);
 }
 
+function toISODate(d: Date) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
 function HistoryPage() {
   const { data: days = [], isLoading } = useTaskHistory(30);
+  const [selected, setSelected] = useState<Date | undefined>(undefined);
+  const [open, setOpen] = useState(false);
+
+  const daysWithActivity = useMemo(
+    () => new Set(days.map((d) => d.date)),
+    [days],
+  );
+
+  const filtered = useMemo(() => {
+    if (!selected) return days;
+    const iso = toISODate(selected);
+    return days.filter((d) => d.date === iso);
+  }, [days, selected]);
 
   return (
     <AppShell>
@@ -41,22 +66,70 @@ function HistoryPage() {
         >
           <ChevronLeft className="size-5" />
         </Link>
-        <div>
-          <p className="text-[10px] text-zinc-400 uppercase tracking-widest font-medium">30 derniers jours</p>
+        <div className="flex-1">
+          <p className="text-[10px] text-zinc-400 uppercase tracking-widest font-medium">
+            {selected ? "Date sélectionnée" : "30 derniers jours"}
+          </p>
           <h1 className="text-3xl font-semibold tracking-tight">Historique</h1>
         </div>
       </header>
+
+      <section className="px-5 pb-4 flex items-center gap-2">
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className={cn(
+                "flex-1 justify-start text-left font-normal bg-card ring-1 ring-white/10 border-0",
+                !selected && "text-muted-foreground",
+              )}
+            >
+              <CalendarIcon className="size-4" />
+              {selected ? formatDay(toISODate(selected)) : "Choisir une date"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={selected}
+              onSelect={(d) => {
+                setSelected(d);
+                setOpen(false);
+              }}
+              disabled={(d) => {
+                const iso = toISODate(d);
+                const today = toISODate(new Date());
+                return iso >= today || !daysWithActivity.has(iso);
+              }}
+              initialFocus
+              className={cn("p-3 pointer-events-auto")}
+            />
+          </PopoverContent>
+        </Popover>
+        {selected && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setSelected(undefined)}
+            className="text-muted-foreground"
+          >
+            <X className="size-4" />
+          </Button>
+        )}
+      </section>
 
       <section className="px-5 pb-4 space-y-6">
         {isLoading && (
           <div className="p-8 text-center text-muted-foreground">Chargement…</div>
         )}
-        {!isLoading && days.length === 0 && (
+        {!isLoading && filtered.length === 0 && (
           <div className="p-8 text-center text-muted-foreground border border-dashed border-white/10 rounded-2xl">
-            Aucune quête passée. Reviens demain pour voir ton historique.
+            {selected
+              ? "Aucune quête pour cette date."
+              : "Aucune quête passée. Reviens demain pour voir ton historique."}
           </div>
         )}
-        {days.map((day) => {
+        {filtered.map((day) => {
           const done = day.tasks.filter((t) => t.done).length;
           return (
             <div key={day.date} className="space-y-2">
