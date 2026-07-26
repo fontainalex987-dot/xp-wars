@@ -115,7 +115,7 @@ function ProfilePage() {
             </button>
           </div>
 
-          {reminder.permission === "default" && reminder.permission !== "unsupported" && (
+          {reminder.permission === "default" && (
             <button
               onClick={() => reminder.requestPermission()}
               className="mt-3 w-full text-xs font-semibold py-2 px-3 rounded-lg bg-brand/10 text-brand ring-1 ring-brand/30 active:scale-95"
