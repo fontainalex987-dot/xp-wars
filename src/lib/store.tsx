@@ -262,6 +262,56 @@ export function useRemoveTask() {
   });
 }
 
+// ------- History ---------
+export type HistoryDay = {
+  date: string; // YYYY-MM-DD
+  tasks: Array<Task & { doneAt: number | null }>;
+  earned: number;
+  possible: number;
+};
+
+export function useTaskHistory(days = 30) {
+  const { userId } = useAuth();
+  return useQuery({
+    queryKey: ["tasks", "history", userId, days],
+    enabled: !!userId,
+    queryFn: async (): Promise<HistoryDay[]> => {
+      const today = todayGuadeloupe();
+      const since = new Date(today);
+      since.setDate(since.getDate() - days);
+      const sinceStr = since.toISOString().slice(0, 10);
+      const { data, error } = await supabase
+        .from("tasks")
+        .select("*")
+        .eq("user_id", userId!)
+        .gte("task_date", sinceStr)
+        .lt("task_date", today)
+        .order("task_date", { ascending: false })
+        .order("created_at", { ascending: true });
+      if (error) throw error;
+      const byDay = new Map<string, HistoryDay>();
+      for (const t of data ?? []) {
+        const d = t.task_date as string;
+        if (!byDay.has(d)) byDay.set(d, { date: d, tasks: [], earned: 0, possible: 0 });
+        const bucket = byDay.get(d)!;
+        bucket.tasks.push({
+          id: t.id,
+          title: t.title,
+          description: t.description ?? "",
+          difficulty: t.difficulty as Difficulty,
+          points: t.points,
+          done: t.done,
+          createdAt: new Date(t.created_at).getTime(),
+          doneAt: t.done_at ? new Date(t.done_at).getTime() : null,
+        });
+        bucket.possible += t.points;
+        if (t.done) bucket.earned += t.points;
+      }
+      return Array.from(byDay.values());
+    },
+  });
+}
+
 // ------- Groups ---------
 export function useMyGroup() {
   const { userId } = useAuth();
