@@ -81,39 +81,102 @@ function ProfilePage() {
         <StatBox icon={<Trophy className="size-4" />} label="Badges" value={`${badges.filter((b) => b.unlocked).length}/${badges.length}`} />
       </section>
 
-      <section className="px-5 py-4">
-        <div className="p-4 rounded-2xl bg-card ring-1 ring-white/5 flex items-center gap-3">
-          <div className={`size-10 rounded-full flex items-center justify-center ${reminder.enabled ? "bg-brand/20 text-brand xp-glow" : "bg-zinc-800 text-muted-foreground"}`}>
-            <Bell className="size-5" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold">Rappel quotidien</p>
-            <p className="text-xs text-muted-foreground">
-              {reminder.permission === "unsupported"
-                ? "Notifications non supportées sur cet appareil"
-                : reminder.permission === "denied"
-                ? "Notifications bloquées — active-les dans les réglages du navigateur"
-                : `Alerte chaque jour à ${reminder.reminderLabel} pour ton bilan`}
-            </p>
-          </div>
-          <button
-            role="switch"
-            aria-checked={reminder.enabled}
-            aria-label="Activer le rappel quotidien"
-            disabled={reminder.permission === "unsupported"}
-            onClick={() => reminder.toggle(!reminder.enabled)}
-            className={`relative w-12 h-7 rounded-full transition-colors shrink-0 disabled:opacity-40 disabled:cursor-not-allowed ${
-              reminder.enabled ? "bg-brand" : "bg-zinc-700"
-            }`}
-          >
-            <span
-              className={`absolute top-0.5 size-6 rounded-full bg-white transition-transform ${
-                reminder.enabled ? "translate-x-[22px]" : "translate-x-0.5"
+      <section className="px-5 py-4 space-y-3">
+        <div className="p-4 rounded-2xl bg-card ring-1 ring-white/5">
+          <div className="flex items-center gap-3">
+            <div className={`size-10 rounded-full flex items-center justify-center ${reminder.enabled ? "bg-brand/20 text-brand xp-glow" : "bg-zinc-800 text-muted-foreground"}`}>
+              <Bell className="size-5" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold">Rappel quotidien</p>
+              <p className="text-xs text-muted-foreground">
+                {reminder.permission === "unsupported"
+                  ? "Notifications non supportées sur cet appareil"
+                  : reminder.permission === "denied"
+                  ? "Notifications bloquées — active-les dans les réglages du navigateur"
+                  : `Alerte à ${reminder.reminderTime} pour ton bilan`}
+              </p>
+            </div>
+            <button
+              role="switch"
+              aria-checked={reminder.enabled}
+              aria-label="Activer le rappel quotidien"
+              disabled={reminder.permission === "unsupported"}
+              onClick={() => reminder.toggle(!reminder.enabled)}
+              className={`relative w-12 h-7 rounded-full transition-colors shrink-0 disabled:opacity-40 disabled:cursor-not-allowed ${
+                reminder.enabled ? "bg-brand" : "bg-zinc-700"
               }`}
-            />
-          </button>
+            >
+              <span
+                className={`absolute top-0.5 size-6 rounded-full bg-white transition-transform ${
+                  reminder.enabled ? "translate-x-[22px]" : "translate-x-0.5"
+                }`}
+              />
+            </button>
+          </div>
+
+          {reminder.permission === "default" && (
+            <button
+              onClick={() => reminder.requestPermission()}
+              className="mt-3 w-full text-xs font-semibold py-2 px-3 rounded-lg bg-brand/10 text-brand ring-1 ring-brand/30 active:scale-95"
+            >
+              Autoriser les notifications
+            </button>
+          )}
+
+          {reminder.enabled && (
+            <div className="mt-4 space-y-3">
+              <label className="flex items-center justify-between gap-3">
+                <span className="text-xs uppercase tracking-widest text-muted-foreground">Heure du rappel</span>
+                <input
+                  type="time"
+                  value={reminder.reminderTime}
+                  onChange={(e) => reminder.setReminderTime(e.target.value)}
+                  className="bg-zinc-900 ring-1 ring-white/10 rounded-lg px-3 py-1.5 text-sm font-semibold text-foreground"
+                />
+              </label>
+
+              <div className="pt-3 border-t border-white/5">
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold">Relance douce</p>
+                    <p className="text-xs text-muted-foreground">
+                      Un rappel bienveillant si aucune quête n'est validée
+                    </p>
+                  </div>
+                  <button
+                    role="switch"
+                    aria-checked={reminder.nudgeEnabled}
+                    aria-label="Activer la relance douce"
+                    onClick={() => reminder.setNudgeEnabled(!reminder.nudgeEnabled)}
+                    className={`relative w-12 h-7 rounded-full transition-colors shrink-0 ${
+                      reminder.nudgeEnabled ? "bg-brand" : "bg-zinc-700"
+                    }`}
+                  >
+                    <span
+                      className={`absolute top-0.5 size-6 rounded-full bg-white transition-transform ${
+                        reminder.nudgeEnabled ? "translate-x-[22px]" : "translate-x-0.5"
+                      }`}
+                    />
+                  </button>
+                </div>
+                {reminder.nudgeEnabled && (
+                  <label className="mt-3 flex items-center justify-between gap-3">
+                    <span className="text-xs uppercase tracking-widest text-muted-foreground">Heure de la relance</span>
+                    <input
+                      type="time"
+                      value={reminder.nudgeTime}
+                      onChange={(e) => reminder.setNudgeTime(e.target.value)}
+                      className="bg-zinc-900 ring-1 ring-white/10 rounded-lg px-3 py-1.5 text-sm font-semibold text-foreground"
+                    />
+                  </label>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </section>
+
 
       <section className="px-5 py-4">
         <h2 className="text-lg font-medium mb-3">Badges</h2>
