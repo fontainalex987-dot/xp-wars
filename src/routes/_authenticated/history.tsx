@@ -1,6 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Check, ChevronLeft, X } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Calendar as CalendarIcon, Check, ChevronLeft, X } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 import { useTaskHistory } from "@/lib/store";
 
 export const Route = createFileRoute("/_authenticated/history")({
