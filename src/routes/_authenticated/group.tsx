@@ -61,22 +61,23 @@ function GroupPage() {
   const shareCode = async () => {
     if (!group) return;
     const text = `Rejoins mon groupe "${group.name}" sur XP Wars avec le code ${group.code}`;
-    if (typeof navigator !== "undefined" && "share" in navigator) {
+    const nav = typeof navigator !== "undefined" ? (navigator as Navigator & { share?: (d: ShareData) => Promise<void> }) : null;
+    if (nav?.share) {
       try {
-        await navigator.share({ title: "XP Wars", text });
+        await nav.share({ title: "XP Wars", text });
         return;
       } catch {
-        // user cancelled
         return;
       }
     }
     try {
-      await navigator.clipboard.writeText(text);
+      await nav!.clipboard.writeText(text);
       toast.success("Invitation copiée !");
     } catch {
       toast.error("Partage impossible");
     }
   };
+
 
   const handleCreateChallenge = async () => {
     if (!group || !challengeTitle.trim() || challengeTarget <= 0) return;
