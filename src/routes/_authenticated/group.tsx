@@ -1,9 +1,20 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Copy, LogOut, Plus, UserPlus } from "lucide-react";
+import { Copy, LogOut, Plus, Share2, Target, Trash2, UserPlus, Zap } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
-import { useCreateGroup, useGroupMembers, useJoinGroup, useLeaveGroup, useMyGroup } from "@/lib/store";
+import {
+  useCreateChallenge,
+  useCreateGroup,
+  useDeleteChallenge,
+  useGroupActivity,
+  useGroupChallenge,
+  useGroupMembers,
+  useJoinGroup,
+  useLeaveGroup,
+  useMyGroup,
+  useProfile,
+} from "@/lib/store";
 
 export const Route = createFileRoute("/_authenticated/group")({
   head: () => ({
