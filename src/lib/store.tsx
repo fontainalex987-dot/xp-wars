@@ -246,6 +246,8 @@ export function useCompleteTask() {
       qc.invalidateQueries({ queryKey: ["tasks"] });
       qc.invalidateQueries({ queryKey: ["profile"] });
       qc.invalidateQueries({ queryKey: ["members"] });
+      qc.invalidateQueries({ queryKey: ["challenge"] });
+      qc.invalidateQueries({ queryKey: ["activity"] });
     },
   });
 }
