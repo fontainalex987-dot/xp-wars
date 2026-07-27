@@ -246,6 +246,8 @@ export function useCompleteTask() {
       qc.invalidateQueries({ queryKey: ["tasks"] });
       qc.invalidateQueries({ queryKey: ["profile"] });
       qc.invalidateQueries({ queryKey: ["members"] });
+      qc.invalidateQueries({ queryKey: ["challenge"] });
+      qc.invalidateQueries({ queryKey: ["activity"] });
     },
   });
 }
@@ -425,6 +427,145 @@ export function useLeaveGroup() {
       qc.invalidateQueries({ queryKey: ["myGroup"] });
       qc.invalidateQueries({ queryKey: ["members"] });
     },
+  });
+}
+
+// ------- Group Challenges ---------
+export type GroupChallenge = {
+  id: string;
+  groupId: string;
+  title: string;
+  targetPoints: number;
+  startsAt: string;
+  endsAt: string;
+  createdBy: string;
+  progress: number;
+};
+
+export function useGroupChallenge(groupId: string | undefined) {
+  return useQuery({
+    queryKey: ["challenge", groupId],
+    enabled: !!groupId,
+    queryFn: async (): Promise<GroupChallenge | null> => {
+      const nowIso = new Date().toISOString();
+      const { data: ch, error } = await supabase
+        .from("group_challenges")
+        .select("*")
+        .eq("group_id", groupId!)
+        .lte("starts_at", nowIso)
+        .gte("ends_at", nowIso)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      if (!ch) return null;
+
+      const { data: members } = await supabase.from("group_members").select("user_id").eq("group_id", groupId!);
+      const ids = (members ?? []).map((m) => m.user_id);
+      let progress = 0;
+      if (ids.length) {
+        const { data: done } = await supabase
+          .from("tasks")
+          .select("points")
+          .in("user_id", ids)
+          .eq("done", true)
+          .gte("done_at", ch.starts_at)
+          .lte("done_at", ch.ends_at);
+        progress = (done ?? []).reduce((s, t) => s + (t.points ?? 0), 0);
+      }
+      return {
+        id: ch.id,
+        groupId: ch.group_id,
+        title: ch.title,
+        targetPoints: ch.target_points,
+        startsAt: ch.starts_at,
+        endsAt: ch.ends_at,
+        createdBy: ch.created_by,
+        progress,
+      };
+    },
+    refetchOnWindowFocus: true,
+  });
+}
+
+export function useCreateChallenge() {
+  const { userId } = useAuth();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: { groupId: string; title: string; targetPoints: number; days: number }) => {
+      if (!userId) throw new Error("Not authenticated");
+      const startsAt = new Date();
+      const endsAt = new Date(startsAt.getTime() + input.days * 24 * 60 * 60 * 1000);
+      const { error } = await supabase.from("group_challenges").insert({
+        group_id: input.groupId,
+        title: input.title,
+        target_points: input.targetPoints,
+        starts_at: startsAt.toISOString(),
+        ends_at: endsAt.toISOString(),
+        created_by: userId,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["challenge"] }),
+  });
+}
+
+export function useDeleteChallenge() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("group_challenges").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["challenge"] }),
+  });
+}
+
+// ------- Group Activity Feed ---------
+export type ActivityItem = {
+  id: string;
+  userId: string;
+  pseudo: string;
+  avatar: string;
+  title: string;
+  points: number;
+  doneAt: number;
+};
+
+export function useGroupActivity(groupId: string | undefined, limit = 20) {
+  return useQuery({
+    queryKey: ["activity", groupId, limit],
+    enabled: !!groupId,
+    queryFn: async (): Promise<ActivityItem[]> => {
+      const { data: members } = await supabase.from("group_members").select("user_id").eq("group_id", groupId!);
+      const ids = (members ?? []).map((m) => m.user_id);
+      if (!ids.length) return [];
+      const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      const { data: tasks, error } = await supabase
+        .from("tasks")
+        .select("id, user_id, title, points, done_at")
+        .in("user_id", ids)
+        .eq("done", true)
+        .gte("done_at", since)
+        .order("done_at", { ascending: false })
+        .limit(limit);
+      if (error) throw error;
+      const { data: profs } = await supabase.from("profiles").select("id, pseudo, avatar").in("id", ids);
+      const pmap = new Map((profs ?? []).map((p) => [p.id, p]));
+      return (tasks ?? []).map((t) => {
+        const p = pmap.get(t.user_id);
+        return {
+          id: t.id,
+          userId: t.user_id,
+          pseudo: p?.pseudo ?? "?",
+          avatar: p?.avatar ?? "🥷",
+          title: t.title,
+          points: t.points,
+          doneAt: t.done_at ? new Date(t.done_at).getTime() : 0,
+        };
+      });
+    },
+    refetchOnWindowFocus: true,
   });
 }
 

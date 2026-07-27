@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      group_challenges: {
+        Row: {
+          created_at: string
+          created_by: string
+          ends_at: string
+          group_id: string
+          id: string
+          starts_at: string
+          target_points: number
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          ends_at: string
+          group_id: string
+          id?: string
+          starts_at?: string
+          target_points: number
+          title: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          ends_at?: string
+          group_id?: string
+          id?: string
+          starts_at?: string
+          target_points?: number
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_challenges_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       group_members: {
         Row: {
           group_id: string
