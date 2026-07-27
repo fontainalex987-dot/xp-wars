@@ -124,6 +124,15 @@ function ProfilePage() {
             </button>
           )}
 
+          {reminder.permission !== "unsupported" && (
+            <button
+              onClick={() => reminder.sendTestNotification()}
+              className="mt-2 w-full text-xs font-semibold py-2 px-3 rounded-lg bg-card ring-1 ring-white/10 text-foreground active:scale-95"
+            >
+              Tester la notification
+            </button>
+          )}
+
           {reminder.enabled && (
             <div className="mt-4 space-y-3">
               <label className="flex items-center justify-between gap-3">

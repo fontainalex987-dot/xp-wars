@@ -22,6 +22,7 @@ type ReminderCtx = {
   setNudgeEnabled: (v: boolean) => void;
   nudgeTime: string;
   setNudgeTime: (t: string) => void;
+  sendTestNotification: () => Promise<void>;
 };
 
 const Ctx = createContext<ReminderCtx | null>(null);
@@ -175,6 +176,30 @@ export function DailyReminderProvider({ children }: { children: ReactNode }) {
     if (typeof window !== "undefined") window.localStorage.setItem(NUDGE_TIME_KEY, t);
   }, []);
 
+  const sendTestNotification = useCallback(async () => {
+    if (typeof Notification === "undefined") {
+      toast("Notifications non supportées", { description: "Ton navigateur ne prend pas en charge les notifications." });
+      return;
+    }
+    if (Notification.permission === "default") {
+      const p = await Notification.requestPermission();
+      setPermission(p);
+    }
+    if (Notification.permission !== "granted") {
+      toast("Autorisation requise", { description: "Active les notifications dans les réglages du navigateur." });
+      return;
+    }
+    try {
+      new Notification("XP Wars — Test de notification 🔔", {
+        body: "Parfait, tes rappels quotidiens fonctionnent !",
+        icon: "/icon-192.png",
+      });
+      toast.success("Notification test envoyée");
+    } catch {
+      toast("Impossible d'envoyer la notification", { description: "Réessaie depuis les réglages du navigateur." });
+    }
+  }, []);
+
   const value = useMemo<ReminderCtx>(
     () => ({
       enabled,
@@ -187,8 +212,9 @@ export function DailyReminderProvider({ children }: { children: ReactNode }) {
       setNudgeEnabled,
       nudgeTime,
       setNudgeTime,
+      sendTestNotification,
     }),
-    [enabled, permission, toggle, requestPermission, reminderTime, setReminderTime, nudgeEnabled, setNudgeEnabled, nudgeTime, setNudgeTime]
+    [enabled, permission, toggle, requestPermission, reminderTime, setReminderTime, nudgeEnabled, setNudgeEnabled, nudgeTime, setNudgeTime, sendTestNotification]
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
