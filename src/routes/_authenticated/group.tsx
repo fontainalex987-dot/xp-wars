@@ -29,13 +29,24 @@ export const Route = createFileRoute("/_authenticated/group")({
 });
 
 function GroupPage() {
+  const { data: profile } = useProfile();
   const { data: group, isLoading } = useMyGroup();
   const { data: friends = [] } = useGroupMembers(group?.id);
+  const { data: challenge } = useGroupChallenge(group?.id);
+  const { data: activity = [] } = useGroupActivity(group?.id);
   const create = useCreateGroup();
   const join = useJoinGroup();
   const leave = useLeaveGroup();
+  const createChallenge = useCreateChallenge();
+  const deleteChallenge = useDeleteChallenge();
   const [groupName, setGroupName] = useState("");
   const [joinCode, setJoinCode] = useState("");
+  const [showChallengeForm, setShowChallengeForm] = useState(false);
+  const [challengeTitle, setChallengeTitle] = useState("");
+  const [challengeTarget, setChallengeTarget] = useState(1000);
+  const [challengeDays, setChallengeDays] = useState(7);
+
+  const isOwner = !!group && !!profile && group.owner_id === profile.id;
 
   const copyCode = async () => {
     if (!group) return;
@@ -46,6 +57,56 @@ function GroupPage() {
       toast.error("Copie impossible");
     }
   };
+
+  const shareCode = async () => {
+    if (!group) return;
+    const text = `Rejoins mon groupe "${group.name}" sur XP Wars avec le code ${group.code}`;
+    if (typeof navigator !== "undefined" && "share" in navigator) {
+      try {
+        await navigator.share({ title: "XP Wars", text });
+        return;
+      } catch {
+        // user cancelled
+        return;
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success("Invitation copiée !");
+    } catch {
+      toast.error("Partage impossible");
+    }
+  };
+
+  const handleCreateChallenge = async () => {
+    if (!group || !challengeTitle.trim() || challengeTarget <= 0) return;
+    try {
+      await createChallenge.mutateAsync({
+        groupId: group.id,
+        title: challengeTitle.trim(),
+        targetPoints: challengeTarget,
+        days: challengeDays,
+      });
+      toast.success("Défi lancé !");
+      setShowChallengeForm(false);
+      setChallengeTitle("");
+      setChallengeTarget(1000);
+      setChallengeDays(7);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erreur");
+    }
+  };
+
+  const handleDeleteChallenge = async () => {
+    if (!challenge) return;
+    try {
+      await deleteChallenge.mutateAsync(challenge.id);
+      toast.success("Défi supprimé");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erreur");
+    }
+  };
+
 
   const handleCreate = async () => {
     if (!groupName.trim()) return;
