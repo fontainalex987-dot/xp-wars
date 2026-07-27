@@ -22,6 +22,7 @@ type ReminderCtx = {
   setNudgeEnabled: (v: boolean) => void;
   nudgeTime: string;
   setNudgeTime: (t: string) => void;
+  sendTestNotification: () => Promise<void>;
 };
 
 const Ctx = createContext<ReminderCtx | null>(null);
