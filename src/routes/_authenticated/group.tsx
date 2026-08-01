@@ -45,6 +45,83 @@ function formatRelative(ts: number): string {
   return `il y a ${d} j`;
 }
 
+// ------- Activity Feed Item (separate component to allow hooks) -------
+function ActivityFeedItem({ activity, profile }: { activity: import("@/lib/store").ActivityItem; profile: import("@/lib/store").Profile | null }) {
+  const [localReactions, setLocalReactions] = useState(activity.reactions ?? []);
+  const toggle = useToggleReaction();
+
+  const handleReact = async (emoji: string) => {
+    if (!profile || activity.userId === profile.id) {
+      toast("Tu ne peux pas réagir à ta propre quête 😅");
+      return;
+    }
+    const existing = localReactions.find((r: any) => r.emoji === emoji);
+    let next;
+    if (existing) {
+      if (existing.userReacted) {
+        next = localReactions
+          .map((r: any) => (r.emoji === emoji ? { ...r, count: r.count - 1, userReacted: false } : r))
+          .filter((r: any) => r.count > 0);
+      } else {
+        next = localReactions.map((r: any) =>
+          r.emoji === emoji ? { ...r, count: r.count + 1, userReacted: true } : r
+        );
+      }
+    } else {
+      next = [...localReactions, { emoji, count: 1, userReacted: true }];
+    }
+    setLocalReactions(next);
+    try {
+      await toggle.mutateAsync({ taskId: activity.id, emoji });
+    } catch {
+      setLocalReactions(activity.reactions ?? []);
+    }
+  };
+
+  return (
+    <li className="p-3 rounded-2xl bg-card ring-1 ring-white/5">
+      <Link to="/member/$memberId" params={{ memberId: activity.userId }} className="flex items-center gap-3">
+        <div className="size-9 rounded-full bg-zinc-800 flex items-center justify-center text-lg shrink-0">
+          {activity.avatar}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm truncate">
+            <span className="font-semibold">{activity.pseudo}</span>
+            <span className="text-muted-foreground"> a fini </span>
+            <span className="font-medium">{activity.title}</span>
+          </p>
+          <p className="text-[10px] text-muted-foreground">{formatRelative(activity.doneAt)}</p>
+        </div>
+        <span className="text-sm font-bold text-brand shrink-0">+{activity.points}</span>
+      </Link>
+      <div className="mt-2 flex items-center gap-1 pl-12">
+        {["🔥", "💪", "👏", "⚡", "🎯", "😂"].map((emoji) => {
+          const reaction = localReactions.find((r: any) => r.emoji === emoji);
+          const isActive = reaction?.userReacted ?? false;
+          const count = reaction?.count ?? 0;
+          return (
+            <button
+              key={emoji}
+              onClick={() => handleReact(emoji)}
+              disabled={toggle.isPending}
+              className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs transition-all active:scale-90 ${
+                isActive
+                  ? "bg-brand/20 text-brand ring-1 ring-brand/40"
+                  : count > 0
+                  ? "bg-zinc-800/60 text-zinc-400 hover:bg-zinc-700"
+                  : "bg-transparent text-zinc-600 hover:bg-zinc-800/40 hover:text-zinc-400"
+              }`}
+            >
+              <span>{emoji}</span>
+              {count > 0 && <span className="font-medium">{count}</span>}
+            </button>
+          );
+        })}
+      </div>
+    </li>
+  );
+}
+
 function GroupPage() {
   const { data: profile } = useProfile();
   const { data: group, isLoading } = useMyGroup();
@@ -552,81 +629,9 @@ function GroupPage() {
           </div>
         ) : (
           <ul className="space-y-2">
-            {activity.map((a) => {
-              const [localReactions, setLocalReactions] = useState(a.reactions ?? []);
-              const toggle = useToggleReaction();
-
-              const handleReact = async (emoji: string) => {
-                if (!profile || a.userId === profile.id) {
-                  toast("Tu ne peux pas réagir à ta propre quête 😅");
-                  return;
-                }
-                const existing = localReactions.find((r: any) => r.emoji === emoji);
-                let next;
-                if (existing) {
-                  if (existing.userReacted) {
-                    next = localReactions
-                      .map((r: any) => (r.emoji === emoji ? { ...r, count: r.count - 1, userReacted: false } : r))
-                      .filter((r: any) => r.count > 0);
-                  } else {
-                    next = localReactions.map((r: any) =>
-                      r.emoji === emoji ? { ...r, count: r.count + 1, userReacted: true } : r
-                    );
-                  }
-                } else {
-                  next = [...localReactions, { emoji, count: 1, userReacted: true }];
-                }
-                setLocalReactions(next);
-                try {
-                  await toggle.mutateAsync({ taskId: a.id, emoji });
-                } catch {
-                  setLocalReactions(a.reactions ?? []);
-                }
-              };
-
-              return (
-                <li key={a.id} className="p-3 rounded-2xl bg-card ring-1 ring-white/5">
-                  <Link to="/member/$memberId" params={{ memberId: a.userId }} className="flex items-center gap-3">
-                    <div className="size-9 rounded-full bg-zinc-800 flex items-center justify-center text-lg shrink-0">
-                      {a.avatar}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm truncate">
-                        <span className="font-semibold">{a.pseudo}</span>
-                        <span className="text-muted-foreground"> a fini </span>
-                        <span className="font-medium">{a.title}</span>
-                      </p>
-                      <p className="text-[10px] text-muted-foreground">{formatRelative(a.doneAt)}</p>
-                    </div>
-                    <span className="text-sm font-bold text-brand shrink-0">+{a.points}</span>
-                  </Link>
-                  <div className="mt-2 flex items-center gap-1 pl-12">
-                    {["🔥", "💪", "👏", "⚡", "🎯", "😂"].map((emoji) => {
-                      const reaction = localReactions.find((r: any) => r.emoji === emoji);
-                      const isActive = reaction?.userReacted ?? false;
-                      const count = reaction?.count ?? 0;
-                      return (
-                        <button
-                          key={emoji}
-                          onClick={() => handleReact(emoji)}
-                          disabled={toggle.isPending}
-                          className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs transition-all active:scale-90 ${
-                            isActive
-                              ? "bg-brand/20 text-brand ring-1 ring-brand/40"
-                              : count > 0
-                              ? "bg-zinc-800/60 text-zinc-400 hover:bg-zinc-700"
-                              : "bg-transparent text-zinc-600 hover:bg-zinc-800/40 hover:text-zinc-400"
-                          }`}
-                        >
-                          <span>{emoji}</span>
-                          {count > 0 && <span className="font-medium">{count}</span>}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </li>
-              );
-            })}
+            {activity.map((a) => (
+              <ActivityFeedItem key={a.id} activity={a} profile={profile} />
+            ))}
           </ul>
         )}
       </section>
