@@ -564,35 +564,22 @@ export function useGroupActivity(groupId: string | undefined, limit = 20) {
   return useQuery({
     queryKey: ["activity", groupId, limit],
     enabled: !!groupId,
+    // Server-side feed: includes every member's completions (RLS-safe via SECURITY DEFINER).
     queryFn: async (): Promise<ActivityItem[]> => {
-      const { data: members } = await supabase.from("group_members").select("user_id").eq("group_id", groupId!);
-      const ids = (members ?? []).map((m) => m.user_id);
-      if (!ids.length) return [];
-      const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-      const { data: tasks, error } = await supabase
-        .from("tasks")
-        .select("id, user_id, title, points, done_at")
-        .in("user_id", ids)
-        .eq("done", true)
-        .gte("done_at", since)
-        .order("done_at", { ascending: false })
-        .limit(limit);
+      const { data, error } = await supabase.rpc("group_activity", { _group: groupId!, _limit: limit });
       if (error) throw error;
-      const { data: profs } = await supabase.from("profiles").select("id, pseudo, avatar").in("id", ids);
-      const pmap = new Map((profs ?? []).map((p) => [p.id, p]));
-      return (tasks ?? []).map((t) => {
-        const p = pmap.get(t.user_id);
-        return {
-          id: t.id,
-          userId: t.user_id,
-          pseudo: p?.pseudo ?? "?",
-          avatar: p?.avatar ?? "🥷",
-          title: t.title,
-          points: t.points,
-          doneAt: t.done_at ? new Date(t.done_at).getTime() : 0,
-        };
-      });
+      return (data ?? []).map((t) => ({
+        id: t.id,
+        userId: t.user_id,
+        pseudo: t.pseudo,
+        avatar: t.avatar,
+        title: t.title,
+        points: t.points,
+        doneAt: t.done_at ? new Date(t.done_at).getTime() : 0,
+      }));
     },
+    refetchOnMount: "always",
+    refetchInterval: 20000,
     refetchOnWindowFocus: true,
   });
 }
