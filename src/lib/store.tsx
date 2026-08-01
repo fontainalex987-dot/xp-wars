@@ -22,6 +22,7 @@ export type Task = {
   points: number;
   done: boolean;
   createdAt: number;
+  templateId?: string | null;
 };
 
 export type Profile = {
@@ -40,6 +41,9 @@ export type Friend = {
   pseudo: string;
   avatar: string;
   level: number;
+  xp: number;
+  totalPoints: number;
+  streak: number;
   pointsToday: number;
   pointsWeek: number;
   pointsMonth: number;
@@ -186,6 +190,7 @@ export function useTodayTasks() {
         points: t.points,
         done: t.done,
         createdAt: new Date(t.created_at).getTime(),
+        templateId: t.template_id,
       }));
     },
     refetchOnWindowFocus: true,
@@ -253,12 +258,68 @@ export function useCompleteTask() {
 }
 
 
-export function useRemoveTask() {
+// Edit a task that is not yet validated. Recurring tasks also update their template
+// so tomorrow's instance carries the new content.
+export function useUpdateTask() {
+  const { userId } = useAuth();
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from("tasks").delete().eq("id", id);
+    mutationFn: async (input: {
+      id: string;
+      templateId?: string | null;
+      title: string;
+      description: string;
+      difficulty: Difficulty;
+    }) => {
+      if (!userId) throw new Error("Not authenticated");
+      const points = DIFFICULTY_POINTS[input.difficulty];
+      const { data, error } = await supabase
+        .from("tasks")
+        .update({ title: input.title, description: input.description, difficulty: input.difficulty, points })
+        .eq("id", input.id)
+        .eq("user_id", userId)
+        .eq("done", false)
+        .select("id");
       if (error) throw error;
+      if (!data || data.length === 0) throw new Error("Tâche déjà validée ou introuvable");
+      if (input.templateId) {
+        const { error: tErr } = await supabase
+          .from("task_templates")
+          .update({ title: input.title, description: input.description, difficulty: input.difficulty, points })
+          .eq("id", input.templateId)
+          .eq("user_id", userId);
+        if (tErr) throw tErr;
+      }
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["tasks"] }),
+  });
+}
+
+// Delete a task that is not yet validated. Recurring tasks are also deactivated
+// so they stop being regenerated each day.
+export function useRemoveTask() {
+  const { userId } = useAuth();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: { id: string; templateId?: string | null }) => {
+      if (!userId) throw new Error("Not authenticated");
+      if (input.templateId) {
+        const { error: tErr } = await supabase
+          .from("task_templates")
+          .update({ active: false })
+          .eq("id", input.templateId)
+          .eq("user_id", userId);
+        if (tErr) throw tErr;
+      }
+      const { data, error } = await supabase
+        .from("tasks")
+        .delete()
+        .eq("id", input.id)
+        .eq("user_id", userId)
+        .eq("done", false)
+        .select("id");
+      if (error) throw error;
+      if (!data || data.length === 0) throw new Error("Tâche déjà validée ou introuvable");
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["tasks"] }),
   });
@@ -335,48 +396,73 @@ export function useGroupMembers(groupId: string | undefined) {
   return useQuery({
     queryKey: ["members", groupId],
     enabled: !!groupId,
+    // Server-side aggregate: returns every member's real XP/points (RLS-safe via SECURITY DEFINER).
     queryFn: async (): Promise<Friend[]> => {
-      const { data: members, error } = await supabase.from("group_members").select("user_id").eq("group_id", groupId!);
+      const { data, error } = await supabase.rpc("group_leaderboard", { _group: groupId! });
       if (error) throw error;
-      const ids = (members ?? []).map((m) => m.user_id);
-      if (!ids.length) return [];
-      const { data: profs, error: pErr } = await supabase.from("profiles").select("*").in("id", ids);
-      if (pErr) throw pErr;
+      return (data ?? []).map((m) => ({
+        id: m.user_id,
+        pseudo: m.pseudo,
+        avatar: m.avatar,
+        level: m.level,
+        xp: m.xp,
+        totalPoints: m.total_points,
+        streak: m.streak,
+        pointsToday: m.points_today,
+        pointsWeek: m.points_week,
+        pointsMonth: m.points_month,
+      }));
+    },
+    refetchOnWindowFocus: true,
+    refetchOnMount: "always",
+    refetchInterval: 20000,
+  });
+}
 
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const weekStart = new Date(today);
-      const dow = today.getDay(); // 0 sun ... 6 sat
-      const diff = (dow + 6) % 7; // shift so Monday=0
-      weekStart.setDate(today.getDate() - diff);
-      const monthStart = new Date();
-      monthStart.setDate(1);
-      monthStart.setHours(0, 0, 0, 0);
+// Public profile of another group member (visible only to members of the same group).
+export type MemberProfile = {
+  id: string;
+  pseudo: string;
+  avatar: string;
+  goal: string | null;
+  level: number;
+  xp: number;
+  totalPoints: number;
+  streak: number;
+  pointsToday: number;
+  pointsWeek: number;
+  pointsMonth: number;
+  tasksDone: number;
+};
 
-      const { data: doneTasks } = await supabase
-        .from("tasks")
-        .select("user_id, points, done_at")
-        .in("user_id", ids)
-        .eq("done", true)
-        .gte("done_at", monthStart.toISOString());
-
-      const sum = (uid: string, since: Date) =>
-        (doneTasks ?? [])
-          .filter((t) => t.user_id === uid && t.done_at && new Date(t.done_at) >= since)
-          .reduce((s, t) => s + (t.points ?? 0), 0);
-
-      return (profs ?? []).map((p) => ({
+export function useMemberProfile(groupId: string | undefined, memberId: string | undefined) {
+  return useQuery({
+    queryKey: ["memberProfile", groupId, memberId],
+    enabled: !!groupId && !!memberId,
+    queryFn: async (): Promise<MemberProfile | null> => {
+      const { data, error } = await supabase.rpc("group_member_profile", { _group: groupId!, _user: memberId! });
+      if (error) throw error;
+      const p = (data ?? [])[0];
+      if (!p) return null;
+      return {
         id: p.id,
         pseudo: p.pseudo,
         avatar: p.avatar,
+        goal: p.goal,
         level: p.level,
-        pointsToday: sum(p.id, today),
-        pointsWeek: sum(p.id, weekStart),
-        pointsMonth: sum(p.id, monthStart),
-      }));
+        xp: p.xp,
+        totalPoints: p.total_points,
+        streak: p.streak,
+        pointsToday: p.points_today,
+        pointsWeek: p.points_week,
+        pointsMonth: p.points_month,
+        tasksDone: p.tasks_done,
+      };
     },
+    refetchOnWindowFocus: true,
   });
 }
+
 
 export function useCreateGroup() {
 
@@ -460,19 +546,9 @@ export function useGroupChallenge(groupId: string | undefined) {
       if (error) throw error;
       if (!ch) return null;
 
-      const { data: members } = await supabase.from("group_members").select("user_id").eq("group_id", groupId!);
-      const ids = (members ?? []).map((m) => m.user_id);
-      let progress = 0;
-      if (ids.length) {
-        const { data: done } = await supabase
-          .from("tasks")
-          .select("points")
-          .in("user_id", ids)
-          .eq("done", true)
-          .gte("done_at", ch.starts_at)
-          .lte("done_at", ch.ends_at);
-        progress = (done ?? []).reduce((s, t) => s + (t.points ?? 0), 0);
-      }
+      // Progress across all members, computed server-side.
+      const { data: progress, error: pErr } = await supabase.rpc("group_challenge_progress", { _challenge: ch.id });
+      if (pErr) throw pErr;
       return {
         id: ch.id,
         groupId: ch.group_id,
@@ -481,10 +557,11 @@ export function useGroupChallenge(groupId: string | undefined) {
         startsAt: ch.starts_at,
         endsAt: ch.ends_at,
         createdBy: ch.created_by,
-        progress,
+        progress: progress ?? 0,
       };
     },
     refetchOnWindowFocus: true,
+    refetchInterval: 20000,
   });
 }
 
@@ -536,35 +613,22 @@ export function useGroupActivity(groupId: string | undefined, limit = 20) {
   return useQuery({
     queryKey: ["activity", groupId, limit],
     enabled: !!groupId,
+    // Server-side feed: includes every member's completions (RLS-safe via SECURITY DEFINER).
     queryFn: async (): Promise<ActivityItem[]> => {
-      const { data: members } = await supabase.from("group_members").select("user_id").eq("group_id", groupId!);
-      const ids = (members ?? []).map((m) => m.user_id);
-      if (!ids.length) return [];
-      const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-      const { data: tasks, error } = await supabase
-        .from("tasks")
-        .select("id, user_id, title, points, done_at")
-        .in("user_id", ids)
-        .eq("done", true)
-        .gte("done_at", since)
-        .order("done_at", { ascending: false })
-        .limit(limit);
+      const { data, error } = await supabase.rpc("group_activity", { _group: groupId!, _limit: limit });
       if (error) throw error;
-      const { data: profs } = await supabase.from("profiles").select("id, pseudo, avatar").in("id", ids);
-      const pmap = new Map((profs ?? []).map((p) => [p.id, p]));
-      return (tasks ?? []).map((t) => {
-        const p = pmap.get(t.user_id);
-        return {
-          id: t.id,
-          userId: t.user_id,
-          pseudo: p?.pseudo ?? "?",
-          avatar: p?.avatar ?? "🥷",
-          title: t.title,
-          points: t.points,
-          doneAt: t.done_at ? new Date(t.done_at).getTime() : 0,
-        };
-      });
+      return (data ?? []).map((t) => ({
+        id: t.id,
+        userId: t.user_id,
+        pseudo: t.pseudo,
+        avatar: t.avatar,
+        title: t.title,
+        points: t.points,
+        doneAt: t.done_at ? new Date(t.done_at).getTime() : 0,
+      }));
     },
+    refetchOnMount: "always",
+    refetchInterval: 20000,
     refetchOnWindowFocus: true,
   });
 }

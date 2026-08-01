@@ -106,9 +106,11 @@ function LeaderboardPage() {
         {sorted.map((f, i) => {
           const isMe = f.id === profile?.id;
           return (
-            <div
+            <Link
               key={f.id}
-              className={`p-3 rounded-2xl flex items-center gap-3 ring-1 ${
+              to="/member/$memberId"
+              params={{ memberId: f.id }}
+              className={`p-3 rounded-2xl flex items-center gap-3 ring-1 active:scale-[0.99] transition-transform ${
                 isMe ? "bg-brand/10 ring-brand/30" : "bg-card ring-white/5"
               }`}
             >
@@ -119,7 +121,7 @@ function LeaderboardPage() {
                 <p className="text-xs text-muted-foreground">Niveau {f.level}</p>
               </div>
               <span className="font-bold tabular-nums">{pick(f, range)} pts</span>
-            </div>
+            </Link>
           );
         })}
       </section>

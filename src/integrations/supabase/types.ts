@@ -261,6 +261,54 @@ export type Database = {
         }
       }
       generate_group_code: { Args: never; Returns: string }
+      group_activity: {
+        Args: { _group: string; _limit?: number }
+        Returns: {
+          avatar: string
+          done_at: string
+          id: string
+          points: number
+          pseudo: string
+          title: string
+          user_id: string
+        }[]
+      }
+      group_challenge_progress: {
+        Args: { _challenge: string }
+        Returns: number
+      }
+      group_leaderboard: {
+        Args: { _group: string }
+        Returns: {
+          avatar: string
+          level: number
+          points_month: number
+          points_today: number
+          points_week: number
+          pseudo: string
+          streak: number
+          total_points: number
+          user_id: string
+          xp: number
+        }[]
+      }
+      group_member_profile: {
+        Args: { _group: string; _user: string }
+        Returns: {
+          avatar: string
+          goal: string
+          id: string
+          level: number
+          points_month: number
+          points_today: number
+          points_week: number
+          pseudo: string
+          streak: number
+          tasks_done: number
+          total_points: number
+          xp: number
+        }[]
+      }
       is_group_member: {
         Args: { _group: string; _user: string }
         Returns: boolean
