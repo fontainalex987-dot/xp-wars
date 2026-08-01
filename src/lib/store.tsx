@@ -599,6 +599,12 @@ export function useDeleteChallenge() {
 }
 
 // ------- Group Activity Feed ---------
+export type Reaction = {
+  emoji: string;
+  count: number;
+  userReacted: boolean;
+};
+
 export type ActivityItem = {
   id: string;
   userId: string;
@@ -607,9 +613,10 @@ export type ActivityItem = {
   title: string;
   points: number;
   doneAt: number;
+  reactions: Reaction[];
 };
 
-export function useGroupActivity(groupId: string | undefined, limit = 20) {
+export function useGroupActivityexport(groupId: string | undefined, limit = 20) {
   return useQuery({
     queryKey: ["activity", groupId, limit],
     enabled: !!groupId,
@@ -631,6 +638,60 @@ export function useGroupActivity(groupId: string | undefined, limit = 20) {
     refetchInterval: 20000,
     refetchOnWindowFocus: true,
   });
+}
+// ========== 2) useToggleReaction (NOUVEAU, après useGroupActivity) ==========
+export function useToggleReaction() {
+  const { userId } = useAuth();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ taskId, emoji }: { taskId: string; emoji: string }) => {
+      if (!userId) throw new Error("Not authenticated");
+      const { data: existing } = await supabase
+        .from("activity_reactions")
+        .select("id")
+        .eq("task_id", taskId)
+        .eq("user_id", userId)
+        .eq("emoji", emoji)
+        .maybeSingle();
+
+      if (existing) {
+        const { error } = await supabase.from("activity_reactions").delete().eq("id", existing.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("activity_reactions").insert({ task_id: taskId, user_id: userId, emoji });
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["activity"] }),
+  });
+}
+
+// ========== 3) useNewReactions (NOUVEAU, après useToggleReaction) ==========
+export function useNewReactions() {
+  const { userId } = useAuth();
+  const [lastCheck, setLastCheck] = useState(Date.now());
+
+  useEffect(() => {
+    if (!userId) return;
+    const interval = setInterval(async () => {
+      const { data } = await supabase
+        .from("activity_reactions")
+        .select("id, emoji, task:tasks(title), reactor:profiles(pseudo)")
+        .neq("user_id", userId)
+        .gt("created_at", new Date(lastCheck).toISOString());
+
+      if (data && data.length > 0) {
+        data.forEach((r: any) => {
+          toast(`${r.reactor.pseudo} a réagi ${r.emoji} à ta quête "${r.task.title}"`, {
+            icon: r.emoji,
+            duration: 4000,
+          });
+        });
+        setLastCheck(Date.now());
+      }
+    }, 20000);
+    return () => clearInterval(interval);
+  }, [userId, lastCheck]);
 }
 
 // ------- Badges (derived, local) ---------
