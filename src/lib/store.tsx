@@ -256,12 +256,68 @@ export function useCompleteTask() {
 }
 
 
-export function useRemoveTask() {
+// Edit a task that is not yet validated. Recurring tasks also update their template
+// so tomorrow's instance carries the new content.
+export function useUpdateTask() {
+  const { userId } = useAuth();
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from("tasks").delete().eq("id", id);
+    mutationFn: async (input: {
+      id: string;
+      templateId?: string | null;
+      title: string;
+      description: string;
+      difficulty: Difficulty;
+    }) => {
+      if (!userId) throw new Error("Not authenticated");
+      const points = DIFFICULTY_POINTS[input.difficulty];
+      const { data, error } = await supabase
+        .from("tasks")
+        .update({ title: input.title, description: input.description, difficulty: input.difficulty, points })
+        .eq("id", input.id)
+        .eq("user_id", userId)
+        .eq("done", false)
+        .select("id");
       if (error) throw error;
+      if (!data || data.length === 0) throw new Error("Tâche déjà validée ou introuvable");
+      if (input.templateId) {
+        const { error: tErr } = await supabase
+          .from("task_templates")
+          .update({ title: input.title, description: input.description, difficulty: input.difficulty, points })
+          .eq("id", input.templateId)
+          .eq("user_id", userId);
+        if (tErr) throw tErr;
+      }
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["tasks"] }),
+  });
+}
+
+// Delete a task that is not yet validated. Recurring tasks are also deactivated
+// so they stop being regenerated each day.
+export function useRemoveTask() {
+  const { userId } = useAuth();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: { id: string; templateId?: string | null }) => {
+      if (!userId) throw new Error("Not authenticated");
+      if (input.templateId) {
+        const { error: tErr } = await supabase
+          .from("task_templates")
+          .update({ active: false })
+          .eq("id", input.templateId)
+          .eq("user_id", userId);
+        if (tErr) throw tErr;
+      }
+      const { data, error } = await supabase
+        .from("tasks")
+        .delete()
+        .eq("id", input.id)
+        .eq("user_id", userId)
+        .eq("done", false)
+        .select("id");
+      if (error) throw error;
+      if (!data || data.length === 0) throw new Error("Tâche déjà validée ou introuvable");
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["tasks"] }),
   });
