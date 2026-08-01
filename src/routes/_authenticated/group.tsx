@@ -4,16 +4,22 @@ import { toast } from "sonner";
 import { ChevronRight, Copy, LogOut, Plus, Share2, Target, Trash2, UserPlus, Zap } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import {
+  useAcceptDuel,
+  useCancelDuel,
   useCreateChallenge,
+  useCreateDuel,
   useCreateGroup,
   useDeleteChallenge,
   useGroupActivity,
   useGroupChallenge,
+  useGroupDuels,
   useGroupMembers,
   useJoinGroup,
   useLeaveGroup,
   useMyGroup,
+  useNewReactions,
   useProfile,
+  useToggleReaction,
 } from "@/lib/store";
 
 export const Route = createFileRoute("/_authenticated/group")({
@@ -45,6 +51,13 @@ function GroupPage() {
   const { data: friends = [] } = useGroupMembers(group?.id);
   const { data: challenge } = useGroupChallenge(group?.id);
   const { data: activity = [] } = useGroupActivity(group?.id);
+  const { data: duels = [] } = useGroupDuels(group?.id);
+  const createDuel = useCreateDuel();
+  const acceptDuel = useAcceptDuel();
+  const cancelDuel = useCancelDuel();
+  const [showDuelForm, setShowDuelForm] = useState(false);
+  const [selectedOpponent, setSelectedOpponent] = useState<string | null>(null);
+  useNewReactions();
   const create = useCreateGroup();
   const join = useJoinGroup();
   const leave = useLeaveGroup();
@@ -377,6 +390,157 @@ function GroupPage() {
         )}
       </section>
 
+      {/* ---- DUELS 1V1 ---- */}
+      <section className="px-5 py-4">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Target className="size-4 text-brand" />
+            <h2 className="text-lg font-medium">Duels 1v1</h2>
+          </div>
+          <button
+            onClick={() => setShowDuelForm(!showDuelForm)}
+            className="text-xs font-bold text-brand bg-brand/10 px-3 py-1.5 rounded-full ring-1 ring-brand/20 active:scale-95 transition-transform"
+          >
+            {showDuelForm ? "Annuler" : "+ Défier"}
+          </button>
+        </div>
+
+        {showDuelForm && (
+          <div className="p-4 rounded-2xl bg-card ring-1 ring-white/5 space-y-3 mb-3">
+            <p className="text-sm text-muted-foreground">Choisis un adversaire pour la semaine :</p>
+            <div className="grid grid-cols-2 gap-2">
+              {friends
+                .filter((f) => f.id !== profile?.id)
+                .map((f) => (
+                  <button
+                    key={f.id}
+                    onClick={() => setSelectedOpponent(f.id === selectedOpponent ? null : f.id)}
+                    className={`flex items-center gap-2 p-2 rounded-xl transition-all ${
+                      selectedOpponent === f.id
+                        ? "bg-brand/20 ring-1 ring-brand"
+                        : "bg-black/20 ring-1 ring-white/5 hover:bg-white/5"
+                    }`}
+                  >
+                    <span className="text-lg">{f.avatar}</span>
+                    <span className="text-xs font-medium truncate">{f.pseudo}</span>
+                  </button>
+                ))}
+            </div>
+            <button
+              onClick={async () => {
+                if (!selectedOpponent || !group) return;
+                try {
+                  await createDuel.mutateAsync({ challengedId: selectedOpponent, groupId: group.id });
+                  toast.success("Défi envoyé !");
+                  setShowDuelForm(false);
+                  setSelectedOpponent(null);
+                } catch (err) {
+                  toast.error(err instanceof Error ? err.message : "Erreur");
+                }
+              }}
+              disabled={!selectedOpponent || createDuel.isPending}
+              className="w-full py-2.5 rounded-xl bg-brand text-primary-foreground font-bold text-sm active:scale-95 transition-transform disabled:opacity-40"
+            >
+              {createDuel.isPending ? "..." : "Envoyer le défi"}
+            </button>
+          </div>
+        )}
+
+        {duels.length === 0 ? (
+          <div className="p-4 rounded-2xl bg-card/60 ring-1 ring-white/5 text-center">
+            <p className="text-sm text-muted-foreground">Aucun duel en cours. Défie un pote !</p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {duels.map((d) => {
+              const isChallenger = d.challengerId === profile?.id;
+              const isChallenged = d.challengedId === profile?.id;
+              const total = d.challengerPoints + d.challengedPoints;
+              const challengerPct = total > 0 ? Math.round((d.challengerPoints / total) * 100) : 50;
+
+              return (
+                <div key={d.id} className="p-4 rounded-2xl bg-card ring-1 ring-white/5">
+                  {/* Header */}
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-brand/10 text-brand ring-1 ring-brand/20 uppercase">
+                        {d.status === "pending" ? "En attente" : d.status === "active" ? "En cours" : "Terminé"}
+                      </span>
+                      {d.daysLeft > 0 && d.status === "active" && (
+                        <span className="text-[10px] text-muted-foreground">{d.daysLeft}j restants</span>
+                      )}
+                    </div>
+                    {d.status === "pending" && isChallenger && (
+                      <button
+                        onClick={async () => {
+                          try {
+                            await cancelDuel.mutateAsync(d.id);
+                            toast.success("Défi annulé");
+                          } catch (err) {
+                            toast.error("Erreur");
+                          }
+                        }}
+                        className="text-[10px] text-zinc-500 hover:text-red-400"
+                      >
+                        Annuler
+                      </button>
+                    )}
+                    {d.status === "pending" && isChallenged && (
+                      <button
+                        onClick={async () => {
+                          try {
+                            await acceptDuel.mutateAsync(d.id);
+                            toast.success("Défi accepté ! Que le meilleur gagne 💪");
+                          } catch (err) {
+                            toast.error("Erreur");
+                          }
+                        }}
+                        className="text-xs font-bold text-brand bg-brand/10 px-3 py-1 rounded-full ring-1 ring-brand/20 active:scale-95"
+                      >
+                        Accepter
+                      </button>
+                    )}
+                  </div>
+
+                  {/* VS */}
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1 text-center">
+                      <div className="text-2xl">{d.challengerAvatar}</div>
+                      <p className="text-xs font-semibold mt-1 truncate">{d.challengerPseudo}</p>
+                      <p className="text-lg font-bold text-brand">{d.challengerPoints}</p>
+                    </div>
+                    <div className="text-xs font-bold text-zinc-500 uppercase tracking-widest">VS</div>
+                    <div className="flex-1 text-center">
+                      <div className="text-2xl">{d.challengedAvatar}</div>
+                      <p className="text-xs font-semibold mt-1 truncate">{d.challengedPseudo}</p>
+                      <p className="text-lg font-bold text-brand">{d.challengedPoints}</p>
+                    </div>
+                  </div>
+
+                  {/* Barre de progression */}
+                  {d.status !== "pending" && (
+                    <div className="mt-3 h-2 bg-black/40 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-brand transition-all duration-500"
+                        style={{ width: `${challengerPct}%` }}
+                      />
+                    </div>
+                  )}
+
+                  {/* Gagnant */}
+                  {d.status === "completed" && d.winnerId && (
+                    <p className="mt-2 text-center text-xs font-bold text-emerald-400">
+                      🏆 {d.winnerId === d.challengerId ? d.challengerPseudo : d.challengedPseudo} a gagné !
+                    </p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      {/* ---- ACTIVITÉ RÉCENTE ---- */}
       <section className="px-5 py-4">
         <div className="flex items-center gap-2 mb-3">
           <Zap className="size-4 text-brand" />
@@ -388,22 +552,81 @@ function GroupPage() {
           </div>
         ) : (
           <ul className="space-y-2">
-            {activity.map((a) => (
-              <li key={a.id} className="p-3 rounded-2xl bg-card ring-1 ring-white/5">
-                <Link to="/member/$memberId" params={{ memberId: a.userId }} className="flex items-center gap-3">
-                <div className="size-9 rounded-full bg-zinc-800 flex items-center justify-center text-lg shrink-0">{a.avatar}</div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm truncate">
-                    <span className="font-semibold">{a.pseudo}</span>
-                    <span className="text-muted-foreground"> a fini </span>
-                    <span className="font-medium">{a.title}</span>
-                  </p>
-                  <p className="text-[10px] text-muted-foreground">{formatRelative(a.doneAt)}</p>
-                </div>
-                <span className="text-sm font-bold text-brand shrink-0">+{a.points}</span>
-                </Link>
-              </li>
-            ))}
+            {activity.map((a) => {
+              const [localReactions, setLocalReactions] = useState(a.reactions ?? []);
+              const toggle = useToggleReaction();
+
+              const handleReact = async (emoji: string) => {
+                if (!profile || a.userId === profile.id) {
+                  toast("Tu ne peux pas réagir à ta propre quête 😅");
+                  return;
+                }
+                const existing = localReactions.find((r: any) => r.emoji === emoji);
+                let next;
+                if (existing) {
+                  if (existing.userReacted) {
+                    next = localReactions
+                      .map((r: any) => (r.emoji === emoji ? { ...r, count: r.count - 1, userReacted: false } : r))
+                      .filter((r: any) => r.count > 0);
+                  } else {
+                    next = localReactions.map((r: any) =>
+                      r.emoji === emoji ? { ...r, count: r.count + 1, userReacted: true } : r
+                    );
+                  }
+                } else {
+                  next = [...localReactions, { emoji, count: 1, userReacted: true }];
+                }
+                setLocalReactions(next);
+                try {
+                  await toggle.mutateAsync({ taskId: a.id, emoji });
+                } catch {
+                  setLocalReactions(a.reactions ?? []);
+                }
+              };
+
+              return (
+                <li key={a.id} className="p-3 rounded-2xl bg-card ring-1 ring-white/5">
+                  <Link to="/member/$memberId" params={{ memberId: a.userId }} className="flex items-center gap-3">
+                    <div className="size-9 rounded-full bg-zinc-800 flex items-center justify-center text-lg shrink-0">
+                      {a.avatar}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm truncate">
+                        <span className="font-semibold">{a.pseudo}</span>
+                        <span className="text-muted-foreground"> a fini </span>
+                        <span className="font-medium">{a.title}</span>
+                      </p>
+                      <p className="text-[10px] text-muted-foreground">{formatRelative(a.doneAt)}</p>
+                    </div>
+                    <span className="text-sm font-bold text-brand shrink-0">+{a.points}</span>
+                  </Link>
+                  <div className="mt-2 flex items-center gap-1 pl-12">
+                    {["🔥", "💪", "👏", "⚡", "🎯", "😂"].map((emoji) => {
+                      const reaction = localReactions.find((r: any) => r.emoji === emoji);
+                      const isActive = reaction?.userReacted ?? false;
+                      const count = reaction?.count ?? 0;
+                      return (
+                        <button
+                          key={emoji}
+                          onClick={() => handleReact(emoji)}
+                          disabled={toggle.isPending}
+                          className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs transition-all active:scale-90 ${
+                            isActive
+                              ? "bg-brand/20 text-brand ring-1 ring-brand/40"
+                              : count > 0
+                              ? "bg-zinc-800/60 text-zinc-400 hover:bg-zinc-700"
+                              : "bg-transparent text-zinc-600 hover:bg-zinc-800/40 hover:text-zinc-400"
+                          }`}
+                        >
+                          <span>{emoji}</span>
+                          {count > 0 && <span className="font-medium">{count}</span>}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>
