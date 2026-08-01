@@ -746,13 +746,16 @@ export function useCreateDuel() {
   const { userId } = useAuth();
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ challengedId, groupId }: { challengedId: string; groupId: string }) => {
+    mutationFn: async ({ challengedId, groupId }: { challengedId: string; groupId?: string }) => {
       if (!userId) throw new Error("Not authenticated");
-      const { data, error } = await supabase.rpc("create_duel", { _challenged: challengedId, _group: groupId });
+      const { data, error } = await supabase.rpc("create_duel", { _challenged: challengedId, _group: groupId ?? null });
       if (error) throw error;
       return data;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["duels"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["duels"] });
+      qc.invalidateQueries({ queryKey: ["myDuels"] });
+    },
   });
 }
 
@@ -777,6 +780,178 @@ export function useCancelDuel() {
       return data;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["duels"] }),
+  });
+}
+
+
+// ------- Friends ---------
+export type Friend = {
+  id: string;
+  pseudo: string;
+  avatar: string;
+  level: number;
+  xp: number;
+  streak: number;
+  totalPoints: number;
+};
+
+export type FriendRequest = {
+  id: string;
+  senderId: string;
+  senderPseudo: string;
+  senderAvatar: string;
+  senderLevel: number;
+  createdAt: string;
+};
+
+export type SearchedUser = {
+  id: string;
+  pseudo: string;
+  avatar: string;
+  level: number;
+  isFriend: boolean;
+  requestSent: boolean;
+  requestReceived: boolean;
+};
+
+export function useSearchUsers(query: string) {
+  return useQuery({
+    queryKey: ["searchUsers", query],
+    enabled: query.length >= 2,
+    queryFn: async (): Promise<SearchedUser[]> => {
+      const { data, error } = await supabase.rpc("search_users", { _query: query });
+      if (error) throw error;
+      return (data ?? []).map((u) => ({
+        id: u.id,
+        pseudo: u.pseudo,
+        avatar: u.avatar,
+        level: u.level,
+        isFriend: u.is_friend,
+        requestSent: u.request_sent,
+        requestReceived: u.request_received,
+      }));
+    },
+  });
+}
+
+export function useMyFriends() {
+  return useQuery({
+    queryKey: ["friends"],
+    queryFn: async (): Promise<Friend[]> => {
+      const { data, error } = await supabase.rpc("my_friends");
+      if (error) throw error;
+      return (data ?? []).map((f) => ({
+        id: f.id,
+        pseudo: f.pseudo,
+        avatar: f.avatar,
+        level: f.level,
+        xp: f.xp,
+        streak: f.streak,
+        totalPoints: f.total_points,
+      }));
+    },
+    refetchOnWindowFocus: true,
+  });
+}
+
+export function useMyFriendRequests() {
+  return useQuery({
+    queryKey: ["friendRequests"],
+    queryFn: async (): Promise<FriendRequest[]> => {
+      const { data, error } = await supabase.rpc("my_friend_requests");
+      if (error) throw error;
+      return (data ?? []).map((r) => ({
+        id: r.id,
+        senderId: r.sender_id,
+        senderPseudo: r.sender_pseudo,
+        senderAvatar: r.sender_avatar,
+        senderLevel: r.sender_level,
+        createdAt: r.created_at,
+      }));
+    },
+    refetchOnWindowFocus: true,
+    refetchInterval: 15000,
+  });
+}
+
+export function useSendFriendRequest() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (receiverId: string) => {
+      const { data, error } = await supabase.rpc("send_friend_request", { _receiver: receiverId });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["searchUsers"] });
+      qc.invalidateQueries({ queryKey: ["friends"] });
+    },
+  });
+}
+
+export function useAcceptFriendRequest() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (requestId: string) => {
+      const { data, error } = await supabase.rpc("accept_friend_request", { _request: requestId });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["friendRequests"] });
+      qc.invalidateQueries({ queryKey: ["friends"] });
+    },
+  });
+}
+
+export function useRejectFriendRequest() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (requestId: string) => {
+      const { data, error } = await supabase.rpc("reject_friend_request", { _request: requestId });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["friendRequests"] }),
+  });
+}
+
+export function useRemoveFriend() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (friendId: string) => {
+      const { error } = await supabase.rpc("remove_friend", { _friend: friendId });
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["friends"] }),
+  });
+}
+
+export function useMyDuels() {
+  return useQuery({
+    queryKey: ["myDuels"],
+    queryFn: async (): Promise<Duel[]> => {
+      const { data, error } = await supabase.rpc("my_duels");
+      if (error) throw error;
+      return (data ?? []).map((d) => ({
+        id: d.id,
+        challengerId: d.challenger_id,
+        challengerPseudo: d.challenger_pseudo,
+        challengerAvatar: d.challenger_avatar,
+        challengedId: d.challenged_id,
+        challengedPseudo: d.challenged_pseudo,
+        challengedAvatar: d.challenged_avatar,
+        status: d.status as Duel["status"],
+        winnerId: d.winner_id,
+        startsAt: d.starts_at,
+        endsAt: d.ends_at,
+        challengerPoints: d.challenger_points,
+        challengedPoints: d.challenged_points,
+        daysLeft: d.days_left,
+      }));
+    },
+    refetchOnWindowFocus: true,
+    refetchInterval: 15000,
   });
 }
 
