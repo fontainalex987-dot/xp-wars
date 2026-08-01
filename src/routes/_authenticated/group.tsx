@@ -402,7 +402,15 @@ function GroupPage() {
     <AppShell>
       <header className="px-5 pt-8 pb-4">
         <p className="text-[10px] text-zinc-400 uppercase tracking-widest font-medium">Groupe</p>
-        <h1 className="text-3xl font-semibold tracking-tight">{group.name}</h1>
+       <div className="flex items-center justify-between">
+  <h1 className="text-3xl font-semibold tracking-tight">{group.name}</h1>
+  <Link 
+    to="/friends" 
+    className="text-xs font-bold text-brand bg-brand/10 px-3 py-2 rounded-xl ring-1 ring-brand/20"
+  >
+    Mes amis
+  </Link>
+</div>
       </header>
 
       <section className="px-5 py-4">
