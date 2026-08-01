@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Flame, Plus, Trophy, Target } from "lucide-react";
+import { Flame, Plus, Trophy, Target, Users } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { XpBar } from "@/components/XpBar";
 import { useGroupMembers, useMyGroup, useProfile, useTodayTasks, XP_PER_LEVEL } from "@/lib/store";
@@ -79,7 +79,7 @@ function HomePage() {
         </div>
       </section>
 
-      <section className="px-5 py-2 grid grid-cols-2 gap-3">
+      <section className="px-5 py-2 grid grid-cols-3 gap-3">
         <div className="p-4 rounded-2xl bg-card ring-1 ring-white/5">
           <div className="flex items-center gap-2 text-zinc-400">
             <Target className="size-4" />
@@ -96,6 +96,16 @@ function HomePage() {
           <p className="mt-2 text-2xl font-bold">{group ? `#${myRank || "-"}` : "—"}</p>
           <p className="text-xs text-muted-foreground truncate">{group ? group.name : "Aucun groupe"}</p>
         </div>
+        <Link
+          to="/friends"
+          className="p-4 rounded-2xl bg-card ring-1 ring-white/5 flex flex-col justify-between active:scale-95 transition-transform"
+        >
+          <div className="flex items-center gap-2 text-zinc-400">
+            <Users className="size-4" />
+            <span className="text-[10px] uppercase tracking-widest">Amis</span>
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground">Gérer</p>
+        </Link>
       </section>
 
       {tasks.length > 0 && (
