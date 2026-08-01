@@ -488,19 +488,9 @@ export function useGroupChallenge(groupId: string | undefined) {
       if (error) throw error;
       if (!ch) return null;
 
-      const { data: members } = await supabase.from("group_members").select("user_id").eq("group_id", groupId!);
-      const ids = (members ?? []).map((m) => m.user_id);
-      let progress = 0;
-      if (ids.length) {
-        const { data: done } = await supabase
-          .from("tasks")
-          .select("points")
-          .in("user_id", ids)
-          .eq("done", true)
-          .gte("done_at", ch.starts_at)
-          .lte("done_at", ch.ends_at);
-        progress = (done ?? []).reduce((s, t) => s + (t.points ?? 0), 0);
-      }
+      // Progress across all members, computed server-side.
+      const { data: progress, error: pErr } = await supabase.rpc("group_challenge_progress", { _challenge: ch.id });
+      if (pErr) throw pErr;
       return {
         id: ch.id,
         groupId: ch.group_id,
@@ -509,10 +499,11 @@ export function useGroupChallenge(groupId: string | undefined) {
         startsAt: ch.starts_at,
         endsAt: ch.ends_at,
         createdBy: ch.created_by,
-        progress,
+        progress: progress ?? 0,
       };
     },
     refetchOnWindowFocus: true,
+    refetchInterval: 20000,
   });
 }
 
