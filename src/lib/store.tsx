@@ -40,6 +40,9 @@ export type Friend = {
   pseudo: string;
   avatar: string;
   level: number;
+  xp: number;
+  totalPoints: number;
+  streak: number;
   pointsToday: number;
   pointsWeek: number;
   pointsMonth: number;
