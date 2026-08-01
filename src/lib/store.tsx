@@ -22,6 +22,7 @@ export type Task = {
   points: number;
   done: boolean;
   createdAt: number;
+  templateId?: string | null;
 };
 
 export type Profile = {
