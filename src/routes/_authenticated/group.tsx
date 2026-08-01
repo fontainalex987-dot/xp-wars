@@ -1,5 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { ChevronRight, Copy, LogOut, Plus, Share2, Target, Trash2, UserPlus, Zap } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
