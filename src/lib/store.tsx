@@ -338,48 +338,73 @@ export function useGroupMembers(groupId: string | undefined) {
   return useQuery({
     queryKey: ["members", groupId],
     enabled: !!groupId,
+    // Server-side aggregate: returns every member's real XP/points (RLS-safe via SECURITY DEFINER).
     queryFn: async (): Promise<Friend[]> => {
-      const { data: members, error } = await supabase.from("group_members").select("user_id").eq("group_id", groupId!);
+      const { data, error } = await supabase.rpc("group_leaderboard", { _group: groupId! });
       if (error) throw error;
-      const ids = (members ?? []).map((m) => m.user_id);
-      if (!ids.length) return [];
-      const { data: profs, error: pErr } = await supabase.from("profiles").select("*").in("id", ids);
-      if (pErr) throw pErr;
+      return (data ?? []).map((m) => ({
+        id: m.user_id,
+        pseudo: m.pseudo,
+        avatar: m.avatar,
+        level: m.level,
+        xp: m.xp,
+        totalPoints: m.total_points,
+        streak: m.streak,
+        pointsToday: m.points_today,
+        pointsWeek: m.points_week,
+        pointsMonth: m.points_month,
+      }));
+    },
+    refetchOnWindowFocus: true,
+    refetchOnMount: "always",
+    refetchInterval: 20000,
+  });
+}
 
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const weekStart = new Date(today);
-      const dow = today.getDay(); // 0 sun ... 6 sat
-      const diff = (dow + 6) % 7; // shift so Monday=0
-      weekStart.setDate(today.getDate() - diff);
-      const monthStart = new Date();
-      monthStart.setDate(1);
-      monthStart.setHours(0, 0, 0, 0);
+// Public profile of another group member (visible only to members of the same group).
+export type MemberProfile = {
+  id: string;
+  pseudo: string;
+  avatar: string;
+  goal: string | null;
+  level: number;
+  xp: number;
+  totalPoints: number;
+  streak: number;
+  pointsToday: number;
+  pointsWeek: number;
+  pointsMonth: number;
+  tasksDone: number;
+};
 
-      const { data: doneTasks } = await supabase
-        .from("tasks")
-        .select("user_id, points, done_at")
-        .in("user_id", ids)
-        .eq("done", true)
-        .gte("done_at", monthStart.toISOString());
-
-      const sum = (uid: string, since: Date) =>
-        (doneTasks ?? [])
-          .filter((t) => t.user_id === uid && t.done_at && new Date(t.done_at) >= since)
-          .reduce((s, t) => s + (t.points ?? 0), 0);
-
-      return (profs ?? []).map((p) => ({
+export function useMemberProfile(groupId: string | undefined, memberId: string | undefined) {
+  return useQuery({
+    queryKey: ["memberProfile", groupId, memberId],
+    enabled: !!groupId && !!memberId,
+    queryFn: async (): Promise<MemberProfile | null> => {
+      const { data, error } = await supabase.rpc("group_member_profile", { _group: groupId!, _user: memberId! });
+      if (error) throw error;
+      const p = (data ?? [])[0];
+      if (!p) return null;
+      return {
         id: p.id,
         pseudo: p.pseudo,
         avatar: p.avatar,
+        goal: p.goal,
         level: p.level,
-        pointsToday: sum(p.id, today),
-        pointsWeek: sum(p.id, weekStart),
-        pointsMonth: sum(p.id, monthStart),
-      }));
+        xp: p.xp,
+        totalPoints: p.total_points,
+        streak: p.streak,
+        pointsToday: p.points_today,
+        pointsWeek: p.points_week,
+        pointsMonth: p.points_month,
+        tasksDone: p.tasks_done,
+      };
     },
+    refetchOnWindowFocus: true,
   });
 }
+
 
 export function useCreateGroup() {
 
