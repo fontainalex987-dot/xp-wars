@@ -190,6 +190,7 @@ export function useTodayTasks() {
         points: t.points,
         done: t.done,
         createdAt: new Date(t.created_at).getTime(),
+        templateId: t.template_id,
       }));
     },
     refetchOnWindowFocus: true,
