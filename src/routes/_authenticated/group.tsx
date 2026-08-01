@@ -50,6 +50,9 @@ function ActivityFeedItem({ activity, profile }: { activity: import("@/lib/store
   const [localReactions, setLocalReactions] = useState(activity.reactions ?? []);
   const [showPicker, setShowPicker] = useState(false);
   const toggle = useToggleReaction();
+  const navigate = useNavigate();
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isLongPress = useRef(false);
 
   const handleReact = async (emoji: string) => {
     if (!profile || activity.userId === profile.id) {
@@ -79,77 +82,132 @@ function ActivityFeedItem({ activity, profile }: { activity: import("@/lib/store
     }
   };
 
+  const onPointerDown = () => {
+    isLongPress.current = false;
+    timerRef.current = setTimeout(() => {
+      isLongPress.current = true;
+      setShowPicker(true);
+      // Haptic feedback si dispo
+      if (typeof navigator !== "undefined" && (navigator as any).vibrate) {
+        (navigator as any).vibrate(50);
+      }
+    }, 600);
+  };
+
+  const onPointerUp = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  };
+
+  const onPointerLeave = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  };
+
+  const onClick = () => {
+    if (!isLongPress.current) {
+      navigate({ to: "/member/$memberId", params: { memberId: activity.userId } });
+    }
+  };
+
   const allEmojis = ["🔥", "💪", "👏", "⚡", "🎯", "😂"];
-  const unusedEmojis = allEmojis.filter((e) => !localReactions.some((r: any) => r.emoji === e));
 
   return (
-    <li className="p-3 rounded-2xl bg-card ring-1 ring-white/5">
-      <Link to="/member/$memberId" params={{ memberId: activity.userId }} className="flex items-center gap-3">
-        <div className="size-9 rounded-full bg-zinc-800 flex items-center justify-center text-lg shrink-0">
-          {activity.avatar}
+    <>
+      <li
+        className="p-3 rounded-2xl bg-card ring-1 ring-white/5 select-none"
+        onPointerDown={onPointerDown}
+        onPointerUp={onPointerUp}
+        onPointerLeave={onPointerLeave}
+        onContextMenu={(e) => e.preventDefault()}
+        onClick={onClick}
+      >
+        <div className="flex items-center gap-3 cursor-pointer">
+          <div className="size-9 rounded-full bg-zinc-800 flex items-center justify-center text-lg shrink-0">
+            {activity.avatar}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm truncate">
+              <span className="font-semibold">{activity.pseudo}</span>
+              <span className="text-muted-foreground"> a fini </span>
+              <span className="font-medium">{activity.title}</span>
+            </p>
+            <p className="text-[10px] text-muted-foreground">{formatRelative(activity.doneAt)}</p>
+          </div>
+          <span className="text-sm font-bold text-brand shrink-0">+{activity.points}</span>
         </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm truncate">
-            <span className="font-semibold">{activity.pseudo}</span>
-            <span className="text-muted-foreground"> a fini </span>
-            <span className="font-medium">{activity.title}</span>
-          </p>
-          <p className="text-[10px] text-muted-foreground">{formatRelative(activity.doneAt)}</p>
-        </div>
-        <span className="text-sm font-bold text-brand shrink-0">+{activity.points}</span>
-      </Link>
 
-      {/* Réactions compactes */}
-      <div className="mt-2 flex items-center gap-1 pl-12">
-        {/* Emojis déjà utilisés */}
-        {localReactions.map((r: any) => (
-          <button
-            key={r.emoji}
-            onClick={() => handleReact(r.emoji)}
-            disabled={toggle.isPending}
-            className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs transition-all active:scale-90 ${
-              r.userReacted
-                ? "bg-brand/20 text-brand ring-1 ring-brand/40"
-                : "bg-zinc-800/60 text-zinc-400 hover:bg-zinc-700"
-            }`}
-            title={r.userReacted ? "Retirer" : "Ajouter"}
-          >
-            <span>{r.emoji}</span>
-            {r.count > 1 && <span className="font-medium">{r.count}</span>}
-          </button>
-        ))}
-
-        {/* Bouton + pour ouvrir le sélecteur */}
-        {unusedEmojis.length > 0 && (
-          <button
-            onClick={() => setShowPicker(!showPicker)}
-            className="flex items-center justify-center size-7 rounded-full text-xs bg-zinc-800/40 text-zinc-500 hover:bg-zinc-700 hover:text-zinc-300 transition-all active:scale-90"
-            title="Réagir"
-          >
-            +
-          </button>
-        )}
-
-        {/* Sélecteur d'emojis */}
-        {showPicker && (
-          <div className="flex items-center gap-1 ml-1 animate-in fade-in slide-in-from-left-2 duration-150">
-            {unusedEmojis.map((emoji) => (
-              <button
-                key={emoji}
-                onClick={() => {
-                  handleReact(emoji);
-                  setShowPicker(false);
-                }}
-                disabled={toggle.isPending}
-                className="flex items-center justify-center size-7 rounded-full text-sm bg-zinc-800 hover:bg-zinc-700 transition-all active:scale-75"
+        {/* Réactions déjà présentes */}
+        {localReactions.length > 0 && (
+          <div className="mt-2 flex items-center gap-1 pl-12">
+            {localReactions.map((r: any) => (
+              <span
+                key={r.emoji}
+                className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs ${
+                  r.userReacted
+                    ? "bg-brand/20 text-brand ring-1 ring-brand/40"
+                    : "bg-zinc-800/60 text-zinc-400"
+                }`}
               >
-                {emoji}
-              </button>
+                <span>{r.emoji}</span>
+                {r.count > 1 && <span className="font-medium">{r.count}</span>}
+              </span>
             ))}
+            <span className="text-[10px] text-zinc-600 ml-1">maintenir pour réagir</span>
           </div>
         )}
-      </div>
-    </li>
+        {localReactions.length === 0 && (
+          <p className="mt-1 pl-12 text-[10px] text-zinc-600">Maintenir pour réagir</p>
+        )}
+      </li>
+
+      {/* Overlay sélecteur d'emojis */}
+      {showPicker && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm animate-in fade-in duration-200"
+          onClick={() => setShowPicker(false)}
+        >
+          <div
+            className="flex flex-col items-center gap-4 p-6 rounded-3xl bg-card ring-1 ring-white/10 animate-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="text-sm text-muted-foreground">Réagir à la quête de {activity.pseudo}</p>
+            <div className="flex gap-3">
+              {allEmojis.map((emoji) => {
+                const alreadyReacted = localReactions.some((r: any) => r.emoji === emoji && r.userReacted);
+                return (
+                  <button
+                    key={emoji}
+                    onClick={() => {
+                      handleReact(emoji);
+                      setShowPicker(false);
+                    }}
+                    disabled={toggle.isPending}
+                    className={`text-4xl p-4 rounded-2xl transition-all active:scale-75 ${
+                      alreadyReacted
+                        ? "bg-brand/20 ring-2 ring-brand"
+                        : "bg-zinc-800/50 hover:bg-zinc-700"
+                    }`}
+                  >
+                    {emoji}
+                  </button>
+                );
+              })}
+            </div>
+            <button
+              onClick={() => setShowPicker(false)}
+              className="text-xs text-zinc-500 hover:text-zinc-300 mt-1"
+            >
+              Annuler
+            </button>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
