@@ -5,7 +5,16 @@ import { Plus, X } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { TaskCard } from "@/components/TaskCard";
 import { triggerBurst } from "@/components/PointsBurst";
-import { useAddTask, useCompleteTask, useTodayTasks, type Difficulty, DIFFICULTY_POINTS, type Task } from "@/lib/store";
+import {
+  useAddTask,
+  useCompleteTask,
+  useRemoveTask,
+  useTodayTasks,
+  useUpdateTask,
+  type Difficulty,
+  DIFFICULTY_POINTS,
+  type Task,
+} from "@/lib/store";
 
 export const Route = createFileRoute("/_authenticated/tasks")({
   head: () => ({
@@ -23,7 +32,10 @@ function TasksPage() {
   const { data: tasks = [] } = useTodayTasks();
   const addTask = useAddTask();
   const completeTask = useCompleteTask();
+  const updateTask = useUpdateTask();
+  const removeTask = useRemoveTask();
   const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState<Task | null>(null);
   const done = tasks.filter((t) => t.done).length;
   const totalPossible = tasks.reduce((s, t) => s + t.points, 0);
   const earned = tasks.filter((t) => t.done).reduce((s, t) => s + t.points, 0);
@@ -42,6 +54,37 @@ function TasksPage() {
     }
   };
 
+
+  const handleEdit = async (t: { title: string; description: string; difficulty: Difficulty }) => {
+    if (!editing) return;
+    try {
+      await updateTask.mutateAsync({
+        id: editing.id,
+        templateId: editing.templateId,
+        title: t.title,
+        description: t.description,
+        difficulty: t.difficulty,
+      });
+      setEditing(null);
+      toast.success("Quête modifiée");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erreur");
+    }
+  };
+
+  const handleDelete = async (task: Task) => {
+    if (task.done) return;
+    const label = task.templateId
+      ? "Supprimer cette quête quotidienne ? Elle ne sera plus recréée chaque jour."
+      : "Supprimer cette quête ?";
+    if (typeof window !== "undefined" && !window.confirm(label)) return;
+    try {
+      await removeTask.mutateAsync({ id: task.id, templateId: task.templateId });
+      toast.success("Quête supprimée");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erreur");
+    }
+  };
 
   const handleAdd = async (t: { title: string; description: string; difficulty: Difficulty; recurrence: "unique" | "daily" }) => {
     try {
@@ -102,7 +145,13 @@ function TasksPage() {
           </div>
         )}
         {tasks.map((t: Task) => (
-          <TaskCard key={t.id} task={t} onComplete={handleComplete} />
+          <TaskCard
+            key={t.id}
+            task={t}
+            onComplete={handleComplete}
+            onEdit={setEditing}
+            onDelete={handleDelete}
+          />
         ))}
         {Array.from({ length: Math.max(0, 3 - tasks.length) }).map((_, i) => (
           <button
@@ -116,6 +165,7 @@ function TasksPage() {
       </section>
 
       {open && <NewTaskSheet onClose={() => setOpen(false)} onAdd={handleAdd} />}
+      {editing && <EditTaskSheet task={editing} onClose={() => setEditing(null)} onSave={handleEdit} />}
     </AppShell>
   );
 }
@@ -220,6 +270,93 @@ function NewTaskSheet({
 
         <button type="submit" className="w-full py-3 rounded-xl bg-brand text-primary-foreground font-bold active:scale-95 transition-transform">
           Ajouter la quête
+        </button>
+      </form>
+    </div>
+  );
+}
+
+function EditTaskSheet({
+  task,
+  onClose,
+  onSave,
+}: {
+  task: Task;
+  onClose: () => void;
+  onSave: (t: { title: string; description: string; difficulty: Difficulty }) => void;
+}) {
+  const [title, setTitle] = useState(task.title);
+  const [description, setDescription] = useState(task.description);
+  const [difficulty, setDifficulty] = useState<Difficulty>(task.difficulty);
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title.trim()) return;
+    onSave({ title: title.trim(), description: description.trim(), difficulty });
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm" onClick={onClose}>
+      <form
+        onClick={(e) => e.stopPropagation()}
+        onSubmit={submit}
+        className="w-full max-w-md bg-card rounded-t-3xl p-6 ring-1 ring-white/10 space-y-4 animate-in slide-in-from-bottom duration-300"
+      >
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold">Modifier la quête</h2>
+          <button type="button" onClick={onClose} className="size-8 rounded-full bg-zinc-800 flex items-center justify-center">
+            <X className="size-4" />
+          </button>
+        </div>
+
+        <div>
+          <label className="text-xs uppercase tracking-widest text-muted-foreground">Titre</label>
+          <input
+            autoFocus
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="mt-1 w-full bg-black/40 rounded-xl px-4 py-3 ring-1 ring-white/10 focus:ring-brand focus:outline-none"
+          />
+        </div>
+
+        <div>
+          <label className="text-xs uppercase tracking-widest text-muted-foreground">Description</label>
+          <input
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="mt-1 w-full bg-black/40 rounded-xl px-4 py-3 ring-1 ring-white/10 focus:ring-brand focus:outline-none"
+          />
+        </div>
+
+        <div>
+          <label className="text-xs uppercase tracking-widest text-muted-foreground">Difficulté</label>
+          <div className="mt-2 grid grid-cols-3 gap-2">
+            {(["facile", "moyenne", "difficile"] as const).map((d) => (
+              <button
+                type="button"
+                key={d}
+                onClick={() => setDifficulty(d)}
+                className={`p-3 rounded-xl text-sm font-semibold uppercase tracking-wide transition-all ${
+                  difficulty === d
+                    ? "bg-brand text-primary-foreground ring-2 ring-brand"
+                    : "bg-black/40 text-muted-foreground ring-1 ring-white/10"
+                }`}
+              >
+                <div>{d}</div>
+                <div className="text-[10px] mt-0.5 opacity-70">+{DIFFICULTY_POINTS[d]} pts</div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {task.templateId && (
+          <p className="text-xs text-muted-foreground">
+            Cette quête est quotidienne : la modification s'appliquera aussi aux prochains jours.
+          </p>
+        )}
+
+        <button type="submit" className="w-full py-3 rounded-xl bg-brand text-primary-foreground font-bold active:scale-95 transition-transform">
+          Enregistrer
         </button>
       </form>
     </div>
