@@ -48,6 +48,7 @@ function formatRelative(ts: number): string {
 // ------- Activity Feed Item (separate component to allow hooks) -------
 function ActivityFeedItem({ activity, profile }: { activity: import("@/lib/store").ActivityItem; profile: import("@/lib/store").Profile | null }) {
   const [localReactions, setLocalReactions] = useState(activity.reactions ?? []);
+  const [showPicker, setShowPicker] = useState(false);
   const toggle = useToggleReaction();
 
   const handleReact = async (emoji: string) => {
@@ -78,6 +79,9 @@ function ActivityFeedItem({ activity, profile }: { activity: import("@/lib/store
     }
   };
 
+  const allEmojis = ["🔥", "💪", "👏", "⚡", "🎯", "😂"];
+  const unusedEmojis = allEmojis.filter((e) => !localReactions.some((r: any) => r.emoji === e));
+
   return (
     <li className="p-3 rounded-2xl bg-card ring-1 ring-white/5">
       <Link to="/member/$memberId" params={{ memberId: activity.userId }} className="flex items-center gap-3">
@@ -94,29 +98,56 @@ function ActivityFeedItem({ activity, profile }: { activity: import("@/lib/store
         </div>
         <span className="text-sm font-bold text-brand shrink-0">+{activity.points}</span>
       </Link>
+
+      {/* Réactions compactes */}
       <div className="mt-2 flex items-center gap-1 pl-12">
-        {["🔥", "💪", "👏", "⚡", "🎯", "😂"].map((emoji) => {
-          const reaction = localReactions.find((r: any) => r.emoji === emoji);
-          const isActive = reaction?.userReacted ?? false;
-          const count = reaction?.count ?? 0;
-          return (
-            <button
-              key={emoji}
-              onClick={() => handleReact(emoji)}
-              disabled={toggle.isPending}
-              className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs transition-all active:scale-90 ${
-                isActive
-                  ? "bg-brand/20 text-brand ring-1 ring-brand/40"
-                  : count > 0
-                  ? "bg-zinc-800/60 text-zinc-400 hover:bg-zinc-700"
-                  : "bg-transparent text-zinc-600 hover:bg-zinc-800/40 hover:text-zinc-400"
-              }`}
-            >
-              <span>{emoji}</span>
-              {count > 0 && <span className="font-medium">{count}</span>}
-            </button>
-          );
-        })}
+        {/* Emojis déjà utilisés */}
+        {localReactions.map((r: any) => (
+          <button
+            key={r.emoji}
+            onClick={() => handleReact(r.emoji)}
+            disabled={toggle.isPending}
+            className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs transition-all active:scale-90 ${
+              r.userReacted
+                ? "bg-brand/20 text-brand ring-1 ring-brand/40"
+                : "bg-zinc-800/60 text-zinc-400 hover:bg-zinc-700"
+            }`}
+            title={r.userReacted ? "Retirer" : "Ajouter"}
+          >
+            <span>{r.emoji}</span>
+            {r.count > 1 && <span className="font-medium">{r.count}</span>}
+          </button>
+        ))}
+
+        {/* Bouton + pour ouvrir le sélecteur */}
+        {unusedEmojis.length > 0 && (
+          <button
+            onClick={() => setShowPicker(!showPicker)}
+            className="flex items-center justify-center size-7 rounded-full text-xs bg-zinc-800/40 text-zinc-500 hover:bg-zinc-700 hover:text-zinc-300 transition-all active:scale-90"
+            title="Réagir"
+          >
+            +
+          </button>
+        )}
+
+        {/* Sélecteur d'emojis */}
+        {showPicker && (
+          <div className="flex items-center gap-1 ml-1 animate-in fade-in slide-in-from-left-2 duration-150">
+            {unusedEmojis.map((emoji) => (
+              <button
+                key={emoji}
+                onClick={() => {
+                  handleReact(emoji);
+                  setShowPicker(false);
+                }}
+                disabled={toggle.isPending}
+                className="flex items-center justify-center size-7 rounded-full text-sm bg-zinc-800 hover:bg-zinc-700 transition-all active:scale-75"
+              >
+                {emoji}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </li>
   );
