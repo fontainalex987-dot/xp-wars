@@ -1,7 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Copy, LogOut, Plus, Share2, Target, Trash2, UserPlus, Zap } from "lucide-react";
+import { ChevronRight, Copy, LogOut, Plus, Share2, Target, Trash2, UserPlus, Zap } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import {
   useCreateChallenge,
@@ -389,7 +389,8 @@ function GroupPage() {
         ) : (
           <ul className="space-y-2">
             {activity.map((a) => (
-              <li key={a.id} className="p-3 rounded-2xl bg-card ring-1 ring-white/5 flex items-center gap-3">
+              <li key={a.id} className="p-3 rounded-2xl bg-card ring-1 ring-white/5">
+                <Link to="/member/$memberId" params={{ memberId: a.userId }} className="flex items-center gap-3">
                 <div className="size-9 rounded-full bg-zinc-800 flex items-center justify-center text-lg shrink-0">{a.avatar}</div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm truncate">
@@ -400,6 +401,7 @@ function GroupPage() {
                   <p className="text-[10px] text-muted-foreground">{formatRelative(a.doneAt)}</p>
                 </div>
                 <span className="text-sm font-bold text-brand shrink-0">+{a.points}</span>
+                </Link>
               </li>
             ))}
           </ul>
@@ -414,13 +416,18 @@ function GroupPage() {
             const weekPct = Math.min(100, Math.round((f.pointsWeek / 400) * 100));
             return (
               <div key={f.id} className="p-4 rounded-2xl bg-card ring-1 ring-white/5">
-                <div className="flex items-center gap-3">
+                <Link
+                  to="/member/$memberId"
+                  params={{ memberId: f.id }}
+                  className="flex items-center gap-3 active:scale-[0.99] transition-transform"
+                >
                   <div className="size-10 rounded-full bg-zinc-800 flex items-center justify-center text-lg">{f.avatar}</div>
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold truncate">{f.pseudo}</p>
                     <p className="text-xs text-muted-foreground">Niveau {f.level} · {f.pointsToday} pts aujourd'hui</p>
                   </div>
-                </div>
+                  <ChevronRight className="size-4 text-muted-foreground shrink-0" />
+                </Link>
                 <div className="mt-3 h-1.5 bg-black/40 rounded-full overflow-hidden">
                   <div className="h-full bg-brand xp-glow" style={{ width: `${weekPct}%` }} />
                 </div>
