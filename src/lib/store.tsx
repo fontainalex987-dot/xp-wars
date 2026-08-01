@@ -785,7 +785,7 @@ export function useCancelDuel() {
 
 
 // ------- Friends ---------
-export type Friend = {
+export type FriendUser = {
   id: string;
   pseudo: string;
   avatar: string;
@@ -837,7 +837,7 @@ export function useSearchUsers(query: string) {
 export function useMyFriends() {
   return useQuery({
     queryKey: ["friends"],
-    queryFn: async (): Promise<Friend[]> => {
+    queryFn: async (): Promise<FriendUser[]> => {
       const { data, error } = await supabase.rpc("my_friends");
       if (error) throw error;
       return (data ?? []).map((f) => ({
