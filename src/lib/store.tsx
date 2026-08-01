@@ -616,7 +616,7 @@ export type ActivityItem = {
   reactions: Reaction[];
 };
 
-export function useGroupActivityexport(groupId: string | undefined, limit = 20) {
+export function useGroupActivity(groupId: string | undefined, limit = 20) {
   return useQuery({
     queryKey: ["activity", groupId, limit],
     enabled: !!groupId,
@@ -632,6 +632,7 @@ export function useGroupActivityexport(groupId: string | undefined, limit = 20) 
         title: t.title,
         points: t.points,
         doneAt: t.done_at ? new Date(t.done_at).getTime() : 0,
+        reactions: t.reactions ?? [],
       }));
     },
     refetchOnMount: "always",
@@ -639,7 +640,7 @@ export function useGroupActivityexport(groupId: string | undefined, limit = 20) 
     refetchOnWindowFocus: true,
   });
 }
-// ========== 2) useToggleReaction (NOUVEAU, après useGroupActivity) ==========
+
 export function useToggleReaction() {
   const { userId } = useAuth();
   const qc = useQueryClient();
@@ -666,7 +667,6 @@ export function useToggleReaction() {
   });
 }
 
-// ========== 3) useNewReactions (NOUVEAU, après useToggleReaction) ==========
 export function useNewReactions() {
   const { userId } = useAuth();
   const [lastCheck, setLastCheck] = useState(Date.now());
@@ -692,6 +692,92 @@ export function useNewReactions() {
     }, 20000);
     return () => clearInterval(interval);
   }, [userId, lastCheck]);
+}
+
+
+// ------- Duels 1v1 ---------
+export type Duel = {
+  id: string;
+  challengerId: string;
+  challengerPseudo: string;
+  challengerAvatar: string;
+  challengedId: string;
+  challengedPseudo: string;
+  challengedAvatar: string;
+  status: "pending" | "active" | "completed" | "cancelled";
+  winnerId: string | null;
+  startsAt: string;
+  endsAt: string;
+  challengerPoints: number;
+  challengedPoints: number;
+  daysLeft: number;
+};
+
+export function useGroupDuels(groupId: string | undefined) {
+  return useQuery({
+    queryKey: ["duels", groupId],
+    enabled: !!groupId,
+    queryFn: async (): Promise<Duel[]> => {
+      const { data, error } = await supabase.rpc("group_duels", { _group: groupId! });
+      if (error) throw error;
+      return (data ?? []).map((d) => ({
+        id: d.id,
+        challengerId: d.challenger_id,
+        challengerPseudo: d.challenger_pseudo,
+        challengerAvatar: d.challenger_avatar,
+        challengedId: d.challenged_id,
+        challengedPseudo: d.challenged_pseudo,
+        challengedAvatar: d.challenged_avatar,
+        status: d.status as Duel["status"],
+        winnerId: d.winner_id,
+        startsAt: d.starts_at,
+        endsAt: d.ends_at,
+        challengerPoints: d.challenger_points,
+        challengedPoints: d.challenged_points,
+        daysLeft: d.days_left,
+      }));
+    },
+    refetchOnWindowFocus: true,
+    refetchInterval: 15000,
+  });
+}
+
+export function useCreateDuel() {
+  const { userId } = useAuth();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ challengedId, groupId }: { challengedId: string; groupId: string }) => {
+      if (!userId) throw new Error("Not authenticated");
+      const { data, error } = await supabase.rpc("create_duel", { _challenged: challengedId, _group: groupId });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["duels"] }),
+  });
+}
+
+export function useAcceptDuel() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (duelId: string) => {
+      const { data, error } = await supabase.rpc("accept_duel", { _duel: duelId });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["duels"] }),
+  });
+}
+
+export function useCancelDuel() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (duelId: string) => {
+      const { data, error } = await supabase.rpc("cancel_duel", { _duel: duelId });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["duels"] }),
+  });
 }
 
 // ------- Badges (derived, local) ---------
