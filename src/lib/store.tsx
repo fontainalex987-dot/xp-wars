@@ -699,6 +699,7 @@ export function useNewReactions() {
 // ------- Duels 1v1 ---------
 export type Duel = {
   id: string;
+  groupId?: string | null;
   challengerId: string;
   challengerPseudo: string;
   challengerAvatar: string;
@@ -768,7 +769,10 @@ export function useAcceptDuel() {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["duels"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["duels"] });
+      qc.invalidateQueries({ queryKey: ["myDuels"] });
+    },
   });
 }
 
@@ -780,7 +784,10 @@ export function useCancelDuel() {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["duels"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["duels"] });
+      qc.invalidateQueries({ queryKey: ["myDuels"] });
+    },
   });
 }
 
@@ -936,6 +943,7 @@ export function useMyDuels() {
       if (error) throw error;
       return (data ?? []).map((d) => ({
         id: d.id,
+        groupId: d.group_id,
         challengerId: d.challenger_id,
         challengerPseudo: d.challenger_pseudo,
         challengerAvatar: d.challenger_avatar,
