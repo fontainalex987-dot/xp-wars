@@ -13,6 +13,8 @@ import {
   useRemoveFriend,
   useSearchUsers,
   useSendFriendRequest,
+  useAcceptDuel,
+  useCancelDuel,
 } from "@/lib/store";
 import { Search, UserPlus, UserCheck, UserX, Swords, ChevronLeft } from "lucide-react";
 
@@ -30,12 +32,17 @@ function FriendsPage() {
   const { data: requests = [] } = useMyFriendRequests();
   const { data: searchResults = [] } = useSearchUsers(searchQuery);
   const { data: myDuels = [] } = useMyDuels();
+  const privateDuels = myDuels.filter(
+    (d) => !d.groupId && (d.status === "pending" || d.status === "active"),
+  );
 
   const sendRequest = useSendFriendRequest();
   const acceptRequest = useAcceptFriendRequest();
   const rejectRequest = useRejectFriendRequest();
   const removeFriend = useRemoveFriend();
   const createDuel = useCreateDuel();
+  const acceptDuel = useAcceptDuel();
+  const cancelDuel = useCancelDuel();
 
   const [showDuelForm, setShowDuelForm] = useState(false);
   const [selectedFriend, setSelectedFriend] = useState<string | null>(null);
@@ -87,10 +94,8 @@ function FriendsPage() {
             </div>
           ) : (
             friends.map((f) => {
-              const activeDuel = myDuels.find(
-                (d) =>
-                  (d.challengerId === f.id || d.challengedId === f.id) &&
-                  d.status !== "cancelled"
+              const activeDuel = privateDuels.find(
+                (d) => d.challengerId === f.id || d.challengedId === f.id
               );
 
               return (
@@ -109,12 +114,9 @@ function FriendsPage() {
                   </div>
 
                   {activeDuel ? (
-                    <button
-                      onClick={() => navigate({ to: "/group" })}
-                      className="text-xs font-bold text-brand bg-brand/10 px-3 py-2 rounded-xl ring-1 ring-brand/20"
-                    >
+                    <span className="text-xs font-bold text-brand bg-brand/10 px-3 py-2 rounded-xl ring-1 ring-brand/20">
                       {activeDuel.status === "pending" ? "En attente" : "En cours"}
-                    </button>
+                    </span>
                   ) : (
                     <button
                       onClick={async () => {
@@ -152,6 +154,79 @@ function FriendsPage() {
               );
             })
           )}
+        </div>
+      )}
+
+      {/* Duels privés (invisibles pour le groupe) */}
+      {activeTab === "friends" && privateDuels.length > 0 && (
+        <div className="px-5 pb-8 space-y-2">
+          <div className="flex items-center gap-2 mb-1">
+            <Swords className="size-4 text-brand" />
+            <h2 className="text-sm font-bold">Duels privés</h2>
+          </div>
+          <p className="text-[11px] text-zinc-500 mb-2">Visibles uniquement par toi et ton adversaire.</p>
+          {privateDuels.map((d) => {
+            const isChallenger = d.challengerId === profile?.id;
+            const isChallenged = d.challengedId === profile?.id;
+            return (
+              <div key={d.id} className="p-4 rounded-2xl bg-card ring-1 ring-white/5">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-brand/10 text-brand ring-1 ring-brand/20 uppercase">
+                    {d.status === "pending" ? "En attente" : "En cours"}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    {d.status === "pending" && isChallenged && (
+                      <button
+                        onClick={async () => {
+                          try {
+                            await acceptDuel.mutateAsync(d.id);
+                            toast.success("Défi accepté 💪");
+                          } catch {
+                            toast.error("Erreur");
+                          }
+                        }}
+                        className="text-xs font-bold text-brand bg-brand/10 px-3 py-1 rounded-full ring-1 ring-brand/20 active:scale-95"
+                      >
+                        Accepter
+                      </button>
+                    )}
+                    {(isChallenger || isChallenged) && (
+                      <button
+                        onClick={async () => {
+                          if (!confirm(d.status === "active" ? "Abandonner ce duel ?" : "Supprimer ce défi ?")) return;
+                          try {
+                            await cancelDuel.mutateAsync(d.id);
+                            toast.success("Défi supprimé");
+                          } catch {
+                            toast.error("Erreur");
+                          }
+                        }}
+                        className="text-[10px] text-zinc-500 hover:text-red-400"
+                      >
+                        {d.status === "active" ? "Abandonner" : "Supprimer"}
+                      </button>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 text-center">
+                    <div className="text-2xl">{d.challengerAvatar}</div>
+                    <p className="text-xs font-semibold mt-1 truncate">{d.challengerPseudo}</p>
+                    <p className="text-lg font-bold text-brand">{d.challengerPoints}</p>
+                  </div>
+                  <div className="text-xs font-bold text-zinc-500 uppercase tracking-widest">VS</div>
+                  <div className="flex-1 text-center">
+                    <div className="text-2xl">{d.challengedAvatar}</div>
+                    <p className="text-xs font-semibold mt-1 truncate">{d.challengedPseudo}</p>
+                    <p className="text-lg font-bold text-brand">{d.challengedPoints}</p>
+                  </div>
+                </div>
+                {d.status === "active" && d.daysLeft > 0 && (
+                  <p className="text-[10px] text-muted-foreground text-center mt-2">{d.daysLeft}j restants</p>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
 
