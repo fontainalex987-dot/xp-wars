@@ -44,8 +44,6 @@ function FriendsPage() {
   const acceptDuel = useAcceptDuel();
   const cancelDuel = useCancelDuel();
 
-  const [showDuelForm, setShowDuelForm] = useState(false);
-  const [selectedFriend, setSelectedFriend] = useState<string | null>(null);
 
   return (
     <AppShell>
