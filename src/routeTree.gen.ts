@@ -18,6 +18,7 @@ import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authentic
 import { Route as AuthenticatedLeaderboardRouteImport } from './routes/_authenticated/leaderboard'
 import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticated/history'
 import { Route as AuthenticatedGroupRouteImport } from './routes/_authenticated/group'
+import { Route as AuthenticatedFriendsRouteImport } from './routes/_authenticated/friends'
 import { Route as AuthenticatedEditProfileRouteImport } from './routes/_authenticated/edit-profile'
 import { Route as AuthenticatedMemberMemberIdRouteImport } from './routes/_authenticated/member.$memberId'
 
@@ -66,6 +67,11 @@ const AuthenticatedGroupRoute = AuthenticatedGroupRouteImport.update({
   path: '/group',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedFriendsRoute = AuthenticatedFriendsRouteImport.update({
+  id: '/friends',
+  path: '/friends',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedEditProfileRoute =
   AuthenticatedEditProfileRouteImport.update({
     id: '/edit-profile',
@@ -83,6 +89,7 @@ export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/auth': typeof AuthRoute
   '/edit-profile': typeof AuthenticatedEditProfileRoute
+  '/friends': typeof AuthenticatedFriendsRoute
   '/group': typeof AuthenticatedGroupRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/leaderboard': typeof AuthenticatedLeaderboardRoute
@@ -94,6 +101,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/edit-profile': typeof AuthenticatedEditProfileRoute
+  '/friends': typeof AuthenticatedFriendsRoute
   '/group': typeof AuthenticatedGroupRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/leaderboard': typeof AuthenticatedLeaderboardRoute
@@ -108,6 +116,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/edit-profile': typeof AuthenticatedEditProfileRoute
+  '/_authenticated/friends': typeof AuthenticatedFriendsRoute
   '/_authenticated/group': typeof AuthenticatedGroupRoute
   '/_authenticated/history': typeof AuthenticatedHistoryRoute
   '/_authenticated/leaderboard': typeof AuthenticatedLeaderboardRoute
@@ -123,6 +132,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/edit-profile'
+    | '/friends'
     | '/group'
     | '/history'
     | '/leaderboard'
@@ -134,6 +144,7 @@ export interface FileRouteTypes {
   to:
     | '/auth'
     | '/edit-profile'
+    | '/friends'
     | '/group'
     | '/history'
     | '/leaderboard'
@@ -147,6 +158,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/edit-profile'
+    | '/_authenticated/friends'
     | '/_authenticated/group'
     | '/_authenticated/history'
     | '/_authenticated/leaderboard'
@@ -227,6 +239,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedGroupRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/friends': {
+      id: '/_authenticated/friends'
+      path: '/friends'
+      fullPath: '/friends'
+      preLoaderRoute: typeof AuthenticatedFriendsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/edit-profile': {
       id: '/_authenticated/edit-profile'
       path: '/edit-profile'
@@ -246,6 +265,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedEditProfileRoute: typeof AuthenticatedEditProfileRoute
+  AuthenticatedFriendsRoute: typeof AuthenticatedFriendsRoute
   AuthenticatedGroupRoute: typeof AuthenticatedGroupRoute
   AuthenticatedHistoryRoute: typeof AuthenticatedHistoryRoute
   AuthenticatedLeaderboardRoute: typeof AuthenticatedLeaderboardRoute
@@ -258,6 +278,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedEditProfileRoute: AuthenticatedEditProfileRoute,
+  AuthenticatedFriendsRoute: AuthenticatedFriendsRoute,
   AuthenticatedGroupRoute: AuthenticatedGroupRoute,
   AuthenticatedHistoryRoute: AuthenticatedHistoryRoute,
   AuthenticatedLeaderboardRoute: AuthenticatedLeaderboardRoute,

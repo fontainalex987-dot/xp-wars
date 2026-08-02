@@ -14,6 +14,109 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_reactions: {
+        Row: {
+          created_at: string
+          emoji: string
+          id: string
+          task_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          emoji: string
+          id?: string
+          task_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          emoji?: string
+          id?: string
+          task_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_reactions_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      duels: {
+        Row: {
+          challenged_id: string
+          challenger_id: string
+          created_at: string
+          ends_at: string | null
+          group_id: string | null
+          id: string
+          starts_at: string | null
+          status: string
+          winner_id: string | null
+        }
+        Insert: {
+          challenged_id: string
+          challenger_id: string
+          created_at?: string
+          ends_at?: string | null
+          group_id?: string | null
+          id?: string
+          starts_at?: string | null
+          status?: string
+          winner_id?: string | null
+        }
+        Update: {
+          challenged_id?: string
+          challenger_id?: string
+          created_at?: string
+          ends_at?: string | null
+          group_id?: string | null
+          id?: string
+          starts_at?: string | null
+          status?: string
+          winner_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "duels_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      friend_requests: {
+        Row: {
+          created_at: string
+          id: string
+          receiver_id: string
+          sender_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          receiver_id: string
+          sender_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          receiver_id?: string
+          sender_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       group_challenges: {
         Row: {
           created_at: string
@@ -235,6 +338,63 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_duel: {
+        Args: { _duel: string }
+        Returns: {
+          challenged_id: string
+          challenger_id: string
+          created_at: string
+          ends_at: string | null
+          group_id: string | null
+          id: string
+          starts_at: string | null
+          status: string
+          winner_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "duels"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      accept_friend_request: {
+        Args: { _request: string }
+        Returns: {
+          created_at: string
+          id: string
+          receiver_id: string
+          sender_id: string
+          status: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "friend_requests"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      cancel_duel: {
+        Args: { _duel: string }
+        Returns: {
+          challenged_id: string
+          challenger_id: string
+          created_at: string
+          ends_at: string | null
+          group_id: string | null
+          id: string
+          starts_at: string | null
+          status: string
+          winner_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "duels"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       complete_task: {
         Args: { _task_id: string }
         Returns: {
@@ -243,6 +403,26 @@ export type Database = {
           total_points: number
           xp: number
         }[]
+      }
+      create_duel: {
+        Args: { _challenged: string; _group?: string }
+        Returns: {
+          challenged_id: string
+          challenger_id: string
+          created_at: string
+          ends_at: string | null
+          group_id: string | null
+          id: string
+          starts_at: string | null
+          status: string
+          winner_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "duels"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       create_group: {
         Args: { _name: string }
@@ -269,6 +449,7 @@ export type Database = {
           id: string
           points: number
           pseudo: string
+          reactions: Json
           title: string
           user_id: string
         }[]
@@ -276,6 +457,25 @@ export type Database = {
       group_challenge_progress: {
         Args: { _challenge: string }
         Returns: number
+      }
+      group_duels: {
+        Args: { _group: string }
+        Returns: {
+          challenged_avatar: string
+          challenged_id: string
+          challenged_points: number
+          challenged_pseudo: string
+          challenger_avatar: string
+          challenger_id: string
+          challenger_points: number
+          challenger_pseudo: string
+          days_left: number
+          ends_at: string
+          id: string
+          starts_at: string
+          status: string
+          winner_id: string
+        }[]
       }
       group_leaderboard: {
         Args: { _group: string }
@@ -325,6 +525,96 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "groups"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      my_duels: {
+        Args: never
+        Returns: {
+          challenged_avatar: string
+          challenged_id: string
+          challenged_points: number
+          challenged_pseudo: string
+          challenger_avatar: string
+          challenger_id: string
+          challenger_points: number
+          challenger_pseudo: string
+          days_left: number
+          ends_at: string
+          group_id: string
+          id: string
+          starts_at: string
+          status: string
+          winner_id: string
+        }[]
+      }
+      my_friend_requests: {
+        Args: never
+        Returns: {
+          created_at: string
+          id: string
+          sender_avatar: string
+          sender_id: string
+          sender_level: number
+          sender_pseudo: string
+        }[]
+      }
+      my_friends: {
+        Args: never
+        Returns: {
+          avatar: string
+          id: string
+          level: number
+          pseudo: string
+          streak: number
+          total_points: number
+          xp: number
+        }[]
+      }
+      reject_friend_request: {
+        Args: { _request: string }
+        Returns: {
+          created_at: string
+          id: string
+          receiver_id: string
+          sender_id: string
+          status: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "friend_requests"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      remove_friend: { Args: { _friend: string }; Returns: undefined }
+      search_users: {
+        Args: { _query: string }
+        Returns: {
+          avatar: string
+          id: string
+          is_friend: boolean
+          level: number
+          pseudo: string
+          request_received: boolean
+          request_sent: boolean
+        }[]
+      }
+      send_friend_request: {
+        Args: { _receiver: string }
+        Returns: {
+          created_at: string
+          id: string
+          receiver_id: string
+          sender_id: string
+          status: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "friend_requests"
           isOneToOne: true
           isSetofReturn: false
         }
