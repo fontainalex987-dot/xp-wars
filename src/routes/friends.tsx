@@ -16,7 +16,7 @@ import {
 } from "@/lib/store";
 import { Search, UserPlus, UserCheck, UserX, Swords, ChevronLeft } from "lucide-react";
 
-export const Route = createFileRoute("/_authenticated/friends")({
+export const Route = createFileRoute("/friends")({
   component: FriendsPage,
 });
 
