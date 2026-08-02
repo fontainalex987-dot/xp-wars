@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export type Difficulty = "facile" | "moyenne" | "difficile";
 
@@ -632,7 +633,7 @@ export function useGroupActivity(groupId: string | undefined, limit = 20) {
         title: t.title,
         points: t.points,
         doneAt: t.done_at ? new Date(t.done_at).getTime() : 0,
-        reactions: t.reactions ?? [],
+        reactions: (t.reactions ?? []) as unknown as Reaction[],
       }));
     },
     refetchOnMount: "always",
@@ -748,7 +749,7 @@ export function useCreateDuel() {
   return useMutation({
     mutationFn: async ({ challengedId, groupId }: { challengedId: string; groupId?: string }) => {
       if (!userId) throw new Error("Not authenticated");
-      const { data, error } = await supabase.rpc("create_duel", { _challenged: challengedId, _group: groupId ?? null });
+      const { data, error } = await supabase.rpc("create_duel", { _challenged: challengedId, _group: groupId ?? undefined });
       if (error) throw error;
       return data;
     },

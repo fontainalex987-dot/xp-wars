@@ -727,7 +727,7 @@ function GroupPage() {
         ) : (
           <ul className="space-y-2">
             {activity.map((a) => (
-              <ActivityFeedItem key={a.id} activity={a} profile={profile} />
+              <ActivityFeedItem key={a.id} activity={a} profile={profile ?? null} />
             ))}
           </ul>
         )}
