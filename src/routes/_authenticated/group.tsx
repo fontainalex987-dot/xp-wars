@@ -644,20 +644,22 @@ function GroupPage() {
                         <span className="text-[10px] text-muted-foreground">{d.daysLeft}j restants</span>
                       )}
                     </div>
-                    {d.status === "pending" && isChallenger && (
+                    {(d.status === "pending" || d.status === "active") && (isChallenger || isChallenged) && (
                       <button
                         onClick={async () => {
+                          if (!confirm(d.status === "active" ? "Abandonner ce duel ?" : "Supprimer ce défi ?")) return;
                           try {
                             await cancelDuel.mutateAsync(d.id);
-                            toast.success("Défi annulé");
-                          } catch (err) {
+                            toast.success("Défi supprimé");
+                          } catch {
                             toast.error("Erreur");
                           }
                         }}
                         className="text-[10px] text-zinc-500 hover:text-red-400"
                       >
-                        Annuler
+                        {d.status === "active" ? "Abandonner" : "Supprimer"}
                       </button>
+
                     )}
                     {d.status === "pending" && isChallenged && (
                       <button
