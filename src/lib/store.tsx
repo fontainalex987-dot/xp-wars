@@ -689,6 +689,7 @@ export function useNewReactions() {
         .gt("created_at", new Date(lastCheck).toISOString());
 
       if (data && data.length > 0) {
+        haptics.light();
         data.forEach((r: any) => {
           toast(`${r.reactor.pseudo} a réagi ${r.emoji} à ta quête "${r.task.title}"`, {
             icon: r.emoji,
