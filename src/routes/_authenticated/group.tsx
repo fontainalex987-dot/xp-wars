@@ -3,6 +3,8 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { ChevronRight, Copy, LogOut, Plus, Share2, Target, Trash2, UserPlus, Zap } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
+import { StaggerItem } from "@/components/PageTransition";
+import { FeedSkeleton, SkeletonBar } from "@/components/Skeletons";
 import {
   useAcceptDuel,
   useCancelDuel,
@@ -336,7 +338,11 @@ function GroupPage() {
   if (isLoading) {
     return (
       <AppShell>
-        <div className="px-5 py-20 text-center text-muted-foreground">Chargement…</div>
+        <div className="px-5 pt-10 space-y-6">
+          <SkeletonBar className="h-8 w-48" />
+          <SkeletonBar className="h-28 w-full rounded-2xl" />
+          <FeedSkeleton />
+        </div>
       </AppShell>
     );
   }
@@ -402,7 +408,7 @@ function GroupPage() {
   const avgLevel = friends.length ? Math.round(friends.reduce((s, f) => s + f.level, 0) / friends.length) : 1;
 
   return (
-    <AppShell>
+    <AppShell onRefresh={handleRefresh}>
       <header className="px-5 pt-8 pb-4">
         <p className="text-[10px] text-zinc-400 uppercase tracking-widest font-medium">Groupe</p>
        <div className="flex items-center justify-between">
