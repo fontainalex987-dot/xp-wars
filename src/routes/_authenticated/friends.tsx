@@ -1,7 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
+import { haptics } from "@/lib/haptics";
 import {
   useAcceptFriendRequest,
   useCreateDuel,
@@ -28,10 +29,10 @@ function FriendsPage() {
   const [activeTab, setActiveTab] = useState<"search" | "requests" | "friends">("friends");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { data: friends = [] } = useMyFriends();
-  const { data: requests = [] } = useMyFriendRequests();
+  const { data: friends = [], refetch: refetchFriends } = useMyFriends();
+  const { data: requests = [], refetch: refetchRequests } = useMyFriendRequests();
   const { data: searchResults = [] } = useSearchUsers(searchQuery);
-  const { data: myDuels = [] } = useMyDuels();
+  const { data: myDuels = [], refetch: refetchDuels } = useMyDuels();
   const privateDuels = myDuels.filter(
     (d) => !d.groupId && (d.status === "pending" || d.status === "active"),
   );
@@ -44,9 +45,20 @@ function FriendsPage() {
   const acceptDuel = useAcceptDuel();
   const cancelDuel = useCancelDuel();
 
+  // Haptic léger quand une nouvelle demande d'ami arrive.
+  const prevRequests = useRef(requests.length);
+  useEffect(() => {
+    if (requests.length > prevRequests.current) haptics.light();
+    prevRequests.current = requests.length;
+  }, [requests.length]);
+
+  const handleRefresh = async () => {
+    await Promise.all([refetchFriends(), refetchRequests(), refetchDuels()]);
+  };
+
 
   return (
-    <AppShell>
+    <AppShell onRefresh={handleRefresh}>
       <div className="px-5 pt-6 pb-4">
         <button
           onClick={() => navigate({ to: "/group" })}
@@ -119,6 +131,7 @@ function FriendsPage() {
                     <button
                       onClick={async () => {
                         try {
+                          haptics.light();
                           await createDuel.mutateAsync({ challengedId: f.id });
                           toast.success(`Défi envoyé à ${f.pseudo} !`);
                         } catch (err) {
@@ -126,7 +139,7 @@ function FriendsPage() {
                         }
                       }}
                       disabled={createDuel.isPending}
-                      className="flex items-center gap-1 text-xs font-bold text-brand bg-brand/10 px-3 py-2 rounded-xl ring-1 ring-brand/20 active:scale-95 transition-transform disabled:opacity-40"
+                      className="flex items-center gap-1 text-xs font-bold text-brand bg-brand/10 px-3 py-2 rounded-xl ring-1 ring-brand/20 active:scale-95 active:shadow-[0_0_20px_rgba(34,197,94,0.3)] transition-all disabled:opacity-40"
                     >
                       <Swords className="size-3" />
                       Défier
@@ -251,13 +264,14 @@ function FriendsPage() {
                 <button
                   onClick={async () => {
                     try {
+                      haptics.light();
                       await acceptRequest.mutateAsync(r.id);
                       toast.success(`${r.senderPseudo} est maintenant ton ami !`);
                     } catch {
                       toast.error("Erreur");
                     }
                   }}
-                  className="flex items-center gap-1 text-xs font-bold text-emerald-400 bg-emerald-400/10 px-3 py-2 rounded-xl ring-1 ring-emerald-400/20 active:scale-95"
+                  className="flex items-center gap-1 text-xs font-bold text-emerald-400 bg-emerald-400/10 px-3 py-2 rounded-xl ring-1 ring-emerald-400/20 active:scale-95 active:shadow-[0_0_20px_rgba(34,197,94,0.3)] transition-all"
                 >
                   <UserCheck className="size-3" />
                   Accepter
@@ -328,6 +342,7 @@ function FriendsPage() {
                   <button
                     onClick={async () => {
                       try {
+                        haptics.light();
                         await sendRequest.mutateAsync(u.id);
                         toast.success(`Demande envoyée à ${u.pseudo} !`);
                       } catch (err) {
