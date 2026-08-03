@@ -213,11 +213,14 @@ function ActivityFeedItem({ activity, profile }: { activity: import("@/lib/store
 
 function GroupPage() {
   const { data: profile } = useProfile();
-  const { data: group, isLoading } = useMyGroup();
-  const { data: friends = [] } = useGroupMembers(group?.id);
-  const { data: challenge } = useGroupChallenge(group?.id);
-  const { data: activity = [] } = useGroupActivity(group?.id);
-  const { data: duels = [] } = useGroupDuels(group?.id);
+  const { data: group, isLoading, refetch: refetchGroup } = useMyGroup();
+  const { data: friends = [], refetch: refetchMembers } = useGroupMembers(group?.id);
+  const { data: challenge, refetch: refetchChallenge } = useGroupChallenge(group?.id);
+  const { data: activity = [], isLoading: activityLoading, refetch: refetchActivity } = useGroupActivity(group?.id);
+  const { data: duels = [], refetch: refetchDuels } = useGroupDuels(group?.id);
+  const handleRefresh = async () => {
+    await Promise.all([refetchGroup(), refetchMembers(), refetchChallenge(), refetchActivity(), refetchDuels()]);
+  };
   const createDuel = useCreateDuel();
   const acceptDuel = useAcceptDuel();
   const cancelDuel = useCancelDuel();
@@ -722,14 +725,18 @@ function GroupPage() {
           <Zap className="size-4 text-brand" />
           <h2 className="text-lg font-medium">Activité récente</h2>
         </div>
-        {activity.length === 0 ? (
+        {activityLoading ? (
+          <FeedSkeleton />
+        ) : activity.length === 0 ? (
           <div className="p-4 rounded-2xl bg-card/60 ring-1 ring-white/5 text-center">
             <p className="text-sm text-muted-foreground">Aucune quête validée cette semaine.</p>
           </div>
         ) : (
           <ul className="space-y-2">
-            {activity.map((a) => (
-              <ActivityFeedItem key={a.id} activity={a} profile={profile ?? null} />
+            {activity.map((a, i) => (
+              <StaggerItem key={a.id} index={i}>
+                <ActivityFeedItem activity={a} profile={profile ?? null} />
+              </StaggerItem>
             ))}
           </ul>
         )}
