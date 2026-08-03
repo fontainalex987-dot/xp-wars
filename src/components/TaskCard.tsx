@@ -38,7 +38,8 @@ export function TaskCard({
   }
 
   return (
-    <div className="group p-4 rounded-[18px] bg-card ring-1 ring-white/5 flex items-center gap-3 transition-all">
+    <div className="group p-4 rounded-[18px] bg-card ring-1 ring-white/5 flex items-center gap-3 transition-all duration-150 active:-translate-y-0.5 active:shadow-[0_10px_25px_-8px_rgba(0,0,0,0.7)]">
+
       <div className="flex-1 min-w-0">
         <div className="flex gap-2 mb-1">
           <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ring-1 uppercase tracking-wide ${diffStyles[task.difficulty]}`}>
