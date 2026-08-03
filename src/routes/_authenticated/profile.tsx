@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Bell, Flame, LogOut, Pencil, Target, Trophy, Zap } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
+import { ProfileSkeleton } from "@/components/Skeletons";
 import { XpBar } from "@/components/XpBar";
 import { useAuth, useBadges, useProfile, useTodayTasks, XP_PER_LEVEL } from "@/lib/store";
 import { useDailyReminder } from "@/lib/daily-reminder";
@@ -30,7 +31,13 @@ function ProfilePage() {
   };
 
 
-  if (!profile) return null;
+  if (!profile) {
+    return (
+      <AppShell>
+        <ProfileSkeleton />
+      </AppShell>
+    );
+  }
 
   return (
     <AppShell>

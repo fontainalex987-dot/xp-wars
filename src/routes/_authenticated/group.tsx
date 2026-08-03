@@ -3,6 +3,8 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { ChevronRight, Copy, LogOut, Plus, Share2, Target, Trash2, UserPlus, Zap } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
+import { StaggerItem } from "@/components/PageTransition";
+import { FeedSkeleton, SkeletonBar } from "@/components/Skeletons";
 import {
   useAcceptDuel,
   useCancelDuel,
@@ -213,11 +215,14 @@ function ActivityFeedItem({ activity, profile }: { activity: import("@/lib/store
 
 function GroupPage() {
   const { data: profile } = useProfile();
-  const { data: group, isLoading } = useMyGroup();
-  const { data: friends = [] } = useGroupMembers(group?.id);
-  const { data: challenge } = useGroupChallenge(group?.id);
-  const { data: activity = [] } = useGroupActivity(group?.id);
-  const { data: duels = [] } = useGroupDuels(group?.id);
+  const { data: group, isLoading, refetch: refetchGroup } = useMyGroup();
+  const { data: friends = [], refetch: refetchMembers } = useGroupMembers(group?.id);
+  const { data: challenge, refetch: refetchChallenge } = useGroupChallenge(group?.id);
+  const { data: activity = [], isLoading: activityLoading, refetch: refetchActivity } = useGroupActivity(group?.id);
+  const { data: duels = [], refetch: refetchDuels } = useGroupDuels(group?.id);
+  const handleRefresh = async () => {
+    await Promise.all([refetchGroup(), refetchMembers(), refetchChallenge(), refetchActivity(), refetchDuels()]);
+  };
   const createDuel = useCreateDuel();
   const acceptDuel = useAcceptDuel();
   const cancelDuel = useCancelDuel();
@@ -333,7 +338,11 @@ function GroupPage() {
   if (isLoading) {
     return (
       <AppShell>
-        <div className="px-5 py-20 text-center text-muted-foreground">Chargement…</div>
+        <div className="px-5 pt-10 space-y-6">
+          <SkeletonBar className="h-8 w-48" />
+          <SkeletonBar className="h-28 w-full rounded-2xl" />
+          <FeedSkeleton />
+        </div>
       </AppShell>
     );
   }
@@ -399,7 +408,7 @@ function GroupPage() {
   const avgLevel = friends.length ? Math.round(friends.reduce((s, f) => s + f.level, 0) / friends.length) : 1;
 
   return (
-    <AppShell>
+    <AppShell onRefresh={handleRefresh}>
       <header className="px-5 pt-8 pb-4">
         <p className="text-[10px] text-zinc-400 uppercase tracking-widest font-medium">Groupe</p>
        <div className="flex items-center justify-between">
@@ -613,7 +622,7 @@ function GroupPage() {
                 }
               }}
               disabled={!selectedOpponent || createDuel.isPending}
-              className="w-full py-2.5 rounded-xl bg-brand text-primary-foreground font-bold text-sm active:scale-95 transition-transform disabled:opacity-40"
+              className="w-full py-2.5 rounded-xl bg-brand text-primary-foreground font-bold text-sm active:scale-95 active:shadow-[0_0_20px_rgba(34,197,94,0.3)] transition-all disabled:opacity-40"
             >
               {createDuel.isPending ? "..." : "Envoyer le défi"}
             </button>
@@ -722,14 +731,18 @@ function GroupPage() {
           <Zap className="size-4 text-brand" />
           <h2 className="text-lg font-medium">Activité récente</h2>
         </div>
-        {activity.length === 0 ? (
+        {activityLoading ? (
+          <FeedSkeleton />
+        ) : activity.length === 0 ? (
           <div className="p-4 rounded-2xl bg-card/60 ring-1 ring-white/5 text-center">
             <p className="text-sm text-muted-foreground">Aucune quête validée cette semaine.</p>
           </div>
         ) : (
           <ul className="space-y-2">
-            {activity.map((a) => (
-              <ActivityFeedItem key={a.id} activity={a} profile={profile ?? null} />
+            {activity.map((a, i) => (
+              <StaggerItem key={a.id} index={i}>
+                <ActivityFeedItem activity={a} profile={profile ?? null} />
+              </StaggerItem>
             ))}
           </ul>
         )}

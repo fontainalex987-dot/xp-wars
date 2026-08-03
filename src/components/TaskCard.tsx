@@ -1,4 +1,5 @@
 import { Check, Pencil, Trash2 } from "lucide-react";
+import { haptics } from "@/lib/haptics";
 import type { Task } from "@/lib/store";
 
 const diffStyles: Record<Task["difficulty"], string> = {
@@ -38,7 +39,8 @@ export function TaskCard({
   }
 
   return (
-    <div className="group p-4 rounded-[18px] bg-card ring-1 ring-white/5 flex items-center gap-3 transition-all">
+    <div className="group p-4 rounded-[18px] bg-card ring-1 ring-white/5 flex items-center gap-3 transition-all duration-150 active:-translate-y-0.5 active:shadow-[0_10px_25px_-8px_rgba(0,0,0,0.7)]">
+
       <div className="flex-1 min-w-0">
         <div className="flex gap-2 mb-1">
           <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ring-1 uppercase tracking-wide ${diffStyles[task.difficulty]}`}>
@@ -72,9 +74,12 @@ export function TaskCard({
           </button>
         )}
         <button
-          onClick={() => onComplete(task.id)}
+          onClick={() => {
+            haptics.taskDone();
+            onComplete(task.id);
+          }}
           aria-label="Terminer la tâche"
-          className="size-12 rounded-xl bg-brand flex items-center justify-center text-primary-foreground transition-all active:scale-90 ring-1 ring-brand hover:xp-glow"
+          className="size-12 rounded-xl bg-brand flex items-center justify-center text-primary-foreground transition-all active:scale-90 ring-1 ring-brand hover:xp-glow active:shadow-[0_0_20px_rgba(34,197,94,0.3)]"
         >
           <Check className="size-6" strokeWidth={3} />
         </button>

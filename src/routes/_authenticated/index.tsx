@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Flame, Plus, Trophy, Target, Users } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
+import { HomeSkeleton } from "@/components/Skeletons";
 import { XpBar } from "@/components/XpBar";
 import { useGroupMembers, useMyGroup, useProfile, useTodayTasks, XP_PER_LEVEL } from "@/lib/store";
 
@@ -22,7 +23,13 @@ function HomePage() {
   const { data: group } = useMyGroup();
   const { data: friends = [] } = useGroupMembers(group?.id);
 
-  if (!profile) return null;
+  if (!profile) {
+    return (
+      <AppShell>
+        <HomeSkeleton />
+      </AppShell>
+    );
+  }
 
   const doneCount = tasks.filter((t) => t.done).length;
   const potentialPoints = tasks.filter((t) => !t.done).reduce((s, t) => s + t.points, 0);
