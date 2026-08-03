@@ -4,6 +4,8 @@ import { toast } from "sonner";
 import { Plus, X } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { TaskCard } from "@/components/TaskCard";
+import { StaggerItem } from "@/components/PageTransition";
+import { TaskListSkeleton } from "@/components/Skeletons";
 import { triggerBurst } from "@/components/PointsBurst";
 import {
   useAddTask,
@@ -29,7 +31,7 @@ export const Route = createFileRoute("/_authenticated/tasks")({
 });
 
 function TasksPage() {
-  const { data: tasks = [] } = useTodayTasks();
+  const { data: tasks = [], isLoading, refetch } = useTodayTasks();
   const addTask = useAddTask();
   const completeTask = useCompleteTask();
   const updateTask = useUpdateTask();
