@@ -622,7 +622,7 @@ function GroupPage() {
                 }
               }}
               disabled={!selectedOpponent || createDuel.isPending}
-              className="w-full py-2.5 rounded-xl bg-brand text-primary-foreground font-bold text-sm active:scale-95 transition-transform disabled:opacity-40"
+              className="w-full py-2.5 rounded-xl bg-brand text-primary-foreground font-bold text-sm active:scale-95 active:shadow-[0_0_20px_rgba(34,197,94,0.3)] transition-all disabled:opacity-40"
             >
               {createDuel.isPending ? "..." : "Envoyer le défi"}
             </button>
