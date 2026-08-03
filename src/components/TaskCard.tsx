@@ -1,4 +1,5 @@
 import { Check, Pencil, Trash2 } from "lucide-react";
+import { haptics } from "@/lib/haptics";
 import type { Task } from "@/lib/store";
 
 const diffStyles: Record<Task["difficulty"], string> = {
@@ -73,9 +74,12 @@ export function TaskCard({
           </button>
         )}
         <button
-          onClick={() => onComplete(task.id)}
+          onClick={() => {
+            haptics.taskDone();
+            onComplete(task.id);
+          }}
           aria-label="Terminer la tâche"
-          className="size-12 rounded-xl bg-brand flex items-center justify-center text-primary-foreground transition-all active:scale-90 ring-1 ring-brand hover:xp-glow"
+          className="size-12 rounded-xl bg-brand flex items-center justify-center text-primary-foreground transition-all active:scale-90 ring-1 ring-brand hover:xp-glow active:shadow-[0_0_20px_rgba(34,197,94,0.3)]"
         >
           <Check className="size-6" strokeWidth={3} />
         </button>
