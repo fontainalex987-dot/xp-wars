@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
+import { ProfileSkeleton } from "@/components/Skeletons";
 import { AVATARS, useProfile, useUpdateProfile } from "@/lib/store";
 
 export const Route = createFileRoute("/_authenticated/edit-profile")({
@@ -34,7 +35,13 @@ function EditProfilePage() {
     }
   }, [profile]);
 
-  if (!profile) return null;
+  if (!profile) {
+    return (
+      <AppShell>
+        <ProfileSkeleton />
+      </AppShell>
+    );
+  }
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
