@@ -100,7 +100,7 @@ function TasksPage() {
   };
 
   return (
-    <AppShell>
+    <AppShell onRefresh={() => refetch()}>
       <header className="px-5 pt-8 pb-4 flex items-center justify-between">
         <div>
           <p className="text-[10px] text-zinc-400 uppercase tracking-widest font-medium">Aujourd'hui</p>
@@ -140,31 +140,31 @@ function TasksPage() {
         </div>
       </section>
 
-      <section className="px-5 pb-4 space-y-3">
-        {tasks.length === 0 && (
-          <div className="p-8 text-center text-muted-foreground border border-dashed border-white/10 rounded-2xl">
-            Aucune quête. Ajoute jusqu'à 3 tâches pour aujourd'hui.
-          </div>
-        )}
-        {tasks.map((t: Task) => (
-          <TaskCard
-            key={t.id}
-            task={t}
-            onComplete={handleComplete}
-            onEdit={setEditing}
-            onDelete={handleDelete}
-          />
-        ))}
-        {Array.from({ length: Math.max(0, 3 - tasks.length) }).map((_, i) => (
-          <button
-            key={`slot-${i}`}
-            onClick={() => setOpen(true)}
-            className="w-full p-4 rounded-[18px] border-2 border-dashed border-white/10 text-muted-foreground text-sm hover:border-brand/40 hover:text-brand transition-colors"
-          >
-            + Slot libre — ajouter une quête
-          </button>
-        ))}
-      </section>
+      {isLoading ? (
+        <TaskListSkeleton />
+      ) : (
+        <section className="px-5 pb-4 space-y-3">
+          {tasks.length === 0 && (
+            <div className="p-8 text-center text-muted-foreground border border-dashed border-white/10 rounded-2xl">
+              Aucune quête. Ajoute jusqu'à 3 tâches pour aujourd'hui.
+            </div>
+          )}
+          {tasks.map((t: Task, i: number) => (
+            <StaggerItem key={t.id} index={i}>
+              <TaskCard task={t} onComplete={handleComplete} onEdit={setEditing} onDelete={handleDelete} />
+            </StaggerItem>
+          ))}
+          {Array.from({ length: Math.max(0, 3 - tasks.length) }).map((_, i) => (
+            <button
+              key={`slot-${i}`}
+              onClick={() => setOpen(true)}
+              className="w-full p-4 rounded-[18px] border-2 border-dashed border-white/10 text-muted-foreground text-sm hover:border-brand/40 hover:text-brand transition-colors"
+            >
+              + Slot libre — ajouter une quête
+            </button>
+          ))}
+        </section>
+      )}
 
       {open && <NewTaskSheet onClose={() => setOpen(false)} onAdd={handleAdd} />}
       {editing && <EditTaskSheet task={editing} onClose={() => setEditing(null)} onSave={handleEdit} />}
