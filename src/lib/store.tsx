@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { haptics } from "@/lib/haptics";
 import { toast } from "sonner";
 
 export type Difficulty = "facile" | "moyenne" | "difficile";
