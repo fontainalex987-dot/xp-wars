@@ -124,13 +124,23 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <DailyResetProvider>
           <DailyReminderProvider>
-            <Outlet />
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={pathname}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0, transition: { duration: 0.25, ease: "easeOut" } }}
+                exit={{ opacity: 0, y: -20, transition: { duration: 0.2, ease: "easeOut" } }}
+              >
+                <Outlet />
+              </motion.div>
+            </AnimatePresence>
             <PointsBurst />
             <Toaster theme="dark" position="top-center" richColors />
           </DailyReminderProvider>
