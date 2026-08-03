@@ -244,16 +244,22 @@ export function useCompleteTask() {
   return useMutation({
     mutationFn: async (task: Task) => {
       if (!userId) throw new Error("Not authenticated");
+      const prevLevel = (qc.getQueryData(["profile", userId]) as Profile | null | undefined)?.level ?? null;
       // Atomic server-side completion: handles XP, level, total_points and streak in a single transaction.
       const { error } = await supabase.rpc("complete_task", { _task_id: task.id });
       if (error) throw error;
+      return { prevLevel };
     },
-    onSuccess: () => {
+    onSuccess: async (result) => {
       qc.invalidateQueries({ queryKey: ["tasks"] });
-      qc.invalidateQueries({ queryKey: ["profile"] });
       qc.invalidateQueries({ queryKey: ["members"] });
       qc.invalidateQueries({ queryKey: ["challenge"] });
       qc.invalidateQueries({ queryKey: ["activity"] });
+      await qc.invalidateQueries({ queryKey: ["profile"] });
+      const nextLevel = (qc.getQueryData(["profile", userId]) as Profile | null | undefined)?.level ?? null;
+      if (result?.prevLevel != null && nextLevel != null && nextLevel > result.prevLevel) {
+        haptics.levelUp();
+      }
     },
   });
 }
