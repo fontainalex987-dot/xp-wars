@@ -100,7 +100,7 @@ function TasksPage() {
   };
 
   return (
-    <AppShell onRefresh={() => refetch()}>
+    <AppShell>
       <header className="px-5 pt-8 pb-4 flex items-center justify-between">
         <div>
           <p className="text-[10px] text-zinc-400 uppercase tracking-widest font-medium">Aujourd'hui</p>
