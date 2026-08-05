@@ -31,7 +31,7 @@ export const Route = createFileRoute("/_authenticated/tasks")({
 });
 
 function TasksPage() {
-  const { data: tasks = [], isLoading, refetch } = useTodayTasks();
+  const { data: tasks = [], isLoading } = useTodayTasks();
   const addTask = useAddTask();
   const completeTask = useCompleteTask();
   const updateTask = useUpdateTask();
