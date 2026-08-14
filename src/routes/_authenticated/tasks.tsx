@@ -1,3 +1,4 @@
+import { StarterTasks } from "@/components/StarterTasks";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
