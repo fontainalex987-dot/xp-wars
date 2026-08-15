@@ -58,7 +58,7 @@ function FriendsPage() {
 
 
   return (
-    <AppShell onRefresh={handleRefresh}>
+    <AppShell>
       <div className="px-5 pt-6 pb-4">
         <button
           onClick={() => navigate({ to: "/group" })}

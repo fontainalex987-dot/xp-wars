@@ -145,11 +145,7 @@ function TasksPage() {
         <TaskListSkeleton />
       ) : (
         <section className="px-5 pb-4 space-y-3">
-          {tasks.length === 0 && (
-            <div className="p-8 text-center text-muted-foreground border border-dashed border-white/10 rounded-2xl">
-              Aucune quête. Ajoute jusqu'à 3 tâches pour aujourd'hui.
-            </div>
-          )}
+          {tasks.length === 0 && <StarterTasks onAdd={handleAdd} />}
           {tasks.map((t: Task, i: number) => (
             <StaggerItem key={t.id} index={i}>
               <TaskCard task={t} onComplete={handleComplete} onEdit={setEditing} onDelete={handleDelete} />

@@ -4,11 +4,11 @@ import { toast } from "sonner";
 import type { Difficulty } from "@/lib/store";
 
 const STARTER_TASKS = [
-  { title: "Boire un verre d'eau", description: "Hydratation = productivité", difficulty: "easy" as Difficulty, icon: "💧", points: 10 },
-  { title: "5 min de rangement", description: "Un petit coin rangé = esprit clair", difficulty: "easy" as Difficulty, icon: "🧹", points: 10 },
-  { title: "Lire 1 page", description: "La lecture, c'est la gym du cerveau", difficulty: "easy" as Difficulty, icon: "📖", points: 10 },
-  { title: "Faire 10 pompes", description: "Bouger un peu, ça fait du bien", difficulty: "medium" as Difficulty, icon: "💪", points: 20 },
-  { title: "Prendre une douche froide", description: "Le défi ultime du matin", difficulty: "hard" as Difficulty, icon: "🥶", points: 30 },
+  { title: "Boire un verre d'eau", description: "Hydratation = productivité", difficulty: "facile" as Difficulty, icon: "💧", points: 10 },
+  { title: "5 min de rangement", description: "Un petit coin rangé = esprit clair", difficulty: "facile" as Difficulty, icon: "🧹", points: 10 },
+  { title: "Lire 1 page", description: "La lecture, c'est la gym du cerveau", difficulty: "facile" as Difficulty, icon: "📖", points: 10 },
+  { title: "Faire 10 pompes", description: "Bouger un peu, ça fait du bien", difficulty: "moyenne" as Difficulty, icon: "💪", points: 20 },
+  { title: "Douche froide", description: "Le défi ultime du matin", difficulty: "difficile" as Difficulty, icon: "🥶", points: 30 },
 ];
 
 export function StarterTasks({ onAdd }: { onAdd: (t: { title: string; description: string; difficulty: Difficulty; recurrence: "unique" | "daily" }) => void }) {
