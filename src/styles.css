@@ -102,3 +102,21 @@
 @utility animate-xp-fill {
   animation: xp-fill 1s cubic-bezier(0.19, 1, 0.22, 1);
 }
+
+@keyframes nav-bounce-subtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+@keyframes nav-pulse-slow {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.04); }
+}
+
+@utility animate-nav-bounce {
+  animation: nav-bounce-subtle 2s ease-in-out infinite;
+}
+
+@utility animate-nav-pulse {
+  animation: nav-pulse-slow 3s ease-in-out infinite;
+}
