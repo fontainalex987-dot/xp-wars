@@ -408,7 +408,7 @@ function GroupPage() {
   const avgLevel = friends.length ? Math.round(friends.reduce((s, f) => s + f.level, 0) / friends.length) : 1;
 
   return (
-    <AppShell onRefresh={handleRefresh}>
+    <AppShell>
       <header className="px-5 pt-8 pb-4">
         <p className="text-[10px] text-zinc-400 uppercase tracking-widest font-medium">Groupe</p>
        <div className="flex items-center justify-between">
