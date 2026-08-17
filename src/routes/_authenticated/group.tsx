@@ -3,6 +3,8 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { ChevronRight, Copy, LogOut, Plus, Share2, Target, Trash2, UserPlus, Zap } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
+import { PullToRefresh } from "@/components/PullToRefresh";
+import { haptics } from "@/lib/haptics";
 import { StaggerItem } from "@/components/PageTransition";
 import { FeedSkeleton, SkeletonBar } from "@/components/Skeletons";
 import {
@@ -90,9 +92,7 @@ function ActivityFeedItem({ activity, profile }: { activity: import("@/lib/store
       isLongPress.current = true;
       setShowPicker(true);
       // Haptic feedback si dispo
-      if (typeof navigator !== "undefined" && (navigator as any).vibrate) {
-        (navigator as any).vibrate(50);
-      }
+      haptics.longPress();
     }, 600);
   };
 
