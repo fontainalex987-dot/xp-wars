@@ -6,7 +6,6 @@ import { useAuth } from "@/lib/store";
 import { useEffect } from "react";
 
 export const Route = createFileRoute("/auth")({
-  ssr: false,
   head: () => ({
     meta: [
       { title: "Connexion — XP Wars" },
