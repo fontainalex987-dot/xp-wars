@@ -39,7 +39,7 @@ export function TaskCard({
   }
 
   return (
-    <div className="group p-4 rounded-[18px] bg-card ring-1 ring-white/5 flex items-center gap-3 transition-all duration-150 active:-translate-y-0.5 active:shadow-[0_10px_25px_-8px_rgba(0,0,0,0.7)]">
+    <div className="group p-4 rounded-[18px] bg-card ring-1 ring-white/5 flex items-center gap-3 transition-colors duration-150 active:bg-zinc-800/60">
 
       <div className="flex-1 min-w-0">
         <div className="flex gap-2 mb-1">

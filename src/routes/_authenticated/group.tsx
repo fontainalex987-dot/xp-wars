@@ -3,6 +3,8 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { ChevronRight, Copy, LogOut, Plus, Share2, Target, Trash2, UserPlus, Zap } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
+import { PullToRefresh } from "@/components/PullToRefresh";
+import { haptics } from "@/lib/haptics";
 import { StaggerItem } from "@/components/PageTransition";
 import { FeedSkeleton, SkeletonBar } from "@/components/Skeletons";
 import {
@@ -90,9 +92,7 @@ function ActivityFeedItem({ activity, profile }: { activity: import("@/lib/store
       isLongPress.current = true;
       setShowPicker(true);
       // Haptic feedback si dispo
-      if (typeof navigator !== "undefined" && (navigator as any).vibrate) {
-        (navigator as any).vibrate(50);
-      }
+      haptics.longPress();
     }, 600);
   };
 
@@ -407,8 +407,10 @@ function GroupPage() {
   const totalPointsWeek = friends.reduce((s, f) => s + f.pointsWeek, 0);
   const avgLevel = friends.length ? Math.round(friends.reduce((s, f) => s + f.level, 0) / friends.length) : 1;
 
+
   return (
     <AppShell>
+      <PullToRefresh onRefresh={handleRefresh}>
       <header className="px-5 pt-8 pb-4">
         <p className="text-[10px] text-zinc-400 uppercase tracking-widest font-medium">Groupe</p>
        <div className="flex items-center justify-between">
@@ -791,6 +793,7 @@ function GroupPage() {
           Quitter le groupe
         </button>
       </section>
+      </PullToRefresh>
     </AppShell>
   );
 }
