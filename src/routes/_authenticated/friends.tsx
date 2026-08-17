@@ -58,10 +58,6 @@ function FriendsPage() {
   };
 
 
-  const handleRefresh = async () => {
-    await Promise.all([refetchFriends(), refetchRequests(), refetchDuels()]);
-  };
-
   return (
     <AppShell>
       <PullToRefresh onRefresh={handleRefresh}>
