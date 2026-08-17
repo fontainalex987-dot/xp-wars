@@ -407,9 +407,6 @@ function GroupPage() {
   const totalPointsWeek = friends.reduce((s, f) => s + f.pointsWeek, 0);
   const avgLevel = friends.length ? Math.round(friends.reduce((s, f) => s + f.level, 0) / friends.length) : 1;
 
-  const handleRefresh = async () => {
-    await Promise.all([refetchGroup(), refetchActivity()]);
-  };
 
   return (
     <AppShell>
