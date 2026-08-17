@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
+import { PullToRefresh } from "@/components/PullToRefresh";
 import { haptics } from "@/lib/haptics";
 import {
   useAcceptFriendRequest,
@@ -57,8 +58,13 @@ function FriendsPage() {
   };
 
 
+  const handleRefresh = async () => {
+    await Promise.all([refetchFriends(), refetchRequests(), refetchDuels()]);
+  };
+
   return (
     <AppShell>
+      <PullToRefresh onRefresh={handleRefresh}>
       <div className="px-5 pt-6 pb-4">
         <button
           onClick={() => navigate({ to: "/group" })}
@@ -361,6 +367,7 @@ function FriendsPage() {
           )}
         </div>
       )}
+      </PullToRefresh>
     </AppShell>
   );
 }

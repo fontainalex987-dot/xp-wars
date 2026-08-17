@@ -407,8 +407,13 @@ function GroupPage() {
   const totalPointsWeek = friends.reduce((s, f) => s + f.pointsWeek, 0);
   const avgLevel = friends.length ? Math.round(friends.reduce((s, f) => s + f.level, 0) / friends.length) : 1;
 
+  const handleRefresh = async () => {
+    await Promise.all([refetchGroup(), refetchActivity()]);
+  };
+
   return (
     <AppShell>
+      <PullToRefresh onRefresh={handleRefresh}>
       <header className="px-5 pt-8 pb-4">
         <p className="text-[10px] text-zinc-400 uppercase tracking-widest font-medium">Groupe</p>
        <div className="flex items-center justify-between">
@@ -791,6 +796,7 @@ function GroupPage() {
           Quitter le groupe
         </button>
       </section>
+      </PullToRefresh>
     </AppShell>
   );
 }
