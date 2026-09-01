@@ -135,6 +135,7 @@ function RootComponent() {
       <AuthProvider>
         <DailyResetProvider>
           <DailyReminderProvider>
+            <BadgeUnlockProvider>
             <AnimatePresence mode="popLayout">
               <motion.div
                 key={pathname}
