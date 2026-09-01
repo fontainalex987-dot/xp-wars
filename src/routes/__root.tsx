@@ -16,6 +16,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "@/lib/store";
 import { DailyReminderProvider } from "@/lib/daily-reminder";
 import { DailyResetProvider } from "@/lib/daily-reset";
+import { BottomNav } from "@/components/BottomNav";
 import { PointsBurst } from "@/components/PointsBurst";
 import { Toaster } from "sonner";
 
@@ -141,6 +142,7 @@ function RootComponent() {
             >
               <Outlet />
             </motion.div>
+            <BottomNav />
             <PointsBurst />
             <Toaster theme="dark" position="top-center" richColors />
           </DailyReminderProvider>

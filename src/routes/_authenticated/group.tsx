@@ -2,10 +2,10 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { ChevronRight, Copy, LogOut, Plus, Share2, Target, Trash2, UserPlus, Zap } from "lucide-react";
+import { motion } from "framer-motion";
 import { AppShell } from "@/components/AppShell";
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { haptics } from "@/lib/haptics";
-import { StaggerItem } from "@/components/PageTransition";
 import { FeedSkeleton, SkeletonBar } from "@/components/Skeletons";
 import {
   useAcceptDuel,
@@ -750,9 +750,14 @@ function GroupPage() {
         ) : (
           <ul className="space-y-2">
             {activity.map((a, i) => (
-              <StaggerItem key={a.id} index={i}>
+              <motion.div
+                key={a.id}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.12, ease: "easeOut", delay: Math.min(i, 8) * 0.03 }}
+              >
                 <ActivityFeedItem activity={a} profile={profile ?? null} />
-              </StaggerItem>
+              </motion.div>
             ))}
           </ul>
         )}

@@ -3,9 +3,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Plus, X } from "lucide-react";
+import { motion } from "framer-motion";
 import { AppShell } from "@/components/AppShell";
 import { TaskCard } from "@/components/TaskCard";
-import { StaggerItem } from "@/components/PageTransition";
 import { TaskListSkeleton } from "@/components/Skeletons";
 import { triggerBurst } from "@/components/PointsBurst";
 import {
@@ -147,9 +147,14 @@ function TasksPage() {
         <section className="px-5 pb-4 space-y-3">
           {tasks.length === 0 && <StarterTasks onAdd={handleAdd} />}
           {tasks.map((t: Task, i: number) => (
-            <StaggerItem key={t.id} index={i}>
+            <motion.div
+              key={t.id}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.12, ease: "easeOut", delay: Math.min(i, 8) * 0.03 }}
+            >
               <TaskCard task={t} onComplete={handleComplete} onEdit={setEditing} onDelete={handleDelete} />
-            </StaggerItem>
+            </motion.div>
           ))}
           {Array.from({ length: Math.max(0, 3 - tasks.length) }).map((_, i) => (
             <button
