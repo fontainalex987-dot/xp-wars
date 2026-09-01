@@ -14,6 +14,7 @@ export function vibrate(pattern: Pattern) {
 export const haptics = {
   taskDone: () => vibrate(40),
   levelUp: () => vibrate([30, 50, 30]),
+  badgeUnlock: () => vibrate([20, 40, 20, 40, 60]),
   light: () => vibrate(20),
   longPress: () => vibrate(30),
 };
