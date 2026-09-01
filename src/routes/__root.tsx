@@ -142,6 +142,7 @@ function RootComponent() {
             >
               <Outlet />
             </motion.div>
+            <BottomNav />
             <PointsBurst />
             <Toaster theme="dark" position="top-center" richColors />
           </DailyReminderProvider>
