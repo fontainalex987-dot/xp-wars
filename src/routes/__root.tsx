@@ -16,6 +16,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "@/lib/store";
 import { DailyReminderProvider } from "@/lib/daily-reminder";
 import { DailyResetProvider } from "@/lib/daily-reset";
+import { BadgeUnlockProvider } from "@/lib/badge-unlock";
 import { BottomNav } from "@/components/BottomNav";
 import { PointsBurst } from "@/components/PointsBurst";
 import { Toaster } from "sonner";
