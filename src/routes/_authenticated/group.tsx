@@ -221,7 +221,15 @@ function GroupPage() {
   const { data: activity = [], isLoading: activityLoading, refetch: refetchActivity } = useGroupActivity(group?.id);
   const { data: duels = [], refetch: refetchDuels } = useGroupDuels(group?.id);
   const handleRefresh = async () => {
-    await Promise.all([refetchGroup(), refetchMembers(), refetchChallenge(), refetchActivity(), refetchDuels()]);
+    const results = await Promise.all([
+      refetchGroup(),
+      refetchMembers(),
+      refetchChallenge(),
+      refetchActivity(),
+      refetchDuels(),
+    ]);
+    const failed = results.find((r) => r.isError);
+    if (failed) throw failed.error ?? new Error("Refresh failed");
   };
   const createDuel = useCreateDuel();
   const acceptDuel = useAcceptDuel();
