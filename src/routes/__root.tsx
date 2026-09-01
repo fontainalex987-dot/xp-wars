@@ -150,6 +150,7 @@ function RootComponent() {
             <BottomNav />
             <PointsBurst />
             <Toaster theme="dark" position="top-center" richColors />
+            </BadgeUnlockProvider>
           </DailyReminderProvider>
         </DailyResetProvider>
       </AuthProvider>
