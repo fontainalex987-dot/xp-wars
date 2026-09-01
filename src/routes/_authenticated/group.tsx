@@ -750,9 +750,14 @@ function GroupPage() {
         ) : (
           <ul className="space-y-2">
             {activity.map((a, i) => (
-              <StaggerItem key={a.id} index={i}>
+              <motion.div
+                key={a.id}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.12, ease: "easeOut", delay: Math.min(i, 8) * 0.03 }}
+              >
                 <ActivityFeedItem activity={a} profile={profile ?? null} />
-              </StaggerItem>
+              </motion.div>
             ))}
           </ul>
         )}
