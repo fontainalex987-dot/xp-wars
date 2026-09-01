@@ -8,7 +8,7 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { useRouterState } from "@tanstack/react-router";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
@@ -134,14 +134,17 @@ function RootComponent() {
       <AuthProvider>
         <DailyResetProvider>
           <DailyReminderProvider>
-            <motion.div
-              key={pathname}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.15, ease: "easeOut" }}
-            >
-              <Outlet />
-            </motion.div>
+            <AnimatePresence mode="popLayout">
+              <motion.div
+                key={pathname}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+              >
+                <Outlet />
+              </motion.div>
+            </AnimatePresence>
             <BottomNav />
             <PointsBurst />
             <Toaster theme="dark" position="top-center" richColors />
