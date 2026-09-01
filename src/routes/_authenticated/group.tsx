@@ -2,10 +2,10 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { ChevronRight, Copy, LogOut, Plus, Share2, Target, Trash2, UserPlus, Zap } from "lucide-react";
+import { motion } from "framer-motion";
 import { AppShell } from "@/components/AppShell";
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { haptics } from "@/lib/haptics";
-import { StaggerItem } from "@/components/PageTransition";
 import { FeedSkeleton, SkeletonBar } from "@/components/Skeletons";
 import {
   useAcceptDuel,

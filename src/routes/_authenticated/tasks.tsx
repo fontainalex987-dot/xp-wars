@@ -3,9 +3,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Plus, X } from "lucide-react";
+import { motion } from "framer-motion";
 import { AppShell } from "@/components/AppShell";
 import { TaskCard } from "@/components/TaskCard";
-import { StaggerItem } from "@/components/PageTransition";
 import { TaskListSkeleton } from "@/components/Skeletons";
 import { triggerBurst } from "@/components/PointsBurst";
 import {
