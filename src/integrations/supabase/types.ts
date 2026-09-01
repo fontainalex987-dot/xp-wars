@@ -572,24 +572,9 @@ export type Database = {
           xp: number
         }[]
       }
-      reject_friend_request: {
-        Args: { _request: string }
-        Returns: {
-          created_at: string
-          id: string
-          receiver_id: string
-          sender_id: string
-          status: string
-          updated_at: string
-        }
-        SetofOptions: {
-          from: "*"
-          to: "friend_requests"
-          isOneToOne: true
-          isSetofReturn: false
-        }
-      }
+      reject_friend_request: { Args: { _request: string }; Returns: undefined }
       remove_friend: { Args: { _friend: string }; Returns: undefined }
+      resolve_expired_duels: { Args: never; Returns: undefined }
       search_users: {
         Args: { _query: string }
         Returns: {
