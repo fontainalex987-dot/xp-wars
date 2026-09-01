@@ -54,7 +54,9 @@ function FriendsPage() {
   }, [requests.length]);
 
   const handleRefresh = async () => {
-    await Promise.all([refetchFriends(), refetchRequests(), refetchDuels()]);
+    const results = await Promise.all([refetchFriends(), refetchRequests(), refetchDuels()]);
+    const failed = results.find((r) => r.isError);
+    if (failed) throw failed.error ?? new Error("Refresh failed");
   };
 
 
