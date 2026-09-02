@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { ChevronRight, Copy, LogOut, Plus, Share2, Target, Trash2, UserPlus, Zap } from "lucide-react";
 import { motion } from "framer-motion";
+import { DuelDurationPicker } from "@/components/DuelDurationPicker";
 import { AppShell } from "@/components/AppShell";
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { haptics } from "@/lib/haptics";
@@ -12,6 +13,7 @@ import {
   useCancelDuel,
   useCreateChallenge,
   useCreateDuel,
+  duelReward,
   useCreateGroup,
   useDeleteChallenge,
   useGroupActivity,
@@ -235,6 +237,7 @@ function GroupPage() {
   const acceptDuel = useAcceptDuel();
   const cancelDuel = useCancelDuel();
   const [showDuelForm, setShowDuelForm] = useState(false);
+  const [duelDays, setDuelDays] = useState(7);
   const [selectedOpponent, setSelectedOpponent] = useState<string | null>(null);
   useNewReactions();
   const create = useCreateGroup();
@@ -600,7 +603,7 @@ function GroupPage() {
 
         {showDuelForm && (
           <div className="p-4 rounded-2xl bg-card ring-1 ring-white/5 space-y-3 mb-3">
-            <p className="text-sm text-muted-foreground">Choisis un adversaire pour la semaine :</p>
+            <p className="text-sm text-muted-foreground">Choisis un adversaire :</p>
             <div className="grid grid-cols-2 gap-2">
               {friends
                 .filter((f) => f.id !== profile?.id)
@@ -619,12 +622,13 @@ function GroupPage() {
                   </button>
                 ))}
             </div>
+            <DuelDurationPicker value={duelDays} onChange={setDuelDays} />
             <button
               onClick={async () => {
                 if (!selectedOpponent || !group) return;
                 try {
-                  await createDuel.mutateAsync({ challengedId: selectedOpponent, groupId: group.id });
-                  toast.success("Défi envoyé !");
+                  await createDuel.mutateAsync({ challengedId: selectedOpponent, groupId: group.id, durationDays: duelDays });
+                  toast.success(`Défi envoyé ! ${duelDays}j · +${duelReward(duelDays)} XP`);
                   setShowDuelForm(false);
                   setSelectedOpponent(null);
                 } catch (err) {
@@ -662,6 +666,10 @@ function GroupPage() {
                       {d.daysLeft > 0 && d.status === "active" && (
                         <span className="text-[10px] text-muted-foreground">{d.daysLeft}j restants</span>
                       )}
+                      <span className="text-[10px] text-muted-foreground">{d.durationDays}j</span>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-400/10 text-amber-300 ring-1 ring-amber-400/20">
+                        +{d.rewardXp} XP
+                      </span>
                     </div>
                     {(d.status === "pending" || d.status === "active") && (isChallenger || isChallenged) && (
                       <button
@@ -723,10 +731,24 @@ function GroupPage() {
                   )}
 
                   {/* Gagnant */}
-                  {d.status === "completed" && d.winnerId && (
-                    <p className="mt-2 text-center text-xs font-bold text-emerald-400">
-                      🏆 {d.winnerId === d.challengerId ? d.challengerPseudo : d.challengedPseudo} a gagné !
-                    </p>
+                  {d.status === "completed" && (
+                    d.winnerId ? (
+                      <div
+                        className={`mt-3 p-2.5 rounded-xl text-center ${
+                          d.winnerId === profile?.id
+                            ? "bg-amber-400/10 ring-1 ring-amber-400/30"
+                            : "bg-black/20 ring-1 ring-white/5"
+                        }`}
+                      >
+                        <p className="text-xs font-bold text-amber-300">
+                          {d.winnerId === profile?.id
+                            ? `🏆 Victoire ! +${d.rewardXp} XP`
+                            : `🏆 ${d.winnerId === d.challengerId ? d.challengerPseudo : d.challengedPseudo} a gagné (+${d.rewardXp} XP)`}
+                        </p>
+                      </div>
+                    ) : (
+                      <p className="mt-2 text-center text-xs font-bold text-muted-foreground">Égalité — aucune récompense</p>
+                    )
                   )}
                 </div>
               );

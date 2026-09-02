@@ -721,7 +721,13 @@ export type Duel = {
   challengerPoints: number;
   challengedPoints: number;
   daysLeft: number;
+  durationDays: number;
+  rewardXp: number;
 };
+
+export function duelReward(days: number) {
+  return Math.max(30, days * 15);
+}
 
 export function useGroupDuels(groupId: string | undefined) {
   return useQuery({
@@ -745,6 +751,8 @@ export function useGroupDuels(groupId: string | undefined) {
         challengerPoints: d.challenger_points,
         challengedPoints: d.challenged_points,
         daysLeft: d.days_left,
+        durationDays: d.duration_days,
+        rewardXp: d.reward_xp,
       }));
     },
     refetchOnWindowFocus: true,
@@ -756,9 +764,18 @@ export function useCreateDuel() {
   const { userId } = useAuth();
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ challengedId, groupId }: { challengedId: string; groupId?: string }) => {
+    mutationFn: async ({
+      challengedId,
+      groupId,
+      durationDays = 7,
+    }: { challengedId: string; groupId?: string; durationDays?: number }) => {
       if (!userId) throw new Error("Not authenticated");
-      const { data, error } = await supabase.rpc("create_duel", { _challenged: challengedId, _group: groupId ?? undefined });
+      const days = Math.min(30, Math.max(1, Math.round(durationDays)));
+      const { data, error } = await supabase.rpc("create_duel", {
+        _challenged: challengedId,
+        _group: groupId ?? undefined,
+        _duration_days: days,
+      });
       if (error) throw error;
       return data;
     },
@@ -965,6 +982,8 @@ export function useMyDuels() {
         challengerPoints: d.challenger_points,
         challengedPoints: d.challenged_points,
         daysLeft: d.days_left,
+        durationDays: d.duration_days,
+        rewardXp: d.reward_xp,
       }));
     },
     refetchOnWindowFocus: true,
