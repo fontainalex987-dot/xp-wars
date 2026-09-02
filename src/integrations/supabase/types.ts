@@ -51,9 +51,11 @@ export type Database = {
           challenged_id: string
           challenger_id: string
           created_at: string
+          duration_days: number
           ends_at: string | null
           group_id: string | null
           id: string
+          reward_xp: number
           starts_at: string | null
           status: string
           winner_id: string | null
@@ -62,9 +64,11 @@ export type Database = {
           challenged_id: string
           challenger_id: string
           created_at?: string
+          duration_days?: number
           ends_at?: string | null
           group_id?: string | null
           id?: string
+          reward_xp?: number
           starts_at?: string | null
           status?: string
           winner_id?: string | null
@@ -73,9 +77,11 @@ export type Database = {
           challenged_id?: string
           challenger_id?: string
           created_at?: string
+          duration_days?: number
           ends_at?: string | null
           group_id?: string | null
           id?: string
+          reward_xp?: number
           starts_at?: string | null
           status?: string
           winner_id?: string | null
@@ -344,9 +350,11 @@ export type Database = {
           challenged_id: string
           challenger_id: string
           created_at: string
+          duration_days: number
           ends_at: string | null
           group_id: string | null
           id: string
+          reward_xp: number
           starts_at: string | null
           status: string
           winner_id: string | null
@@ -381,9 +389,11 @@ export type Database = {
           challenged_id: string
           challenger_id: string
           created_at: string
+          duration_days: number
           ends_at: string | null
           group_id: string | null
           id: string
+          reward_xp: number
           starts_at: string | null
           status: string
           winner_id: string | null
@@ -405,14 +415,16 @@ export type Database = {
         }[]
       }
       create_duel: {
-        Args: { _challenged: string; _group?: string }
+        Args: { _challenged: string; _duration_days?: number; _group?: string }
         Returns: {
           challenged_id: string
           challenger_id: string
           created_at: string
+          duration_days: number
           ends_at: string | null
           group_id: string | null
           id: string
+          reward_xp: number
           starts_at: string | null
           status: string
           winner_id: string | null
@@ -470,8 +482,10 @@ export type Database = {
           challenger_points: number
           challenger_pseudo: string
           days_left: number
+          duration_days: number
           ends_at: string
           id: string
+          reward_xp: number
           starts_at: string
           status: string
           winner_id: string
@@ -541,9 +555,11 @@ export type Database = {
           challenger_points: number
           challenger_pseudo: string
           days_left: number
+          duration_days: number
           ends_at: string
           group_id: string
           id: string
+          reward_xp: number
           starts_at: string
           status: string
           winner_id: string
@@ -644,12 +660,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -673,11 +689,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -698,11 +714,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -723,11 +739,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -740,11 +756,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
