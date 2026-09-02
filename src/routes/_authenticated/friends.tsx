@@ -1,12 +1,14 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { DuelDurationPicker } from "@/components/DuelDurationPicker";
 import { AppShell } from "@/components/AppShell";
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { haptics } from "@/lib/haptics";
 import {
   useAcceptFriendRequest,
   useCreateDuel,
+  duelReward,
   useMyDuels,
   useMyFriendRequests,
   useMyFriends,
@@ -35,8 +37,10 @@ function FriendsPage() {
   const { data: searchResults = [] } = useSearchUsers(searchQuery);
   const { data: myDuels = [], refetch: refetchDuels } = useMyDuels();
   const privateDuels = myDuels.filter(
-    (d) => !d.groupId && (d.status === "pending" || d.status === "active"),
+    (d) => !d.groupId && (d.status === "pending" || d.status === "active" || d.status === "completed"),
   );
+  const [challengeTarget, setChallengeTarget] = useState<string | null>(null);
+  const [duelDays, setDuelDays] = useState(7);
 
   const sendRequest = useSendFriendRequest();
   const acceptRequest = useAcceptFriendRequest();
@@ -109,12 +113,14 @@ function FriendsPage() {
           ) : (
             friends.map((f) => {
               const activeDuel = privateDuels.find(
-                (d) => d.challengerId === f.id || d.challengedId === f.id
+                (d) =>
+                  (d.challengerId === f.id || d.challengedId === f.id) &&
+                  (d.status === "pending" || d.status === "active"),
               );
 
               return (
+                <div key={f.id} className="space-y-2">
                 <div
-                  key={f.id}
                   className="p-4 rounded-2xl bg-card ring-1 ring-white/5 flex items-center gap-3"
                 >
                   <div className="size-12 rounded-full bg-zinc-800 flex items-center justify-center text-2xl shrink-0">
@@ -133,14 +139,9 @@ function FriendsPage() {
                     </span>
                   ) : (
                     <button
-                      onClick={async () => {
-                        try {
-                          haptics.light();
-                          await createDuel.mutateAsync({ challengedId: f.id });
-                          toast.success(`Défi envoyé à ${f.pseudo} !`);
-                        } catch (err) {
-                          toast.error(err instanceof Error ? err.message : "Erreur");
-                        }
+                      onClick={() => {
+                        haptics.light();
+                        setChallengeTarget(challengeTarget === f.id ? null : f.id);
                       }}
                       disabled={createDuel.isPending}
                       className="flex items-center gap-1 text-xs font-bold text-brand bg-brand/10 px-3 py-2 rounded-xl ring-1 ring-brand/20 active:scale-95 active:shadow-[0_0_20px_rgba(34,197,94,0.3)] transition-all disabled:opacity-40"
@@ -166,6 +167,29 @@ function FriendsPage() {
                     <UserX className="size-4" />
                   </button>
                 </div>
+
+                {challengeTarget === f.id && (
+                  <div className="p-4 rounded-2xl bg-card ring-1 ring-brand/20 space-y-3">
+                    <DuelDurationPicker value={duelDays} onChange={setDuelDays} />
+                    <button
+                      onClick={async () => {
+                        try {
+                          haptics.light();
+                          await createDuel.mutateAsync({ challengedId: f.id, durationDays: duelDays });
+                          toast.success(`Défi envoyé à ${f.pseudo} · ${duelDays}j · +${duelReward(duelDays)} XP`);
+                          setChallengeTarget(null);
+                        } catch (err) {
+                          toast.error(err instanceof Error ? err.message : "Erreur");
+                        }
+                      }}
+                      disabled={createDuel.isPending}
+                      className="w-full py-2.5 rounded-xl bg-brand text-primary-foreground font-bold text-sm active:scale-95 transition-all disabled:opacity-40"
+                    >
+                      {createDuel.isPending ? "..." : "Envoyer le défi"}
+                    </button>
+                  </div>
+                )}
+                </div>
               );
             })
           )}
@@ -186,9 +210,15 @@ function FriendsPage() {
             return (
               <div key={d.id} className="p-4 rounded-2xl bg-card ring-1 ring-white/5">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-brand/10 text-brand ring-1 ring-brand/20 uppercase">
-                    {d.status === "pending" ? "En attente" : "En cours"}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-brand/10 text-brand ring-1 ring-brand/20 uppercase">
+                      {d.status === "pending" ? "En attente" : d.status === "active" ? "En cours" : "Terminé"}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground">{d.durationDays}j</span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-400/10 text-amber-300 ring-1 ring-amber-400/20">
+                      +{d.rewardXp} XP
+                    </span>
+                  </div>
                   <div className="flex items-center gap-2">
                     {d.status === "pending" && isChallenged && (
                       <button
@@ -205,7 +235,7 @@ function FriendsPage() {
                         Accepter
                       </button>
                     )}
-                    {(isChallenger || isChallenged) && (
+                    {(isChallenger || isChallenged) && d.status !== "completed" && (
                       <button
                         onClick={async () => {
                           if (!confirm(d.status === "active" ? "Abandonner ce duel ?" : "Supprimer ce défi ?")) return;
@@ -238,6 +268,25 @@ function FriendsPage() {
                 </div>
                 {d.status === "active" && d.daysLeft > 0 && (
                   <p className="text-[10px] text-muted-foreground text-center mt-2">{d.daysLeft}j restants</p>
+                )}
+                {d.status === "completed" && (
+                  d.winnerId ? (
+                    <div
+                      className={`mt-3 p-2.5 rounded-xl text-center ${
+                        d.winnerId === profile?.id
+                          ? "bg-amber-400/10 ring-1 ring-amber-400/30"
+                          : "bg-black/20 ring-1 ring-white/5"
+                      }`}
+                    >
+                      <p className="text-xs font-bold text-amber-300">
+                        {d.winnerId === profile?.id
+                          ? `🏆 Victoire ! +${d.rewardXp} XP`
+                          : `🏆 ${d.winnerId === d.challengerId ? d.challengerPseudo : d.challengedPseudo} a gagné (+${d.rewardXp} XP)`}
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="mt-2 text-center text-xs font-bold text-muted-foreground">Égalité — aucune récompense</p>
+                  )
                 )}
               </div>
             );
