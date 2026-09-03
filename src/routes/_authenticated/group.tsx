@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ChevronRight, Copy, LogOut, Plus, Share2, Target, Trash2, UserPlus, Zap } from "lucide-react";
 import { motion } from "framer-motion";
@@ -14,6 +14,8 @@ import {
   useCreateChallenge,
   useCreateDuel,
   duelReward,
+  challengeRewardForRank,
+  useChallengeContributors,
   useCreateGroup,
   useDeleteChallenge,
   useGroupActivity,
@@ -220,6 +222,7 @@ function GroupPage() {
   const { data: group, isLoading, refetch: refetchGroup } = useMyGroup();
   const { data: friends = [], refetch: refetchMembers } = useGroupMembers(group?.id);
   const { data: challenge, refetch: refetchChallenge } = useGroupChallenge(group?.id);
+  const { data: contributors = [], refetch: refetchContributors } = useChallengeContributors(challenge?.id);
   const { data: activity = [], isLoading: activityLoading, refetch: refetchActivity } = useGroupActivity(group?.id);
   const { data: duels = [], refetch: refetchDuels } = useGroupDuels(group?.id);
   const handleRefresh = async () => {
@@ -227,6 +230,7 @@ function GroupPage() {
       refetchGroup(),
       refetchMembers(),
       refetchChallenge(),
+      refetchContributors(),
       refetchActivity(),
       refetchDuels(),
     ]);
@@ -253,6 +257,22 @@ function GroupPage() {
   const [challengeDays, setChallengeDays] = useState(7);
 
   const isOwner = !!group && !!profile && group.owner_id === profile.id;
+
+  // Celebrate a challenge reward once the resolved podium includes the current user.
+  useEffect(() => {
+    if (!challenge?.ended || !profile) return;
+    const mine = contributors.find((c) => c.userId === profile.id);
+    const reward = mine && mine.points > 0 ? challengeRewardForRank(mine.rank) : 0;
+    if (!reward) return;
+    const key = `taskbattle.challengeReward.${challenge.id}`;
+    if (localStorage.getItem(key)) return;
+    localStorage.setItem(key, "1");
+    haptics.badgeUnlock();
+    toast.success(`🏆 Récompense obtenue : +${reward} XP`, {
+      description: `Tu termines #${mine.rank} du défi « ${challenge.title} »`,
+      duration: 5000,
+    });
+  }, [challenge, contributors, profile]);
 
   const copyCode = async () => {
     if (!group) return;
