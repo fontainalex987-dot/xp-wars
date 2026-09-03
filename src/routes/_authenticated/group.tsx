@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ChevronRight, Copy, LogOut, Plus, Share2, Target, Trash2, UserPlus, Zap } from "lucide-react";
 import { motion } from "framer-motion";
@@ -14,6 +14,8 @@ import {
   useCreateChallenge,
   useCreateDuel,
   duelReward,
+  challengeRewardForRank,
+  useChallengeContributors,
   useCreateGroup,
   useDeleteChallenge,
   useGroupActivity,
@@ -220,6 +222,7 @@ function GroupPage() {
   const { data: group, isLoading, refetch: refetchGroup } = useMyGroup();
   const { data: friends = [], refetch: refetchMembers } = useGroupMembers(group?.id);
   const { data: challenge, refetch: refetchChallenge } = useGroupChallenge(group?.id);
+  const { data: contributors = [], refetch: refetchContributors } = useChallengeContributors(challenge?.id);
   const { data: activity = [], isLoading: activityLoading, refetch: refetchActivity } = useGroupActivity(group?.id);
   const { data: duels = [], refetch: refetchDuels } = useGroupDuels(group?.id);
   const handleRefresh = async () => {
@@ -227,6 +230,7 @@ function GroupPage() {
       refetchGroup(),
       refetchMembers(),
       refetchChallenge(),
+      refetchContributors(),
       refetchActivity(),
       refetchDuels(),
     ]);
@@ -253,6 +257,23 @@ function GroupPage() {
   const [challengeDays, setChallengeDays] = useState(7);
 
   const isOwner = !!group && !!profile && group.owner_id === profile.id;
+
+  // Celebrate a challenge reward once the resolved podium includes the current user.
+  useEffect(() => {
+    if (!challenge?.ended || !profile) return;
+    const mine = contributors.find((c) => c.userId === profile.id);
+    if (!mine || mine.points <= 0) return;
+    const reward = challengeRewardForRank(mine.rank);
+    if (!reward) return;
+    const key = `taskbattle.challengeReward.${challenge.id}`;
+    if (localStorage.getItem(key)) return;
+    localStorage.setItem(key, "1");
+    haptics.badgeUnlock();
+    toast.success(`🏆 Récompense obtenue : +${reward} XP`, {
+      description: `Tu termines #${mine.rank} du défi « ${challenge.title} »`,
+      duration: 5000,
+    });
+  }, [challenge, contributors, profile]);
 
   const copyCode = async () => {
     if (!group) return;
@@ -477,12 +498,14 @@ function GroupPage() {
 
       <section className="px-5 py-4">
         {challenge ? (
-          <div className="p-5 rounded-[24px] bg-card ring-1 ring-brand/20 space-y-3">
+          <div className={`p-5 rounded-[24px] bg-card space-y-3 ${challenge.ended ? "ring-1 ring-amber-400/30" : "ring-1 ring-brand/20"}`}>
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <div className="flex items-center gap-2 text-brand">
+                <div className={`flex items-center gap-2 ${challenge.ended ? "text-amber-400" : "text-brand"}`}>
                   <Target className="size-4" />
-                  <p className="text-[10px] uppercase tracking-widest font-bold">Défi de groupe</p>
+                  <p className="text-[10px] uppercase tracking-widest font-bold">
+                    {challenge.ended ? "Défi terminé" : "Défi de groupe"}
+                  </p>
                 </div>
                 <h2 className="text-lg font-semibold mt-1 truncate">{challenge.title}</h2>
               </div>
@@ -502,18 +525,56 @@ function GroupPage() {
               const done = challenge.progress >= challenge.targetPoints;
               return (
                 <>
-                  <div className="h-2 bg-black/40 rounded-full overflow-hidden">
-                    <div className={`h-full ${done ? "bg-emerald-400" : "bg-brand xp-glow"}`} style={{ width: `${pct}%` }} />
-                  </div>
+                  {!challenge.ended && (
+                    <div className="h-2 bg-black/40 rounded-full overflow-hidden">
+                      <div className={`h-full ${done ? "bg-emerald-400" : "bg-brand xp-glow"}`} style={{ width: `${pct}%` }} />
+                    </div>
+                  )}
                   <div className="flex justify-between text-xs">
                     <span className="font-semibold">{challenge.progress} / {challenge.targetPoints} pts</span>
                     <span className="text-muted-foreground">
-                      {done ? "Objectif atteint 🎉" : `${daysLeft} j restants`}
+                      {challenge.ended
+                        ? done ? "Objectif atteint 🎉" : "Objectif non atteint"
+                        : done ? "Objectif atteint 🎉" : `${daysLeft} j restants`}
                     </span>
                   </div>
                 </>
               );
             })()}
+            {contributors.length > 0 && (
+              <div className="space-y-1.5 pt-1">
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">
+                  {challenge.ended ? "Classement final" : "Top contributeurs"}
+                </p>
+                {contributors.slice(0, 3).map((c) => {
+                  const medal = c.rank === 1 ? "🥇" : c.rank === 2 ? "🥈" : "🥉";
+                  const reward = challenge.ended && c.points > 0 ? challengeRewardForRank(c.rank) : 0;
+                  const isMe = c.userId === profile?.id;
+                  return (
+                    <div
+                      key={c.userId}
+                      className={`flex items-center gap-3 p-2.5 rounded-xl ${
+                        challenge.ended && c.rank === 1
+                          ? "bg-amber-400/10 ring-1 ring-amber-400/40"
+                          : "bg-black/30 ring-1 ring-white/5"
+                      }`}
+                    >
+                      <span className="text-lg">{medal}</span>
+                      <span className="text-xl">{c.avatar}</span>
+                      <span className={`flex-1 truncate text-sm font-semibold ${challenge.ended && c.rank === 1 ? "text-amber-300" : ""}`}>
+                        {c.pseudo}{isMe ? " (toi)" : ""}
+                      </span>
+                      <span className="text-xs font-bold text-muted-foreground">{c.points} pts</span>
+                      {reward > 0 && (
+                        <span className="text-[10px] font-bold text-amber-300 bg-amber-400/10 ring-1 ring-amber-400/30 px-1.5 py-0.5 rounded-md whitespace-nowrap">
+                          🏆 +{reward} XP
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         ) : isOwner ? (
           <div className="p-5 rounded-[24px] bg-card ring-1 ring-white/5 space-y-3">

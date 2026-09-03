@@ -1,0 +1,1 @@
+COMMENT ON COLUMN public.group_challenges.reward_granted IS 'True once resolve_group_challenge has granted XP rewards to the top 3 contributors.';

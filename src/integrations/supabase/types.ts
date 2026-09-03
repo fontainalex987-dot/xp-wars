@@ -130,6 +130,7 @@ export type Database = {
           ends_at: string
           group_id: string
           id: string
+          reward_granted: boolean
           starts_at: string
           target_points: number
           title: string
@@ -140,6 +141,7 @@ export type Database = {
           ends_at: string
           group_id: string
           id?: string
+          reward_granted?: boolean
           starts_at?: string
           target_points: number
           title: string
@@ -150,6 +152,7 @@ export type Database = {
           ends_at?: string
           group_id?: string
           id?: string
+          reward_granted?: boolean
           starts_at?: string
           target_points?: number
           title?: string
@@ -470,6 +473,16 @@ export type Database = {
         Args: { _challenge: string }
         Returns: number
       }
+      group_challenge_top_contributors: {
+        Args: { _challenge: string }
+        Returns: {
+          avatar: string
+          points: number
+          pseudo: string
+          rank: number
+          user_id: string
+        }[]
+      }
       group_duels: {
         Args: { _group: string }
         Returns: {
@@ -591,6 +604,10 @@ export type Database = {
       reject_friend_request: { Args: { _request: string }; Returns: undefined }
       remove_friend: { Args: { _friend: string }; Returns: undefined }
       resolve_expired_duels: { Args: never; Returns: undefined }
+      resolve_group_challenge: {
+        Args: { _challenge: string }
+        Returns: undefined
+      }
       search_users: {
         Args: { _query: string }
         Returns: {
