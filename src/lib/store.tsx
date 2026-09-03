@@ -534,6 +534,8 @@ export type GroupChallenge = {
   endsAt: string;
   createdBy: string;
   progress: number;
+  ended: boolean;
+  rewardGranted: boolean;
 };
 
 export function useGroupChallenge(groupId: string | undefined) {
@@ -542,19 +544,22 @@ export function useGroupChallenge(groupId: string | undefined) {
     enabled: !!groupId,
     queryFn: async (): Promise<GroupChallenge | null> => {
       const nowIso = new Date().toISOString();
+      // Keep recently-ended challenges visible so the final podium can be shown.
+      const recentCutoff = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
       const { data: ch, error } = await supabase
         .from("group_challenges")
         .select("*")
         .eq("group_id", groupId!)
         .lte("starts_at", nowIso)
-        .gte("ends_at", nowIso)
-        .order("created_at", { ascending: false })
+        .gte("ends_at", recentCutoff)
+        .order("ends_at", { ascending: false })
         .limit(1)
         .maybeSingle();
       if (error) throw error;
       if (!ch) return null;
 
-      // Progress across all members, computed server-side.
+      // Progress across all members, computed server-side. This RPC also
+      // resolves rewards automatically once the challenge has ended.
       const { data: progress, error: pErr } = await supabase.rpc("group_challenge_progress", { _challenge: ch.id });
       if (pErr) throw pErr;
       return {
@@ -566,11 +571,45 @@ export function useGroupChallenge(groupId: string | undefined) {
         endsAt: ch.ends_at,
         createdBy: ch.created_by,
         progress: progress ?? 0,
+        ended: new Date(ch.ends_at).getTime() <= Date.now(),
+        rewardGranted: ch.reward_granted ?? false,
       };
     },
     refetchOnWindowFocus: true,
     refetchInterval: 20000,
   });
+}
+
+export type ChallengeContributor = {
+  userId: string;
+  pseudo: string;
+  avatar: string;
+  points: number;
+  rank: number;
+};
+
+export function useChallengeContributors(challengeId: string | undefined) {
+  return useQuery({
+    queryKey: ["challenge-contributors", challengeId],
+    enabled: !!challengeId,
+    queryFn: async (): Promise<ChallengeContributor[]> => {
+      const { data, error } = await supabase.rpc("group_challenge_top_contributors", { _challenge: challengeId! });
+      if (error) throw error;
+      return (data ?? []).map((r) => ({
+        userId: r.user_id,
+        pseudo: r.pseudo,
+        avatar: r.avatar,
+        points: r.points,
+        rank: r.rank,
+      }));
+    },
+    refetchOnWindowFocus: true,
+    refetchInterval: 20000,
+  });
+}
+
+export function challengeRewardForRank(rank: number): number {
+  return rank === 1 ? 100 : rank === 2 ? 60 : rank === 3 ? 30 : 0;
 }
 
 export function useCreateChallenge() {
