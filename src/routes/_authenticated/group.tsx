@@ -262,7 +262,8 @@ function GroupPage() {
   useEffect(() => {
     if (!challenge?.ended || !profile) return;
     const mine = contributors.find((c) => c.userId === profile.id);
-    const reward = mine && mine.points > 0 ? challengeRewardForRank(mine.rank) : 0;
+    if (!mine || mine.points <= 0) return;
+    const reward = challengeRewardForRank(mine.rank);
     if (!reward) return;
     const key = `taskbattle.challengeReward.${challenge.id}`;
     if (localStorage.getItem(key)) return;
