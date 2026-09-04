@@ -14,7 +14,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "@/lib/store";
-import { DailyReminderProvider } from "@/lib/daily-reminder";
+import { PushNotificationsProvider } from "@/lib/push-notifications";
 import { DailyResetProvider } from "@/lib/daily-reset";
 import { BadgeUnlockProvider } from "@/lib/badge-unlock";
 import { BottomNav } from "@/components/BottomNav";
@@ -134,7 +134,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <DailyResetProvider>
-          <DailyReminderProvider>
+          <PushNotificationsProvider>
             <BadgeUnlockProvider>
             <AnimatePresence mode="popLayout">
               <motion.div
@@ -151,7 +151,7 @@ function RootComponent() {
             <PointsBurst />
             <Toaster theme="dark" position="top-center" richColors />
             </BadgeUnlockProvider>
-          </DailyReminderProvider>
+          </PushNotificationsProvider>
         </DailyResetProvider>
       </AuthProvider>
     </QueryClientProvider>
