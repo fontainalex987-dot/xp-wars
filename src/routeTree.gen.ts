@@ -20,6 +20,7 @@ import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedGroupRouteImport } from './routes/_authenticated/group'
 import { Route as AuthenticatedFriendsRouteImport } from './routes/_authenticated/friends'
 import { Route as AuthenticatedEditProfileRouteImport } from './routes/_authenticated/edit-profile'
+import { Route as ApiPublicSendPushRouteImport } from './routes/api/public/send-push'
 import { Route as AuthenticatedMemberMemberIdRouteImport } from './routes/_authenticated/member.$memberId'
 
 const AuthRoute = AuthRouteImport.update({
@@ -78,6 +79,11 @@ const AuthenticatedEditProfileRoute =
     path: '/edit-profile',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPublicSendPushRoute = ApiPublicSendPushRouteImport.update({
+  id: '/api/public/send-push',
+  path: '/api/public/send-push',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedMemberMemberIdRoute =
   AuthenticatedMemberMemberIdRouteImport.update({
     id: '/member/$memberId',
@@ -97,6 +103,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof AuthenticatedProfileRoute
   '/tasks': typeof AuthenticatedTasksRoute
   '/member/$memberId': typeof AuthenticatedMemberMemberIdRoute
+  '/api/public/send-push': typeof ApiPublicSendPushRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
@@ -110,6 +117,7 @@ export interface FileRoutesByTo {
   '/tasks': typeof AuthenticatedTasksRoute
   '/': typeof AuthenticatedIndexRoute
   '/member/$memberId': typeof AuthenticatedMemberMemberIdRoute
+  '/api/public/send-push': typeof ApiPublicSendPushRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -125,6 +133,7 @@ export interface FileRoutesById {
   '/_authenticated/tasks': typeof AuthenticatedTasksRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/member/$memberId': typeof AuthenticatedMemberMemberIdRoute
+  '/api/public/send-push': typeof ApiPublicSendPushRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -140,6 +149,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/tasks'
     | '/member/$memberId'
+    | '/api/public/send-push'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
@@ -153,6 +163,7 @@ export interface FileRouteTypes {
     | '/tasks'
     | '/'
     | '/member/$memberId'
+    | '/api/public/send-push'
   id:
     | '__root__'
     | '/_authenticated'
@@ -167,11 +178,13 @@ export interface FileRouteTypes {
     | '/_authenticated/tasks'
     | '/_authenticated/'
     | '/_authenticated/member/$memberId'
+    | '/api/public/send-push'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiPublicSendPushRoute: typeof ApiPublicSendPushRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -253,6 +266,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEditProfileRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/send-push': {
+      id: '/api/public/send-push'
+      path: '/api/public/send-push'
+      fullPath: '/api/public/send-push'
+      preLoaderRoute: typeof ApiPublicSendPushRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/member/$memberId': {
       id: '/_authenticated/member/$memberId'
       path: '/member/$memberId'
@@ -295,6 +315,7 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiPublicSendPushRoute: ApiPublicSendPushRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
