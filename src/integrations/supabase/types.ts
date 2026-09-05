@@ -297,6 +297,7 @@ export type Database = {
       task_templates: {
         Row: {
           active: boolean
+          category: string
           created_at: string
           description: string
           difficulty: Database["public"]["Enums"]["difficulty"]
@@ -307,6 +308,7 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          category?: string
           created_at?: string
           description?: string
           difficulty: Database["public"]["Enums"]["difficulty"]
@@ -317,6 +319,7 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          category?: string
           created_at?: string
           description?: string
           difficulty?: Database["public"]["Enums"]["difficulty"]
@@ -329,6 +332,7 @@ export type Database = {
       }
       tasks: {
         Row: {
+          category: string
           created_at: string
           description: string
           difficulty: Database["public"]["Enums"]["difficulty"]
@@ -342,6 +346,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          category?: string
           created_at?: string
           description?: string
           difficulty: Database["public"]["Enums"]["difficulty"]
@@ -355,6 +360,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          category?: string
           created_at?: string
           description?: string
           difficulty?: Database["public"]["Enums"]["difficulty"]
@@ -676,6 +682,7 @@ export type Database = {
       sync_today_tasks: {
         Args: never
         Returns: {
+          category: string
           created_at: string
           description: string
           difficulty: Database["public"]["Enums"]["difficulty"]
