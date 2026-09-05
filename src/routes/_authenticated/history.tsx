@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { useTaskHistory } from "@/lib/store";
+import { CATEGORIES, useTaskHistory } from "@/lib/store";
 
 export const Route = createFileRoute("/_authenticated/history")({
   head: () => ({
@@ -151,6 +151,9 @@ function HistoryPage() {
                       <div className="flex gap-2 mb-0.5">
                         <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-zinc-800 text-zinc-400 font-bold uppercase tracking-wide">
                           {t.difficulty}
+                        </span>
+                        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-zinc-800 text-zinc-400 font-bold tracking-wide">
+                          {CATEGORIES[t.category].icon} {CATEGORIES[t.category].short}
                         </span>
                         <span className={`text-[10px] font-medium ${t.done ? "text-brand" : "text-zinc-500"}`}>
                           {t.done ? `+${t.points} pts` : `${t.points} pts manqués`}

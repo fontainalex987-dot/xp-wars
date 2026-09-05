@@ -12,6 +12,31 @@ export const DIFFICULTY_POINTS: Record<Difficulty, number> = {
   difficile: 30,
 };
 
+export type Category =
+  | "etudes"
+  | "sport"
+  | "travail"
+  | "entrepreneuriat"
+  | "developpement_personnel"
+  | "vie_personnelle"
+  | "autre";
+
+export const CATEGORIES: Record<Category, { icon: string; label: string; short: string }> = {
+  etudes: { icon: "📚", label: "Études", short: "Études" },
+  sport: { icon: "🏋️", label: "Sport", short: "Sport" },
+  travail: { icon: "💼", label: "Travail", short: "Travail" },
+  entrepreneuriat: { icon: "🚀", label: "Entrepreneuriat", short: "Entrep." },
+  developpement_personnel: { icon: "🧠", label: "Développement perso", short: "Dév. perso" },
+  vie_personnelle: { icon: "🏠", label: "Vie perso", short: "Vie perso" },
+  autre: { icon: "✨", label: "Autre", short: "Autre" },
+};
+
+export const CATEGORY_KEYS = Object.keys(CATEGORIES) as Category[];
+
+export function categoryOf(value: string | null | undefined): Category {
+  return value && value in CATEGORIES ? (value as Category) : "autre";
+}
+
 export const XP_PER_LEVEL = 500;
 
 export const AVATARS = ["🥷", "🦁", "🐉", "⚡", "🧿", "🦊", "🐺", "🦅", "🐯", "🐼", "🦄", "👾"];
@@ -25,6 +50,7 @@ export type Task = {
   done: boolean;
   createdAt: number;
   templateId?: string | null;
+  category: Category;
 };
 
 export type Profile = {
@@ -193,6 +219,7 @@ export function useTodayTasks() {
         done: t.done,
         createdAt: new Date(t.created_at).getTime(),
         templateId: t.template_id,
+        category: categoryOf(t.category),
       }));
     },
     refetchOnWindowFocus: true,
@@ -209,9 +236,11 @@ export function useAddTask() {
       description: string;
       difficulty: Difficulty;
       recurrence: "unique" | "daily";
+      category?: Category;
     }) => {
       if (!userId) throw new Error("Not authenticated");
       const points = DIFFICULTY_POINTS[input.difficulty];
+      const category: Category = input.category ?? "autre";
       if (input.recurrence === "daily") {
         const { error: tErr } = await supabase.from("task_templates").insert({
           user_id: userId,
@@ -219,6 +248,7 @@ export function useAddTask() {
           description: input.description,
           difficulty: input.difficulty,
           points,
+          category,
         });
         if (tErr) throw tErr;
         const { error: sErr } = await supabase.rpc("sync_today_tasks");
@@ -231,6 +261,7 @@ export function useAddTask() {
           description: input.description,
           difficulty: input.difficulty,
           points,
+          category,
         });
         if (error) throw error;
       }
@@ -374,6 +405,7 @@ export function useTaskHistory(days = 30) {
           done: t.done,
           createdAt: new Date(t.created_at).getTime(),
           doneAt: t.done_at ? new Date(t.done_at).getTime() : null,
+          category: categoryOf(t.category),
         });
         bucket.possible += t.points;
         if (t.done) bucket.earned += t.points;
