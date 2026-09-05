@@ -1,22 +1,22 @@
 import { useState } from "react";
 import { Plus, Zap } from "lucide-react";
 import { toast } from "sonner";
-import type { Difficulty } from "@/lib/store";
+import type { Category, Difficulty } from "@/lib/store";
 
 const STARTER_TASKS = [
-  { title: "Boire un verre d'eau", description: "Hydratation = productivité", difficulty: "facile" as Difficulty, icon: "💧", points: 10 },
-  { title: "5 min de rangement", description: "Un petit coin rangé = esprit clair", difficulty: "facile" as Difficulty, icon: "🧹", points: 10 },
-  { title: "Lire 1 page", description: "La lecture, c'est la gym du cerveau", difficulty: "facile" as Difficulty, icon: "📖", points: 10 },
-  { title: "Faire 10 pompes", description: "Bouger un peu, ça fait du bien", difficulty: "moyenne" as Difficulty, icon: "💪", points: 20 },
-  { title: "Douche froide", description: "Le défi ultime du matin", difficulty: "difficile" as Difficulty, icon: "🥶", points: 30 },
+  { title: "Boire un verre d'eau", description: "Hydratation = productivité", difficulty: "facile" as Difficulty, icon: "💧", points: 10, category: "vie_personnelle" as Category },
+  { title: "5 min de rangement", description: "Un petit coin rangé = esprit clair", difficulty: "facile" as Difficulty, icon: "🧹", points: 10, category: "vie_personnelle" as Category },
+  { title: "Lire 1 page", description: "La lecture, c'est la gym du cerveau", difficulty: "facile" as Difficulty, icon: "📖", points: 10, category: "developpement_personnel" as Category },
+  { title: "Faire 10 pompes", description: "Bouger un peu, ça fait du bien", difficulty: "moyenne" as Difficulty, icon: "💪", points: 20, category: "sport" as Category },
+  { title: "Douche froide", description: "Le défi ultime du matin", difficulty: "difficile" as Difficulty, icon: "🥶", points: 30, category: "developpement_personnel" as Category },
 ];
 
-export function StarterTasks({ onAdd }: { onAdd: (t: { title: string; description: string; difficulty: Difficulty; recurrence: "unique" | "daily" }) => void }) {
+export function StarterTasks({ onAdd }: { onAdd: (t: { title: string; description: string; difficulty: Difficulty; recurrence: "unique" | "daily"; category?: Category }) => void }) {
   const [added, setAdded] = useState<Set<string>>(new Set());
 
   const handleAdd = (task: typeof STARTER_TASKS[0]) => {
     if (added.has(task.title)) return;
-    onAdd({ title: task.title, description: task.description, difficulty: task.difficulty, recurrence: "daily" });
+    onAdd({ title: task.title, description: task.description, difficulty: task.difficulty, recurrence: "daily", category: task.category });
     setAdded((prev) => new Set(prev).add(task.title));
     toast.success(`${task.title} ajouté !`);
   };
