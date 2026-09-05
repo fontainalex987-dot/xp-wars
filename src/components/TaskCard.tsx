@@ -1,12 +1,26 @@
 import { Check, Pencil, Trash2 } from "lucide-react";
 import { haptics } from "@/lib/haptics";
-import type { Task } from "@/lib/store";
+import { CATEGORIES, type Task } from "@/lib/store";
 
 const diffStyles: Record<Task["difficulty"], string> = {
   facile: "bg-emerald-500/10 text-emerald-400 ring-emerald-500/20",
   moyenne: "bg-amber-500/10 text-amber-400 ring-amber-500/20",
   difficile: "bg-orange-500/10 text-orange-400 ring-orange-500/20",
 };
+
+export function CategoryChip({ category, muted = false }: { category: Task["category"]; muted?: boolean }) {
+  const c = CATEGORIES[category];
+  return (
+    <span
+      className={`text-[10px] px-2 py-0.5 rounded-full font-bold ring-1 tracking-wide ${
+        muted ? "bg-zinc-800 text-zinc-400 ring-transparent" : "bg-sky-500/10 text-sky-300 ring-sky-500/20"
+      }`}
+      title={c.label}
+    >
+      {c.icon} {c.short}
+    </span>
+  );
+}
 
 export function TaskCard({
   task,
