@@ -41,6 +41,7 @@ export function TaskCard({
             <span className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400 font-bold uppercase tracking-wide">
               {task.difficulty}
             </span>
+            <CategoryChip category={task.category} muted />
             <span className="text-[10px] text-brand font-medium">+{task.points} pts</span>
           </div>
           <h3 className="text-base font-medium line-through decoration-zinc-600 truncate">{task.title}</h3>
@@ -60,6 +61,7 @@ export function TaskCard({
           <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ring-1 uppercase tracking-wide ${diffStyles[task.difficulty]}`}>
             {task.difficulty}
           </span>
+          <CategoryChip category={task.category} />
           <span className="text-[10px] text-zinc-500 font-medium">+{task.points} pts</span>
           {task.templateId && (
             <span className="text-[10px] text-zinc-500 font-medium uppercase tracking-wide">quotidienne</span>
