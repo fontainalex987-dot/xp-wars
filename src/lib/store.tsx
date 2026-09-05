@@ -236,9 +236,11 @@ export function useAddTask() {
       description: string;
       difficulty: Difficulty;
       recurrence: "unique" | "daily";
+      category?: Category;
     }) => {
       if (!userId) throw new Error("Not authenticated");
       const points = DIFFICULTY_POINTS[input.difficulty];
+      const category: Category = input.category ?? "autre";
       if (input.recurrence === "daily") {
         const { error: tErr } = await supabase.from("task_templates").insert({
           user_id: userId,
@@ -246,6 +248,7 @@ export function useAddTask() {
           description: input.description,
           difficulty: input.difficulty,
           points,
+          category,
         });
         if (tErr) throw tErr;
         const { error: sErr } = await supabase.rpc("sync_today_tasks");
@@ -258,6 +261,7 @@ export function useAddTask() {
           description: input.description,
           difficulty: input.difficulty,
           points,
+          category,
         });
         if (error) throw error;
       }
