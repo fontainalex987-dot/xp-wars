@@ -94,7 +94,7 @@ function TasksPage() {
     }
   };
 
-  const handleAdd = async (t: { title: string; description: string; difficulty: Difficulty; recurrence: "unique" | "daily" }) => {
+  const handleAdd = async (t: { title: string; description: string; difficulty: Difficulty; recurrence: "unique" | "daily"; category?: Category }) => {
     try {
       await addTask.mutateAsync(t);
       setOpen(false);
@@ -151,7 +151,31 @@ function TasksPage() {
       ) : (
         <section className="px-5 pb-4 space-y-3">
           {tasks.length === 0 && <StarterTasks onAdd={handleAdd} />}
-          {tasks.map((t: Task, i: number) => (
+          {tasks.length > 0 && (
+            <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1" style={{ scrollbarWidth: "none" }}>
+              {(["tous", ...CATEGORY_KEYS] as const).map((c) => {
+                const active = categoryFilter === c;
+                const label = c === "tous" ? "✨ Tous" : `${CATEGORIES[c].icon} ${CATEGORIES[c].short}`;
+                return (
+                  <button
+                    key={c}
+                    onClick={() => setCategoryFilter(c)}
+                    className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+                      active
+                        ? "bg-brand/20 text-brand ring-1 ring-brand"
+                        : "bg-card ring-1 ring-white/5 text-muted-foreground"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+          {visibleTasks.length === 0 && tasks.length > 0 && (
+            <p className="text-sm text-muted-foreground text-center py-4">Aucune quête dans cette catégorie.</p>
+          )}
+          {visibleTasks.map((t: Task, i: number) => (
             <motion.div
               key={t.id}
               initial={{ opacity: 0 }}
