@@ -219,6 +219,7 @@ export function useTodayTasks() {
         done: t.done,
         createdAt: new Date(t.created_at).getTime(),
         templateId: t.template_id,
+        category: categoryOf(t.category),
       }));
     },
     refetchOnWindowFocus: true,
@@ -400,6 +401,7 @@ export function useTaskHistory(days = 30) {
           done: t.done,
           createdAt: new Date(t.created_at).getTime(),
           doneAt: t.done_at ? new Date(t.done_at).getTime() : null,
+          category: categoryOf(t.category),
         });
         bucket.possible += t.points;
         if (t.done) bucket.earned += t.points;
