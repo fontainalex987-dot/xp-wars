@@ -14,6 +14,9 @@ import {
   useRemoveTask,
   useTodayTasks,
   useUpdateTask,
+  type Category,
+  CATEGORIES,
+  CATEGORY_KEYS,
   type Difficulty,
   DIFFICULTY_POINTS,
   type Task,
@@ -39,6 +42,8 @@ function TasksPage() {
   const removeTask = useRemoveTask();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Task | null>(null);
+  const [categoryFilter, setCategoryFilter] = useState<Category | "tous">("tous");
+  const visibleTasks = categoryFilter === "tous" ? tasks : tasks.filter((t) => t.category === categoryFilter);
   const done = tasks.filter((t) => t.done).length;
   const totalPossible = tasks.reduce((s, t) => s + t.points, 0);
   const earned = tasks.filter((t) => t.done).reduce((s, t) => s + t.points, 0);
