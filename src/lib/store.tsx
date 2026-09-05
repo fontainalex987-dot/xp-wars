@@ -12,6 +12,31 @@ export const DIFFICULTY_POINTS: Record<Difficulty, number> = {
   difficile: 30,
 };
 
+export type Category =
+  | "etudes"
+  | "sport"
+  | "travail"
+  | "entrepreneuriat"
+  | "developpement_personnel"
+  | "vie_personnelle"
+  | "autre";
+
+export const CATEGORIES: Record<Category, { icon: string; label: string; short: string }> = {
+  etudes: { icon: "📚", label: "Études", short: "Études" },
+  sport: { icon: "🏋️", label: "Sport", short: "Sport" },
+  travail: { icon: "💼", label: "Travail", short: "Travail" },
+  entrepreneuriat: { icon: "🚀", label: "Entrepreneuriat", short: "Entrep." },
+  developpement_personnel: { icon: "🧠", label: "Développement perso", short: "Dév. perso" },
+  vie_personnelle: { icon: "🏠", label: "Vie perso", short: "Vie perso" },
+  autre: { icon: "✨", label: "Autre", short: "Autre" },
+};
+
+export const CATEGORY_KEYS = Object.keys(CATEGORIES) as Category[];
+
+export function categoryOf(value: string | null | undefined): Category {
+  return value && value in CATEGORIES ? (value as Category) : "autre";
+}
+
 export const XP_PER_LEVEL = 500;
 
 export const AVATARS = ["🥷", "🦁", "🐉", "⚡", "🧿", "🦊", "🐺", "🦅", "🐯", "🐼", "🦄", "👾"];
@@ -25,6 +50,7 @@ export type Task = {
   done: boolean;
   createdAt: number;
   templateId?: string | null;
+  category: Category;
 };
 
 export type Profile = {
