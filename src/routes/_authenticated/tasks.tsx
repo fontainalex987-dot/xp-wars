@@ -208,17 +208,18 @@ function NewTaskSheet({
   onAdd,
 }: {
   onClose: () => void;
-  onAdd: (t: { title: string; description: string; difficulty: Difficulty; recurrence: "unique" | "daily" }) => void;
+  onAdd: (t: { title: string; description: string; difficulty: Difficulty; recurrence: "unique" | "daily"; category: Category }) => void;
 }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [difficulty, setDifficulty] = useState<Difficulty>("moyenne");
   const [recurrence, setRecurrence] = useState<"unique" | "daily">("unique");
+  const [category, setCategory] = useState<Category>("autre");
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
-    onAdd({ title: title.trim(), description: description.trim(), difficulty, recurrence });
+    onAdd({ title: title.trim(), description: description.trim(), difficulty, recurrence, category });
   };
 
   return (
@@ -296,6 +297,28 @@ function NewTaskSheet({
               >
                 <div>{d}</div>
                 <div className="text-[10px] mt-0.5 opacity-70">+{DIFFICULTY_POINTS[d]} pts</div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <label className="text-xs uppercase tracking-widest text-muted-foreground">Catégorie</label>
+          <div className="mt-2 grid grid-cols-4 gap-2">
+            {CATEGORY_KEYS.map((c) => (
+              <button
+                type="button"
+                key={c}
+                onClick={() => setCategory(c)}
+                title={CATEGORIES[c].label}
+                className={`p-2 rounded-xl text-[10px] font-semibold transition-all flex flex-col items-center gap-1 ${
+                  category === c
+                    ? "bg-brand text-primary-foreground ring-2 ring-brand"
+                    : "bg-black/40 text-muted-foreground ring-1 ring-white/10"
+                }`}
+              >
+                <span className="text-base leading-none">{CATEGORIES[c].icon}</span>
+                <span className="leading-tight text-center">{CATEGORIES[c].short}</span>
               </button>
             ))}
           </div>
