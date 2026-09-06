@@ -192,7 +192,7 @@ export type TaskTemplate = {
 
 // Today in America/Guadeloupe (UTC-4, no DST) — used only for client-side filters
 // on historical rows. The source of truth for "today" is the server RPC.
-function todayGuadeloupe(): string {
+export function todayGuadeloupe(): string {
   return new Intl.DateTimeFormat("en-CA", {
     timeZone: "America/Guadeloupe",
     year: "numeric",
