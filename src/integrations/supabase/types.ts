@@ -702,6 +702,37 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      user_stats_by_category: {
+        Args: { _from: string; _to: string }
+        Returns: {
+          category: string
+          done_count: number
+          points: number
+        }[]
+      }
+      user_stats_daily: {
+        Args: { _from: string; _to: string }
+        Returns: {
+          done_count: number
+          points: number
+          task_date: string
+          total_count: number
+        }[]
+      }
+      user_stats_monthly: {
+        Args: { _months?: number }
+        Returns: {
+          month_start: string
+          points: number
+        }[]
+      }
+      user_stats_weekly: {
+        Args: { _from: string; _to: string }
+        Returns: {
+          points: number
+          week_start: string
+        }[]
+      }
     }
     Enums: {
       difficulty: "facile" | "moyenne" | "difficile"

@@ -16,6 +16,7 @@ import {
   useUpdateTask,
   type Category,
   CATEGORIES,
+  CATEGORY_KEYS,
   type Difficulty,
   DIFFICULTY_POINTS,
   type Task,
