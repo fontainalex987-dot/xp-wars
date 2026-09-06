@@ -415,7 +415,72 @@ export function useTaskHistory(days = 30) {
   });
 }
 
+// ------- Stats ---------
+export type DailyStat = { date: string; doneCount: number; totalCount: number; points: number };
+export type PointStat = { date: string; points: number };
+export type CategoryStat = { category: Category; points: number; doneCount: number };
+
+export function useStatsDaily(from: string, to: string) {
+  const { userId } = useAuth();
+  return useQuery({
+    queryKey: ["stats", "daily", userId, from, to],
+    enabled: !!userId,
+    queryFn: async (): Promise<DailyStat[]> => {
+      const { data, error } = await supabase.rpc("user_stats_daily", { _from: from, _to: to });
+      if (error) throw error;
+      return (data ?? []).map((r) => ({
+        date: r.task_date,
+        doneCount: r.done_count ?? 0,
+        totalCount: r.total_count ?? 0,
+        points: r.points ?? 0,
+      }));
+    },
+  });
+}
+
+export function useStatsWeekly(from: string, to: string) {
+  const { userId } = useAuth();
+  return useQuery({
+    queryKey: ["stats", "weekly", userId, from, to],
+    enabled: !!userId,
+    queryFn: async (): Promise<PointStat[]> => {
+      const { data, error } = await supabase.rpc("user_stats_weekly", { _from: from, _to: to });
+      if (error) throw error;
+      return (data ?? []).map((r) => ({ date: r.week_start, points: r.points ?? 0 }));
+    },
+  });
+}
+
+export function useStatsMonthly(months: number) {
+  const { userId } = useAuth();
+  return useQuery({
+    queryKey: ["stats", "monthly", userId, months],
+    enabled: !!userId,
+    queryFn: async (): Promise<PointStat[]> => {
+      const { data, error } = await supabase.rpc("user_stats_monthly", { _months: months });
+      if (error) throw error;
+      return (data ?? []).map((r) => ({ date: r.month_start, points: r.points ?? 0 }));
+    },
+  });
+}
+
+export function useStatsByCategory(from: string, to: string) {
+  const { userId } = useAuth();
+  return useQuery({
+    queryKey: ["stats", "category", userId, from, to],
+    enabled: !!userId,
+    queryFn: async (): Promise<CategoryStat[]> => {
+      const { data, error } = await supabase.rpc("user_stats_by_category", { _from: from, _to: to });
+      if (error) throw error;
+      return (data ?? [])
+        .map((r) => ({ category: categoryOf(r.category), points: r.points ?? 0, doneCount: r.done_count ?? 0 }))
+        .sort((a, b) => b.points - a.points);
+    },
+  });
+}
+
 // ------- Groups ---------
+
 export function useMyGroup() {
   const { userId } = useAuth();
   return useQuery({
