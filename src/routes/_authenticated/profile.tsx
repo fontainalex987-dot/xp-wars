@@ -49,12 +49,20 @@ function ProfilePage() {
         </div>
         <h1 className="mt-4 text-2xl font-bold">{profile.pseudo}</h1>
         <p className="text-sm text-muted-foreground">Niveau {profile.level} · {profile.totalPoints.toLocaleString("fr-FR")} pts</p>
-        <Link
-          to="/edit-profile"
-          className="mt-4 inline-flex items-center gap-1.5 bg-card ring-1 ring-white/10 text-sm font-semibold py-2 px-4 rounded-full active:scale-95"
-        >
-          <Pencil className="size-3.5" /> Modifier mon profil
-        </Link>
+        <div className="mt-4 flex items-center gap-2">
+          <Link
+            to="/edit-profile"
+            className="inline-flex items-center gap-1.5 bg-card ring-1 ring-white/10 text-sm font-semibold py-2 px-4 rounded-full active:scale-95"
+          >
+            <Pencil className="size-3.5" /> Modifier mon profil
+          </Link>
+          <Link
+            to="/stats"
+            className="inline-flex items-center gap-1.5 bg-brand/10 ring-1 ring-brand/30 text-brand text-sm font-semibold py-2 px-4 rounded-full active:scale-95"
+          >
+            <BarChart3 className="size-3.5" /> Statistiques
+          </Link>
+        </div>
       </header>
 
       {profile.goal && (
