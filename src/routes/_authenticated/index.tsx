@@ -48,10 +48,7 @@ function HomePage() {
             <p className="text-base font-semibold truncate">{profile.pseudo}</p>
           </div>
         </div>
-        <div className="flex items-center gap-1.5 bg-brand/10 px-2.5 py-1 rounded-full ring-1 ring-brand/20 shrink-0">
-          <Flame className="size-4 text-brand" strokeWidth={2.5} />
-          <span className="text-sm font-semibold text-brand">{profile.streak} JOURS</span>
-        </div>
+        <StreakFlame />
       </header>
 
       <section className="px-5 py-4">
