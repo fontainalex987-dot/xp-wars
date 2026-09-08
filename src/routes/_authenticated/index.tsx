@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Flame, Plus, Trophy, Target, Users } from "lucide-react";
+import { Plus, Trophy, Target, Users } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
+import { StreakFlame } from "@/components/StreakFlame";
 import { HomeSkeleton } from "@/components/Skeletons";
 import { XpBar } from "@/components/XpBar";
 import { useGroupMembers, useMyGroup, useProfile, useTodayTasks, XP_PER_LEVEL } from "@/lib/store";
