@@ -62,6 +62,7 @@ export type Profile = {
   totalPoints: number;
   xp: number;
   streak: number;
+  streakFreezesAvailable: number;
 };
 
 export type Friend = {
@@ -144,7 +145,28 @@ export function useProfile() {
         totalPoints: data.total_points,
         xp: data.xp,
         streak: data.streak,
+        streakFreezesAvailable: data.streak_freezes_available ?? 0,
       };
+    },
+  });
+}
+
+// ------- Streak freezes ---------
+export function useRecentStreakFreeze() {
+  const { userId } = useAuth();
+  return useQuery({
+    queryKey: ["streak-freeze", userId],
+    enabled: !!userId,
+    queryFn: async (): Promise<{ freezeDate: string } | null> => {
+      const { data, error } = await supabase
+        .from("streak_freezes")
+        .select("freeze_date")
+        .eq("user_id", userId!)
+        .order("freeze_date", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      return data ? { freezeDate: data.freeze_date } : null;
     },
   });
 }

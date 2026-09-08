@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Flame, Plus, Trophy, Target, Users } from "lucide-react";
+import { Plus, Trophy, Target, Users } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
+import { StreakFlame } from "@/components/StreakFlame";
 import { HomeSkeleton } from "@/components/Skeletons";
 import { XpBar } from "@/components/XpBar";
 import { useGroupMembers, useMyGroup, useProfile, useTodayTasks, XP_PER_LEVEL } from "@/lib/store";
@@ -48,10 +49,7 @@ function HomePage() {
             <p className="text-base font-semibold truncate">{profile.pseudo}</p>
           </div>
         </div>
-        <div className="flex items-center gap-1.5 bg-brand/10 px-2.5 py-1 rounded-full ring-1 ring-brand/20 shrink-0">
-          <Flame className="size-4 text-brand" strokeWidth={2.5} />
-          <span className="text-sm font-semibold text-brand">{profile.streak} JOURS</span>
-        </div>
+        <StreakFlame />
       </header>
 
       <section className="px-5 py-4">

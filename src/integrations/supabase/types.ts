@@ -227,6 +227,8 @@ export type Database = {
           level: number
           pseudo: string
           streak: number
+          streak_freezes_available: number
+          streak_freezes_week_start: string | null
           total_points: number
           updated_at: string
           xp: number
@@ -240,6 +242,8 @@ export type Database = {
           level?: number
           pseudo: string
           streak?: number
+          streak_freezes_available?: number
+          streak_freezes_week_start?: string | null
           total_points?: number
           updated_at?: string
           xp?: number
@@ -253,6 +257,8 @@ export type Database = {
           level?: number
           pseudo?: string
           streak?: number
+          streak_freezes_available?: number
+          streak_freezes_week_start?: string | null
           total_points?: number
           updated_at?: string
           xp?: number
@@ -287,6 +293,35 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "push_subscriptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      streak_freezes: {
+        Row: {
+          created_at: string
+          freeze_date: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          freeze_date: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          freeze_date?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "streak_freezes_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -427,6 +462,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      apply_streak_freezes: { Args: never; Returns: undefined }
       cancel_duel: {
         Args: { _duel: string }
         Returns: {
