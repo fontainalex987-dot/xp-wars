@@ -37,6 +37,16 @@ function HomePage() {
   const podium = [...friends].sort((a, b) => b.pointsToday - a.pointsToday).slice(0, 3);
   const myRank = [...friends].sort((a, b) => b.pointsToday - a.pointsToday).findIndex((f) => f.id === profile.id) + 1;
 
+  const total = tasks.length;
+  const encouragement =
+    total === 0
+      ? { title: "Aujourd'hui, 3 choses importantes. Pas plus.", body: "Choisis tes 3 quêtes du jour. Ce sont les petites actions répétées qui mènent loin." }
+      : doneCount === total
+        ? { title: "Journée accomplie 🎉", body: "Tu as tenu tes engagements envers toi-même. Continue demain, tu seras encore plus proche de ton objectif." }
+        : doneCount > 0
+          ? { title: "Tu avances 💪", body: `${doneCount} sur ${total} déjà faite${doneCount > 1 ? "s" : ""}. Même si tu ne finis pas tout, tu as avancé aujourd'hui.` }
+          : { title: "Prêt à démarrer ?", body: "Une seule petite action suffit pour lancer ta journée." };
+
   return (
     <AppShell>
       <header className="px-5 pt-8 pb-4 flex items-center justify-between">
@@ -111,6 +121,22 @@ function HomePage() {
           </div>
           <p className="mt-2 text-xs text-muted-foreground">Gérer</p>
         </Link>
+      </section>
+
+      <section className="px-5 pt-2">
+        <div className="p-5 rounded-2xl bg-card ring-1 ring-white/5">
+          <p className="text-base font-semibold">{encouragement.title}</p>
+          <p className="text-sm text-muted-foreground mt-1">{encouragement.body}</p>
+          {profile.goal && (
+            <div className="mt-4 pt-4 border-t border-white/5 flex items-start gap-2">
+              <Target className="size-4 text-brand shrink-0 mt-0.5" />
+              <div className="min-w-0">
+                <p className="text-[10px] text-brand uppercase tracking-widest font-bold">Mon objectif</p>
+                <p className="text-sm font-medium break-words">{profile.goal}</p>
+              </div>
+            </div>
+          )}
+        </div>
       </section>
 
       {tasks.length > 0 && (
