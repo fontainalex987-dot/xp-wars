@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useState, type React
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { haptics } from "@/lib/haptics";
+import { celebrate } from "@/lib/celebrations";
 import { toast } from "sonner";
 
 export type Difficulty = "facile" | "moyenne" | "difficile";
@@ -312,7 +313,8 @@ export function useCompleteTask() {
       await qc.invalidateQueries({ queryKey: ["profile"] });
       const nextLevel = (qc.getQueryData(["profile", userId]) as Profile | null | undefined)?.level ?? null;
       if (result?.prevLevel != null && nextLevel != null && nextLevel > result.prevLevel) {
-        haptics.levelUp();
+        // Célébration plein écran (la vibration est gérée par l'overlay).
+        celebrate({ kind: "level", level: nextLevel });
       }
     },
   });

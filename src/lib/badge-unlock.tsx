@@ -1,7 +1,6 @@
 import { useEffect, useRef, type ReactNode } from "react";
-import { toast } from "sonner";
 import { useAuth, useBadges } from "@/lib/store";
-import { haptics } from "@/lib/haptics";
+import { celebrate } from "@/lib/celebrations";
 
 const KEY_PREFIX = "taskbattle.celebratedBadges";
 
@@ -64,16 +63,11 @@ export function BadgeUnlockProvider({ children }: { children: ReactNode }) {
     const fresh = unlocked.filter((b) => !celebrated.has(b.id));
     if (fresh.length === 0) return;
 
-    fresh.forEach((b, i) => {
-      setTimeout(() => {
-        toast.success(`${b.icon} Badge débloqué : ${b.label}`, {
-          description: b.description,
-          duration: 4000,
-        });
-      }, i * 400);
+    // Chaque nouveau badge a droit à sa célébration plein écran (affichées à la suite).
+    fresh.forEach((b) => {
+      celebrate({ kind: "badge", icon: b.icon, label: b.label, description: b.description });
       celebrated.add(b.id);
     });
-    haptics.badgeUnlock();
     writeSet(userId, celebrated);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId, unlockedKey]);
