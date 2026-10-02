@@ -1155,12 +1155,28 @@ export function useBadges(): Badge[] {
   const { data: tasks } = useTodayTasks();
   const doneToday = (tasks ?? []).filter((t) => t.done).length;
   const total = profile?.totalPoints ?? 0;
+  const level = profile?.level ?? 1;
+  const streak = profile?.streak ?? 0;
   return [
+    // Premiers pas
     { id: "b1", label: "Première quête", description: "Termine ta première tâche", unlocked: total >= 10, icon: "🎯" },
     { id: "b2", label: "Combo x3", description: "3 tâches en une journée", unlocked: doneToday >= 3, icon: "⚡" },
+    // Régularité : la constance avant tout
+    { id: "s3", label: "Lancé", description: "Série de 3 jours", unlocked: streak >= 3, icon: "🔥" },
+    { id: "s7", label: "Semaine tenue", description: "Série de 7 jours", unlocked: streak >= 7, icon: "📅" },
+    { id: "s14", label: "Deux semaines", description: "Série de 14 jours", unlocked: streak >= 14, icon: "💪" },
+    { id: "s30", label: "Un mois de constance", description: "Série de 30 jours", unlocked: streak >= 30, icon: "🌳" },
+    { id: "s100", label: "Inarrêtable", description: "Série de 100 jours", unlocked: streak >= 100, icon: "💎" },
+    // Progression
+    { id: "l3", label: "Niveau 3", description: "Atteins le niveau 3", unlocked: level >= 3, icon: "🌱" },
+    { id: "b5", label: "Niveau 5", description: "Atteins le niveau 5", unlocked: level >= 5, icon: "👑" },
+    { id: "b6", label: "Niveau 10", description: "Atteins le niveau 10", unlocked: level >= 10, icon: "🏆" },
+    { id: "l20", label: "Niveau 20", description: "Atteins le niveau 20", unlocked: level >= 20, icon: "🐉" },
+    // Points cumulés
+    { id: "p100", label: "100 pts", description: "100 points cumulés", unlocked: total >= 100, icon: "✨" },
     { id: "b3", label: "500 pts", description: "500 points cumulés", unlocked: total >= 500, icon: "💯" },
     { id: "b4", label: "1000 pts", description: "1000 points cumulés", unlocked: total >= 1000, icon: "🔺" },
-    { id: "b5", label: "Niveau 5", description: "Atteins le niveau 5", unlocked: (profile?.level ?? 1) >= 5, icon: "👑" },
-    { id: "b6", label: "Niveau 10", description: "Atteins le niveau 10", unlocked: (profile?.level ?? 1) >= 10, icon: "🏆" },
+    { id: "p2500", label: "2 500 pts", description: "2 500 points cumulés", unlocked: total >= 2500, icon: "🚀" },
+    { id: "p5000", label: "5 000 pts", description: "5 000 points cumulés", unlocked: total >= 5000, icon: "🌟" },
   ];
 }
