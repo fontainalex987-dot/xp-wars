@@ -36,7 +36,7 @@ function yesterdayGuadeloupe(): string {
   return d.toISOString().slice(0, 10);
 }
 
-/** Flamme de série + indicateur de gèles hebdomadaires, avec célébration si un gèle a protégé la série. */
+/** Flamme de série + indicateur de gels hebdomadaires, avec célébration si un gel a protégé la série. */
 export function StreakFlame() {
   const { userId } = useAuth();
   const { data: profile } = useProfile();
@@ -59,7 +59,7 @@ export function StreakFlame() {
     setFrozen(true);
     haptics.badgeUnlock();
     toast.success("🧊 Ta série est protégée !", {
-      description: "Tu n'as rien fait hier, un gèle a été utilisé automatiquement. Aucun souci, on continue !",
+      description: "Tu n'as rien fait hier, un gel a été utilisé automatiquement. Aucun souci, on continue !",
       duration: 6000,
     });
     seen.add(freezeDate);
@@ -87,13 +87,13 @@ export function StreakFlame() {
           <Flame className="size-4 text-brand" strokeWidth={2.5} />
         )}
         <span className={`text-sm font-semibold ${frozen ? "text-sky-200" : "text-brand"}`}>
-          {profile.streak} JOURS
+          {profile.streak} {profile.streak > 1 ? "JOURS" : "JOUR"}
         </span>
       </div>
       <div
         className="flex items-center gap-1"
-        title={`${available} gèle${available > 1 ? "s" : ""} disponible${available > 1 ? "s" : ""} cette semaine`}
-        aria-label={`${available} gèles disponibles cette semaine`}
+        title={`${available} gel${available > 1 ? "s" : ""} disponible${available > 1 ? "s" : ""} cette semaine`}
+        aria-label={`${available} gel${available > 1 ? "s" : ""} disponible${available > 1 ? "s" : ""} cette semaine`}
       >
         {Array.from({ length: MAX_FREEZES }).map((_, i) => (
           <Snowflake
