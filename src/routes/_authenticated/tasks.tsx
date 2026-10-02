@@ -8,9 +8,11 @@ import { AppShell } from "@/components/AppShell";
 import { TaskCard } from "@/components/TaskCard";
 import { TaskListSkeleton } from "@/components/Skeletons";
 import { triggerBurst } from "@/components/PointsBurst";
+import { cheerFor } from "@/lib/cheers";
 import {
   useAddTask,
   useCompleteTask,
+  useProfile,
   useRemoveTask,
   useTodayTasks,
   useUpdateTask,
@@ -25,9 +27,9 @@ import {
 export const Route = createFileRoute("/_authenticated/tasks")({
   head: () => ({
     meta: [
-      { title: "Mes tâches — XP Wars" },
-      { name: "description", content: "Gère tes 3 tâches quotidiennes et valide-les pour gagner des points." },
-      { property: "og:title", content: "Mes tâches — XP Wars" },
+      { title: "Mes quêtes — XP Wars" },
+      { name: "description", content: "Gère tes 3 quêtes quotidiennes et valide-les pour gagner des points." },
+      { property: "og:title", content: "Mes quêtes — XP Wars" },
       { property: "og:description", content: "Tes 3 quêtes du jour. Valide, gagne des points, grimpe au classement." },
     ],
   }),
@@ -36,6 +38,7 @@ export const Route = createFileRoute("/_authenticated/tasks")({
 
 function TasksPage() {
   const { data: tasks = [], isLoading } = useTodayTasks();
+  const { data: profile } = useProfile();
   const addTask = useAddTask();
   const completeTask = useCompleteTask();
   const updateTask = useUpdateTask();
@@ -50,10 +53,21 @@ function TasksPage() {
   const handleComplete = async (id: string) => {
     const t = tasks.find((x) => x.id === id);
     if (!t || t.done) return;
+    // Contexte calculé avant la validation (la liste est rafraîchie ensuite).
+    const cheer = cheerFor({
+      doneAfter: done + 1,
+      total: tasks.length,
+      difficulty: t.difficulty,
+      streak: profile?.streak ?? 0,
+    });
     try {
       await completeTask.mutateAsync(t);
       triggerBurst(t.points);
-      toast.success(`Tâche accomplie ! +${t.points} pts`);
+      toast(cheer.title, {
+        icon: cheer.icon,
+        description: `${cheer.description} · +${t.points} pts`,
+        duration: 4000,
+      });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Erreur";
       toast.error(message);
