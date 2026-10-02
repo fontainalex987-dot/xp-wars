@@ -19,6 +19,7 @@ import { DailyResetProvider } from "@/lib/daily-reset";
 import { BadgeUnlockProvider } from "@/lib/badge-unlock";
 import { BottomNav } from "@/components/BottomNav";
 import { PointsBurst } from "@/components/PointsBurst";
+import { CelebrationOverlay } from "@/components/CelebrationOverlay";
 import { Toaster } from "sonner";
 
 function NotFoundComponent() {
@@ -149,6 +150,7 @@ function RootComponent() {
             </AnimatePresence>
             <BottomNav />
             <PointsBurst />
+            <CelebrationOverlay />
             <Toaster theme="dark" position="top-center" richColors />
             </BadgeUnlockProvider>
           </PushNotificationsProvider>
