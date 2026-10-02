@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Plus, Trophy, Target, Users } from "lucide-react";
+import { Flame, Plus, Trophy, Target, Users } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { StreakFlame } from "@/components/StreakFlame";
 import { HomeSkeleton } from "@/components/Skeletons";
@@ -46,6 +46,13 @@ function HomePage() {
         : doneCount > 0
           ? { title: "Tu avances 💪", body: `${doneCount} sur ${total} déjà faite${doneCount > 1 ? "s" : ""}. Même si tu ne finis pas tout, tu as avancé aujourd'hui.` }
           : { title: "Prêt à démarrer ?", body: "Une seule petite action suffit pour lancer ta journée." };
+  const freezes = profile.streakFreezesAvailable;
+  const streakInfo =
+    doneCount > 0
+      ? { tone: "safe", title: "Série sécurisée pour aujourd'hui ✅", body: `${profile.streak} jour${profile.streak > 1 ? "s" : ""} d'affilée. Reviens demain pour la prolonger.` }
+      : profile.streak > 0
+        ? { tone: "risk", title: `Ta série de ${profile.streak} jour${profile.streak > 1 ? "s" : ""} est en jeu`, body: `Valide au moins une quête aujourd'hui pour la garder. ${freezes > 0 ? `${freezes} gel${freezes > 1 ? "s" : ""} en secours cette semaine.` : "Plus aucun gel en secours cette semaine !"}` }
+        : { tone: "start", title: "Lance une nouvelle série", body: "Une quête validée aujourd'hui = jour 1. La constance commence maintenant." };
 
   return (
     <AppShell>
@@ -121,6 +128,30 @@ function HomePage() {
           </div>
           <p className="mt-2 text-xs text-muted-foreground">Gérer</p>
         </Link>
+      </section>
+
+      <section className="px-5 pt-2">
+        <div
+          className={`p-5 rounded-2xl ring-1 flex items-start gap-4 ${
+            streakInfo.tone === "risk"
+              ? "bg-orange-500/10 ring-orange-500/40"
+              : streakInfo.tone === "safe"
+                ? "bg-brand/10 ring-brand/30"
+                : "bg-card ring-white/5"
+          }`}
+        >
+          <div className="flex flex-col items-center shrink-0">
+            <Flame
+              className={`size-8 ${streakInfo.tone === "risk" ? "text-orange-400 animate-pulse" : streakInfo.tone === "safe" ? "text-brand" : "text-zinc-500"}`}
+              strokeWidth={2.5}
+            />
+            <span className="text-2xl font-bold leading-none mt-1">{profile.streak}</span>
+          </div>
+          <div className="min-w-0">
+            <p className="text-base font-semibold">{streakInfo.title}</p>
+            <p className="text-sm text-muted-foreground mt-1">{streakInfo.body}</p>
+          </div>
+        </div>
       </section>
 
       <section className="px-5 pt-2">
