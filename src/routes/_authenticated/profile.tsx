@@ -92,7 +92,7 @@ function ProfilePage() {
 
       <section className="px-5 py-2 grid grid-cols-3 gap-3">
         <StatBox icon={<Zap className="size-4" />} label="Points" value={profile.totalPoints.toLocaleString("fr-FR")} />
-        <StatBox icon={<Flame className="size-4" />} label="Streak" value={`${profile.streak}j`} />
+        <StatBox icon={<Flame className="size-4" />} label="Série" value={`${profile.streak} j`} />
         <StatBox icon={<Trophy className="size-4" />} label="Badges" value={`${badges.filter((b) => b.unlocked).length}/${badges.length}`} />
       </section>
 

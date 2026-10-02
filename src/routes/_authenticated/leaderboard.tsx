@@ -27,7 +27,8 @@ function LeaderboardPage() {
   const { data: friends = [] } = useGroupMembers(group?.id);
   const [range, setRange] = useState<Range>("today");
   const sorted = [...friends].sort((a, b) => pick(b, range) - pick(a, range));
-  const podium = sorted.slice(0, 3);
+  // Seuls les membres qui ont marqué sur la période montent sur le podium.
+  const podium = sorted.filter((f) => pick(f, range) > 0).slice(0, 3);
   const medals = ["🥇", "🥈", "🥉"];
 
   if (!group) {

@@ -39,9 +39,10 @@ function OnboardingPage() {
     <div className="min-h-screen bg-background text-foreground px-5 py-10">
       <div className="mx-auto w-full max-w-md">
         <div className="text-center mb-8">
-          <p className="text-[10px] uppercase tracking-widest text-brand font-bold">Étape 1</p>
-          <h1 className="text-3xl font-bold tracking-tight mt-1">Bienvenue dans XP Wars</h1>
-          <p className="text-sm text-muted-foreground mt-2">Configure ton profil pour rejoindre la battle.</p>
+          <h1 className="text-3xl font-bold tracking-tight">Bienvenue dans XP Wars</h1>
+          <p className="text-sm text-muted-foreground mt-2">
+            Chaque jour, 3 quêtes importantes. Pas plus. Les petites actions répétées mènent aux grandes réussites.
+          </p>
         </div>
 
         <form onSubmit={submit} className="space-y-6">

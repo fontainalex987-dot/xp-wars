@@ -34,7 +34,8 @@ function HomePage() {
 
   const doneCount = tasks.filter((t) => t.done).length;
   const potentialPoints = tasks.filter((t) => !t.done).reduce((s, t) => s + t.points, 0);
-  const podium = [...friends].sort((a, b) => b.pointsToday - a.pointsToday).slice(0, 3);
+  // Seuls les membres qui ont marqué montent sur le podium.
+  const podium = [...friends].filter((f) => f.pointsToday > 0).sort((a, b) => b.pointsToday - a.pointsToday).slice(0, 3);
   const myRank = [...friends].sort((a, b) => b.pointsToday - a.pointsToday).findIndex((f) => f.id === profile.id) + 1;
 
   const total = tasks.length;
@@ -94,8 +95,14 @@ function HomePage() {
               to="/tasks"
               className="flex items-center bg-zinc-50 text-zinc-950 text-sm font-semibold py-2.5 pr-4 pl-3 rounded-full transition-transform active:scale-95 shrink-0"
             >
-              <Plus className="size-4 mr-2 shrink-0" strokeWidth={3} />
-              NOUVELLE TÂCHE
+              {total >= 3 ? (
+                "MES QUÊTES →"
+              ) : (
+                <>
+                  <Plus className="size-4 mr-2 shrink-0" strokeWidth={3} />
+                  NOUVELLE QUÊTE
+                </>
+              )}
             </Link>
           </div>
         </div>

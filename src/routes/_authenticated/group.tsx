@@ -327,6 +327,7 @@ function GroupPage() {
 
   const handleDeleteChallenge = async () => {
     if (!challenge) return;
+    if (!confirm(`Supprimer le défi « ${challenge.title} » ? La progression du groupe sera perdue.`)) return;
     try {
       await deleteChallenge.mutateAsync(challenge.id);
       toast.success("Défi supprimé");
@@ -359,6 +360,7 @@ function GroupPage() {
   };
 
   const handleLeave = async () => {
+    if (!group || !confirm(`Quitter le groupe « ${group.name} » ? Tu pourras le rejoindre à nouveau avec son code.`)) return;
     try {
       await leave.mutateAsync();
       toast.success("Tu as quitté le groupe");
@@ -438,6 +440,8 @@ function GroupPage() {
 
   const totalPointsWeek = friends.reduce((s, f) => s + f.pointsWeek, 0);
   const avgLevel = friends.length ? Math.round(friends.reduce((s, f) => s + f.level, 0) / friends.length) : 1;
+  // Barres « Semaine » relatives au meilleur membre, pour que la comparaison ait du sens.
+  const bestWeek = Math.max(1, ...friends.map((f) => f.pointsWeek));
 
 
   return (
@@ -491,8 +495,8 @@ function GroupPage() {
           <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-1">Pts semaine</p>
         </div>
         <div className="p-4 rounded-2xl bg-card ring-1 ring-white/5 text-center">
-          <p className="text-2xl font-bold">Nv.{avgLevel}</p>
-          <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-1">Moyen</p>
+          <p className="text-2xl font-bold">{avgLevel}</p>
+          <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-1">Niveau moyen</p>
         </div>
       </section>
 
@@ -722,7 +726,7 @@ function GroupPage() {
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-brand/10 text-brand ring-1 ring-brand/20 uppercase">
-                        {d.status === "pending" ? "En attente" : d.status === "active" ? "En cours" : "Terminé"}
+                        {d.status === "pending" ? "En attente" : d.status === "active" ? "En cours" : d.status === "cancelled" ? "Annulé" : "Terminé"}
                       </span>
                       {d.daysLeft > 0 && d.status === "active" && (
                         <span className="text-[10px] text-muted-foreground">{d.daysLeft}j restants</span>
@@ -738,7 +742,7 @@ function GroupPage() {
                           if (!confirm(d.status === "active" ? "Abandonner ce duel ?" : "Supprimer ce défi ?")) return;
                           try {
                             await cancelDuel.mutateAsync(d.id);
-                            toast.success("Défi supprimé");
+                            toast.success(d.status === "active" ? "Duel abandonné" : "Défi supprimé");
                           } catch {
                             toast.error("Erreur");
                           }
@@ -851,7 +855,7 @@ function GroupPage() {
         <h2 className="text-lg font-medium mb-3">Membres</h2>
         <div className="space-y-2">
           {friends.map((f) => {
-            const weekPct = Math.min(100, Math.round((f.pointsWeek / 400) * 100));
+            const weekPct = Math.min(100, Math.round((f.pointsWeek / bestWeek) * 100));
             return (
               <div key={f.id} className="p-4 rounded-2xl bg-card ring-1 ring-white/5">
                 <Link
