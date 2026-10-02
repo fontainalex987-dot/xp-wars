@@ -1,7 +1,7 @@
 {
-  "name": "Task Battle",
-  "short_name": "Task Battle",
-  "description": "Transforme tes tâches quotidiennes en défi entre amis.",
+  "name": "XP Wars",
+  "short_name": "XP Wars",
+  "description": "3 quêtes par jour pour avancer vers tes objectifs, avec tes amis.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
