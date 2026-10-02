@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { BarChart3, Bell, CalendarDays, Flame, LogOut, Pencil, Target, Trophy, Zap } from "lucide-react";
+import { BarChart3, Bell, Flame, LogOut, Pencil, Target, Trophy, Zap } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { ProfileSkeleton } from "@/components/Skeletons";
 import { XpBar } from "@/components/XpBar";
@@ -61,12 +61,6 @@ function ProfilePage() {
             className="inline-flex items-center gap-1.5 bg-brand/10 ring-1 ring-brand/30 text-brand text-sm font-semibold py-2 px-4 rounded-full active:scale-95"
           >
             <BarChart3 className="size-3.5" /> Statistiques
-          </Link>
-          <Link
-            to="/history"
-            className="inline-flex items-center gap-1.5 bg-card ring-1 ring-white/10 text-sm font-semibold py-2 px-4 rounded-full active:scale-95"
-          >
-            <CalendarDays className="size-3.5" /> Historique
           </Link>
         </div>
       </header>
