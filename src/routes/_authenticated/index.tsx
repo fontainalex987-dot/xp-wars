@@ -4,7 +4,8 @@ import { AppShell } from "@/components/AppShell";
 import { StreakFlame } from "@/components/StreakFlame";
 import { HomeSkeleton } from "@/components/Skeletons";
 import { XpBar } from "@/components/XpBar";
-import { useGroupMembers, useMyGroup, useProfile, useTodayTasks, XP_PER_LEVEL } from "@/lib/store";
+import { GoalCard } from "@/components/GoalCard";
+import { isGoalActive, useGroupMembers, useMyGoals, useMyGroup, useProfile, useTodayTasks, XP_PER_LEVEL } from "@/lib/store";
 
 export const Route = createFileRoute("/_authenticated/")({
   head: () => ({
@@ -23,6 +24,7 @@ function HomePage() {
   const { data: tasks = [] } = useTodayTasks();
   const { data: group } = useMyGroup();
   const { data: friends = [] } = useGroupMembers(group?.id);
+  const { data: goals = [] } = useMyGoals();
 
   if (!profile) {
     return (
@@ -37,6 +39,7 @@ function HomePage() {
   const podium = [...friends].sort((a, b) => b.pointsToday - a.pointsToday).slice(0, 3);
   const myRank = [...friends].sort((a, b) => b.pointsToday - a.pointsToday).findIndex((f) => f.id === profile.id) + 1;
 
+  const activeGoals = goals.filter(isGoalActive);
   const total = tasks.length;
   const encouragement =
     total === 0
@@ -114,7 +117,7 @@ function HomePage() {
             <span className="text-[10px] uppercase tracking-widest">Aujourd'hui</span>
           </div>
           <p className="mt-2 text-2xl font-bold">{doneCount}/{tasks.length}</p>
-          <p className="text-xs text-muted-foreground">tâches terminées</p>
+          <p className="text-xs text-muted-foreground">quêtes terminées</p>
         </div>
         <div className="p-4 rounded-2xl bg-card ring-1 ring-white/5">
           <div className="flex items-center gap-2 text-zinc-400">
@@ -158,6 +161,35 @@ function HomePage() {
             <p className="text-sm text-muted-foreground mt-1">{streakInfo.body}</p>
           </div>
         </div>
+      </section>
+
+      <section className="px-5 pt-4">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-medium">Mes objectifs</h2>
+          {activeGoals.length > 0 && (
+            <Link to="/goals" className="text-sm text-brand font-medium">
+              Voir tout →
+            </Link>
+          )}
+        </div>
+        {activeGoals.length === 0 ? (
+          <Link
+            to="/goals"
+            className="p-4 rounded-2xl bg-card/60 border-2 border-dashed border-white/10 flex items-center gap-3 active:scale-[0.99] transition-transform"
+          >
+            <div className="size-10 rounded-xl bg-brand/10 flex items-center justify-center text-xl shrink-0">🎯</div>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold">Fixe-toi un objectif sur plusieurs jours</p>
+              <p className="text-xs text-muted-foreground">Relie tes quêtes du jour à une ambition plus grande.</p>
+            </div>
+          </Link>
+        ) : (
+          <div className="space-y-2">
+            {activeGoals.slice(0, 3).map((g) => (
+              <GoalCard key={g.id} goal={g} />
+            ))}
+          </div>
+        )}
       </section>
 
       <section className="px-5 pt-2">

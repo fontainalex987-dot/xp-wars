@@ -28,7 +28,10 @@ import {
   useNewReactions,
   useProfile,
   useToggleReaction,
+  useGroupGoals,
+  isGoalActive,
 } from "@/lib/store";
+import { GoalCard } from "@/components/GoalCard";
 
 export const Route = createFileRoute("/_authenticated/group")({
   head: () => ({
@@ -222,6 +225,7 @@ function GroupPage() {
   const { data: group, isLoading, refetch: refetchGroup } = useMyGroup();
   const { data: friends = [], refetch: refetchMembers } = useGroupMembers(group?.id);
   const { data: challenge, refetch: refetchChallenge } = useGroupChallenge(group?.id);
+  const { data: groupGoals = [], refetch: refetchGoals } = useGroupGoals(group?.id);
   const { data: contributors = [], refetch: refetchContributors } = useChallengeContributors(challenge?.id);
   const { data: activity = [], isLoading: activityLoading, refetch: refetchActivity } = useGroupActivity(group?.id);
   const { data: duels = [], refetch: refetchDuels } = useGroupDuels(group?.id);
@@ -233,6 +237,7 @@ function GroupPage() {
       refetchContributors(),
       refetchActivity(),
       refetchDuels(),
+      refetchGoals(),
     ]);
     const failed = results.find((r) => r.isError);
     if (failed) throw failed.error ?? new Error("Refresh failed");
@@ -647,6 +652,35 @@ function GroupPage() {
         ) : (
           <div className="p-4 rounded-2xl bg-card/60 ring-1 ring-white/5 text-center">
             <p className="text-sm text-muted-foreground">Aucun défi en cours. Le propriétaire du groupe peut en lancer un.</p>
+          </div>
+        )}
+      </section>
+
+      {/* ---- OBJECTIFS DU GROUPE ---- */}
+      <section className="px-5 py-4">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <span className="text-base">🎯</span>
+            <h2 className="text-lg font-medium">Objectifs du groupe</h2>
+          </div>
+          <Link
+            to="/goals"
+            className="text-xs font-bold text-brand bg-brand/10 px-3 py-1.5 rounded-full ring-1 ring-brand/20 active:scale-95 transition-transform"
+          >
+            + Objectif
+          </Link>
+        </div>
+        {groupGoals.filter(isGoalActive).length === 0 ? (
+          <div className="p-4 rounded-2xl bg-card/60 ring-1 ring-white/5 text-center">
+            <p className="text-sm text-muted-foreground">
+              Aucun objectif commun. Lancez-en un : chaque quête liée de chaque membre le fait avancer.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {groupGoals.filter(isGoalActive).map((g) => (
+              <GoalCard key={g.id} goal={g} showContributors />
+            ))}
           </div>
         )}
       </section>

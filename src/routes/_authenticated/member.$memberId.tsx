@@ -1,7 +1,8 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { ArrowLeft, Flame, Target, Trophy, Zap } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
-import { useGroupMembers, useMemberProfile, useMyGroup, XP_PER_LEVEL } from "@/lib/store";
+import { GoalCard } from "@/components/GoalCard";
+import { isGoalActive, useGroupMembers, useMemberProfile, useMyGroup, useUserGoals, XP_PER_LEVEL } from "@/lib/store";
 
 export const Route = createFileRoute("/_authenticated/member/$memberId")({
   head: () => ({
@@ -20,6 +21,8 @@ function MemberProfilePage() {
   const { data: group } = useMyGroup();
   const { data: member, isLoading } = useMemberProfile(group?.id, memberId);
   const { data: friends = [] } = useGroupMembers(group?.id);
+  const { data: goals = [] } = useUserGoals(memberId);
+  const activeGoals = goals.filter(isGoalActive);
 
   const rank =
     [...friends].sort((a, b) => b.pointsWeek - a.pointsWeek).findIndex((f) => f.id === memberId) + 1;
@@ -91,6 +94,17 @@ function MemberProfilePage() {
         <Stat label="Points cumulés" value={member.totalPoints} />
         <Stat label="Quêtes ce mois" value={member.tasksDone} />
       </section>
+
+      {activeGoals.length > 0 && (
+        <section className="px-5 py-4">
+          <h2 className="text-lg font-medium mb-3">Ses objectifs en cours</h2>
+          <div className="space-y-2">
+            {activeGoals.map((g) => (
+              <GoalCard key={g.id} goal={g} />
+            ))}
+          </div>
+        </section>
+      )}
     </AppShell>
   );
 }
