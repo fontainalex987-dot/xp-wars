@@ -36,6 +36,7 @@ import {
 } from "@/lib/store";
 import { GoalCard } from "@/components/GoalCard";
 import { GroupSwitcher } from "@/components/GroupSwitcher";
+import { useResolveSeasons } from "@/lib/seasons";
 
 export const Route = createFileRoute("/_authenticated/group")({
   head: () => ({
@@ -227,6 +228,7 @@ function ActivityFeedItem({ activity, profile }: { activity: import("@/lib/store
 function GroupPage() {
   const { data: profile } = useProfile();
   const { data: group, isLoading, refetch: refetchGroup } = useMyGroup();
+  useResolveSeasons(group?.id);
   const { data: friends = [], refetch: refetchMembers } = useGroupMembers(group?.id);
   const { data: challenge, refetch: refetchChallenge } = useGroupChallenge(group?.id);
   const { data: groupGoals = [], refetch: refetchGoals } = useGroupGoals(group?.id);

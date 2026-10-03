@@ -36,6 +36,13 @@
       "when": 1790990572875,
       "tag": "0004_xp_curve_and_timezones",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1790992830477,
+      "tag": "0005_group_seasons",
+      "breakpoints": true
     }
   ]
 }

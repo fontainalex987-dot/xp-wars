@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
 import { Avatar } from "@/components/Avatar";
 import { GoalCard } from "@/components/GoalCard";
+import { TrophyShowcase } from "@/lib/seasons";
 import { isGoalActive, useGroupMembers, useMemberProfile, useMyGroup, useMyGroups, useUserGoals, xpToNext } from "@/lib/store";
 
 export const Route = createFileRoute("/_authenticated/member/$memberId")({
@@ -110,6 +111,8 @@ function MemberProfilePage() {
         <Stat label="Points cumulés" value={member.totalPoints} />
         <Stat label="Quêtes ce mois" value={member.tasksDone} />
       </section>
+
+      <TrophyShowcase userId={memberId} />
 
       {activeGoals.length > 0 && (
         <section className="px-5 py-4">
