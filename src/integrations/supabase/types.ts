@@ -277,6 +277,7 @@ export type Database = {
           streak: number
           streak_freezes_available: number
           streak_freezes_week_start: string | null
+          timezone: string
           total_points: number
           updated_at: string
           xp: number
@@ -293,6 +294,7 @@ export type Database = {
           streak?: number
           streak_freezes_available?: number
           streak_freezes_week_start?: string | null
+          timezone?: string
           total_points?: number
           updated_at?: string
           xp?: number
@@ -309,6 +311,7 @@ export type Database = {
           streak?: number
           streak_freezes_available?: number
           streak_freezes_week_start?: string | null
+          timezone?: string
           total_points?: number
           updated_at?: string
           xp?: number
@@ -686,6 +689,10 @@ export type Database = {
         }
       }
       dispatch_daily_reminders: { Args: never; Returns: undefined }
+      duel_points: {
+        Args: { _ends: string; _starts: string; _user: string }
+        Returns: number
+      }
       generate_group_code: { Args: never; Returns: string }
       goal_progress: { Args: { _goal: string }; Returns: number }
       goal_rows: {
@@ -708,6 +715,7 @@ export type Database = {
           user_id: string
         }[]
       }
+      grant_xp: { Args: { _amount: number; _user: string }; Returns: undefined }
       group_activity: {
         Args: { _group: string; _limit?: number }
         Returns: {
@@ -893,6 +901,10 @@ export type Database = {
           user_id: string
         }[]
       }
+      normalize_level: {
+        Args: { _level: number; _xp: number }
+        Returns: Record<string, unknown>
+      }
       reject_friend_request: { Args: { _request: string }; Returns: undefined }
       remove_friend: { Args: { _friend: string }; Returns: undefined }
       reset_season: { Args: never; Returns: string }
@@ -901,6 +913,7 @@ export type Database = {
         Args: { _challenge: string }
         Returns: undefined
       }
+      safe_tz: { Args: { _tz: string }; Returns: string }
       search_users: {
         Args: { _query: string }
         Returns: {
@@ -955,6 +968,7 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      user_date_at: { Args: { _ts: string; _user: string }; Returns: string }
       user_goals: {
         Args: { _user: string }
         Returns: {
@@ -1006,6 +1020,9 @@ export type Database = {
           week_start: string
         }[]
       }
+      user_today: { Args: { _user: string }; Returns: string }
+      user_tz: { Args: { _user: string }; Returns: string }
+      xp_to_next: { Args: { _level: number }; Returns: number }
     }
     Enums: {
       difficulty: "facile" | "moyenne" | "difficile"
