@@ -16,6 +16,8 @@ import {
   useRemoveTask,
   useTodayTasks,
   useUpdateTask,
+  useMyGoals,
+  isGoalActive,
   type Category,
   CATEGORIES,
   CATEGORY_KEYS,
@@ -75,7 +77,7 @@ function TasksPage() {
   };
 
 
-  const handleEdit = async (t: { title: string; description: string; difficulty: Difficulty }) => {
+  const handleEdit = async (t: { title: string; description: string; difficulty: Difficulty; goalId: string | null }) => {
     if (!editing) return;
     try {
       await updateTask.mutateAsync({
@@ -84,6 +86,7 @@ function TasksPage() {
         title: t.title,
         description: t.description,
         difficulty: t.difficulty,
+        goalId: t.goalId,
       });
       setEditing(null);
       toast.success("Quête modifiée");
@@ -106,7 +109,7 @@ function TasksPage() {
     }
   };
 
-  const handleAdd = async (t: { title: string; description: string; difficulty: Difficulty; recurrence: "unique" | "daily"; category?: Category }) => {
+  const handleAdd = async (t: { title: string; description: string; difficulty: Difficulty; recurrence: "unique" | "daily"; category?: Category; goalId?: string | null }) => {
     try {
       await addTask.mutateAsync(t);
       setOpen(false);
@@ -196,18 +199,19 @@ function NewTaskSheet({
   onAdd,
 }: {
   onClose: () => void;
-  onAdd: (t: { title: string; description: string; difficulty: Difficulty; recurrence: "unique" | "daily"; category: Category }) => void;
+  onAdd: (t: { title: string; description: string; difficulty: Difficulty; recurrence: "unique" | "daily"; category: Category; goalId: string | null }) => void;
 }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [difficulty, setDifficulty] = useState<Difficulty>("moyenne");
   const [recurrence, setRecurrence] = useState<"unique" | "daily">("unique");
   const [category, setCategory] = useState<Category>("autre");
+  const [goalId, setGoalId] = useState<string | null>(null);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
-    onAdd({ title: title.trim(), description: description.trim(), difficulty, recurrence, category });
+    onAdd({ title: title.trim(), description: description.trim(), difficulty, recurrence, category, goalId });
   };
 
   return (
@@ -312,6 +316,8 @@ function NewTaskSheet({
           </div>
         </div>
 
+        <GoalPicker value={goalId} onChange={setGoalId} />
+
         <button type="submit" className="w-full py-3 rounded-xl bg-brand text-primary-foreground font-bold active:scale-95 transition-transform">
           Ajouter la quête
         </button>
@@ -327,16 +333,17 @@ function EditTaskSheet({
 }: {
   task: Task;
   onClose: () => void;
-  onSave: (t: { title: string; description: string; difficulty: Difficulty }) => void;
+  onSave: (t: { title: string; description: string; difficulty: Difficulty; goalId: string | null }) => void;
 }) {
   const [title, setTitle] = useState(task.title);
   const [description, setDescription] = useState(task.description);
   const [difficulty, setDifficulty] = useState<Difficulty>(task.difficulty);
+  const [goalId, setGoalId] = useState<string | null>(task.goalId ?? null);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
-    onSave({ title: title.trim(), description: description.trim(), difficulty });
+    onSave({ title: title.trim(), description: description.trim(), difficulty, goalId });
   };
 
   return (
@@ -393,6 +400,8 @@ function EditTaskSheet({
           </div>
         </div>
 
+        <GoalPicker value={goalId} onChange={setGoalId} />
+
         {task.templateId && (
           <p className="text-xs text-muted-foreground">
             Cette quête est quotidienne : la modification s'appliquera aussi aux prochains jours.
@@ -403,6 +412,29 @@ function EditTaskSheet({
           Enregistrer
         </button>
       </form>
+    </div>
+  );
+}
+
+function GoalPicker({ value, onChange }: { value: string | null; onChange: (v: string | null) => void }) {
+  const { data: goals = [] } = useMyGoals();
+  const active = goals.filter((g) => isGoalActive(g) || g.id === value);
+  if (active.length === 0) return null;
+  return (
+    <div>
+      <label className="text-xs uppercase tracking-widest text-muted-foreground">Lier à un objectif (optionnel)</label>
+      <select
+        value={value ?? ""}
+        onChange={(e) => onChange(e.target.value || null)}
+        className="mt-1 w-full bg-black/40 rounded-xl px-4 py-3 ring-1 ring-white/10 focus:ring-brand focus:outline-none"
+      >
+        <option value="">Aucun objectif</option>
+        {active.map((g) => (
+          <option key={g.id} value={g.id}>
+            {g.emoji} {g.title} {g.groupId ? "· groupe" : "· perso"} ({g.progress}/{g.targetCount})
+          </option>
+        ))}
+      </select>
     </div>
   );
 }

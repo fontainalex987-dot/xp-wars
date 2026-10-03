@@ -1,6 +1,17 @@
 import { Check, Pencil, Trash2 } from "lucide-react";
 import { haptics } from "@/lib/haptics";
-import { CATEGORIES, type Task } from "@/lib/store";
+import { CATEGORIES, useMyGoals, type Task } from "@/lib/store";
+
+export function GoalChip({ goalId }: { goalId?: string | null }) {
+  const { data: goals = [] } = useMyGoals();
+  const g = goalId ? goals.find((x) => x.id === goalId) : null;
+  if (!g) return null;
+  return (
+    <span className="inline-flex max-w-full items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-semibold bg-brand/10 text-brand ring-1 ring-brand/20 truncate">
+      {g.emoji} <span className="truncate">{g.title}</span>
+    </span>
+  );
+}
 
 const diffStyles: Record<Task["difficulty"], string> = {
   facile: "bg-emerald-500/10 text-emerald-400 ring-emerald-500/20",
@@ -45,6 +56,7 @@ export function TaskCard({
             <span className="text-[10px] text-brand font-medium">+{task.points} pts</span>
           </div>
           <h3 className="text-base font-medium line-through decoration-zinc-600 truncate">{task.title}</h3>
+          <GoalChip goalId={task.goalId} />
         </div>
         <div className="size-12 shrink-0 rounded-xl bg-zinc-800 flex items-center justify-center text-zinc-500 ring-1 ring-white/5">
           <Check className="size-6" strokeWidth={2.5} />
@@ -68,6 +80,7 @@ export function TaskCard({
           )}
         </div>
         <h3 className="text-base font-medium truncate">{task.title}</h3>
+        {task.goalId && <div className="mt-1"><GoalChip goalId={task.goalId} /></div>}
         {task.description && <p className="text-sm text-muted-foreground text-pretty line-clamp-2">{task.description}</p>}
       </div>
       <div className="flex items-center gap-1 shrink-0">
