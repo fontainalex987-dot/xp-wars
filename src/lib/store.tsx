@@ -52,6 +52,7 @@ export type Task = {
   createdAt: number;
   templateId?: string | null;
   category: Category;
+  goalId?: string | null;
 };
 
 export type Profile = {
@@ -243,6 +244,7 @@ export function useTodayTasks() {
         createdAt: new Date(t.created_at).getTime(),
         templateId: t.template_id,
         category: categoryOf(t.category),
+        goalId: t.goal_id,
       }));
     },
     refetchOnWindowFocus: true,
@@ -260,6 +262,7 @@ export function useAddTask() {
       difficulty: Difficulty;
       recurrence: "unique" | "daily";
       category?: Category;
+      goalId?: string | null;
     }) => {
       if (!userId) throw new Error("Not authenticated");
       const points = DIFFICULTY_POINTS[input.difficulty];
@@ -272,6 +275,7 @@ export function useAddTask() {
           difficulty: input.difficulty,
           points,
           category,
+          goal_id: input.goalId ?? null,
         });
         if (tErr) throw tErr;
         const { error: sErr } = await supabase.rpc("sync_today_tasks");
@@ -285,6 +289,7 @@ export function useAddTask() {
           difficulty: input.difficulty,
           points,
           category,
+          goal_id: input.goalId ?? null,
         });
         if (error) throw error;
       }
@@ -303,13 +308,20 @@ export function useCompleteTask() {
       // Atomic server-side completion: handles XP, level, total_points and streak in a single transaction.
       const { error } = await supabase.rpc("complete_task", { _task_id: task.id });
       if (error) throw error;
-      return { prevLevel };
+      let goal: { emoji: string; title: string } | null = null;
+      if (task.goalId) {
+        const { data: g } = await supabase.from("goals").select("emoji,title,completed_at").eq("id", task.goalId).maybeSingle();
+        if (g?.completed_at && Date.now() - new Date(g.completed_at).getTime() < 15000) goal = { emoji: g.emoji, title: g.title };
+      }
+      return { prevLevel, goal };
     },
     onSuccess: async (result) => {
       qc.invalidateQueries({ queryKey: ["tasks"] });
       qc.invalidateQueries({ queryKey: ["members"] });
       qc.invalidateQueries({ queryKey: ["challenge"] });
       qc.invalidateQueries({ queryKey: ["activity"] });
+      qc.invalidateQueries({ queryKey: ["goals"] });
+      if (result?.goal) celebrate({ kind: "badge", icon: result.goal.emoji, label: "Objectif atteint", description: result.goal.title });
       await qc.invalidateQueries({ queryKey: ["profile"] });
       const nextLevel = (qc.getQueryData(["profile", userId]) as Profile | null | undefined)?.level ?? null;
       if (result?.prevLevel != null && nextLevel != null && nextLevel > result.prevLevel) {
@@ -333,12 +345,13 @@ export function useUpdateTask() {
       title: string;
       description: string;
       difficulty: Difficulty;
+      goalId?: string | null;
     }) => {
       if (!userId) throw new Error("Not authenticated");
       const points = DIFFICULTY_POINTS[input.difficulty];
       const { data, error } = await supabase
         .from("tasks")
-        .update({ title: input.title, description: input.description, difficulty: input.difficulty, points })
+        .update({ title: input.title, description: input.description, difficulty: input.difficulty, points, goal_id: input.goalId ?? null })
         .eq("id", input.id)
         .eq("user_id", userId)
         .eq("done", false)
@@ -348,7 +361,7 @@ export function useUpdateTask() {
       if (input.templateId) {
         const { error: tErr } = await supabase
           .from("task_templates")
-          .update({ title: input.title, description: input.description, difficulty: input.difficulty, points })
+          .update({ title: input.title, description: input.description, difficulty: input.difficulty, points, goal_id: input.goalId ?? null })
           .eq("id", input.templateId)
           .eq("user_id", userId);
         if (tErr) throw tErr;
@@ -1181,4 +1194,101 @@ export function useBadges(): Badge[] {
     { id: "p2500", label: "2 500 pts", description: "2 500 points cumulés", unlocked: total >= 2500, icon: "🚀" },
     { id: "p5000", label: "5 000 pts", description: "5 000 points cumulés", unlocked: total >= 5000, icon: "🌟" },
   ];
+}
+
+// ------- Goals ---------
+export type GoalContributor = { userId: string; pseudo: string; avatar: string; count: number };
+export type Goal = {
+  id: string; userId: string; groupId: string | null; title: string; emoji: string;
+  targetCount: number; startsOn: string; endsOn: string; completedAt: string | null;
+  progress: number; daysLeft: number; creatorPseudo: string; creatorAvatar: string;
+  contributors: GoalContributor[];
+};
+export const GOAL_EMOJIS = ["🎯", "🏃", "📚", "💪", "🧘", "💼", "🚀", "💧", "🥗", "✍️", "🎸", "💰"];
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function mapGoal(r: any): Goal {
+  return {
+    id: r.id, userId: r.user_id, groupId: r.group_id, title: r.title, emoji: r.emoji,
+    targetCount: r.target_count, startsOn: r.starts_on, endsOn: r.ends_on, completedAt: r.completed_at,
+    progress: r.progress ?? 0, daysLeft: r.days_left ?? 0,
+    creatorPseudo: r.creator_pseudo ?? "", creatorAvatar: r.creator_avatar ?? "",
+    contributors: ((r.contributors ?? []) as { user_id: string; pseudo: string; avatar: string; count: number }[]).map((c) => ({
+      userId: c.user_id, pseudo: c.pseudo, avatar: c.avatar, count: c.count,
+    })),
+  };
+}
+
+export function isGoalActive(g: Goal) {
+  return !g.completedAt && g.endsOn >= todayGuadeloupe();
+}
+
+export function useMyGoals() {
+  const { userId } = useAuth();
+  return useQuery({
+    queryKey: ["goals", "mine", userId],
+    enabled: !!userId,
+    queryFn: async (): Promise<Goal[]> => {
+      const { data, error } = await supabase.rpc("my_goals");
+      if (error) throw error;
+      return (data ?? []).map(mapGoal);
+    },
+  });
+}
+
+export function useGroupGoals(groupId: string | undefined) {
+  return useQuery({
+    queryKey: ["goals", "group", groupId],
+    enabled: !!groupId,
+    queryFn: async (): Promise<Goal[]> => {
+      const { data, error } = await supabase.rpc("group_goals", { _group: groupId! });
+      if (error) throw error;
+      return (data ?? []).map(mapGoal);
+    },
+  });
+}
+
+export function useUserGoals(userId: string | undefined) {
+  return useQuery({
+    queryKey: ["goals", "user", userId],
+    enabled: !!userId,
+    queryFn: async (): Promise<Goal[]> => {
+      const { data, error } = await supabase.rpc("user_goals", { _user: userId! });
+      if (error) throw error;
+      return (data ?? []).map(mapGoal);
+    },
+  });
+}
+
+export function useCreateGoal() {
+  const { userId } = useAuth();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: { title: string; emoji: string; targetCount: number; durationDays: number; groupId: string | null }) => {
+      if (!userId) throw new Error("Not authenticated");
+      const start = todayGuadeloupe();
+      const d = new Date(start + "T12:00:00Z");
+      d.setUTCDate(d.getUTCDate() + input.durationDays - 1);
+      const { error } = await supabase.from("goals").insert({
+        user_id: userId, group_id: input.groupId, title: input.title, emoji: input.emoji,
+        target_count: input.targetCount, starts_on: start, ends_on: d.toISOString().slice(0, 10),
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["goals"] }),
+  });
+}
+
+export function useDeleteGoal() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("goals").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["goals"] });
+      qc.invalidateQueries({ queryKey: ["tasks"] });
+    },
+  });
 }
