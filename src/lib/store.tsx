@@ -661,11 +661,12 @@ export function useCreateGroup() {
 
   const { userId } = useAuth();
   const qc = useQueryClient();
+  const setActive = useSetActiveGroup();
   return useMutation({
     mutationFn: async (name: string): Promise<Group> => {
       if (!userId) throw new Error("Not authenticated");
       const { data, error } = await supabase.rpc("create_group", { _name: name });
-      if (error) throw error;
+      if (error) throw new Error(error.message);
       return data as unknown as Group;
     },
     onSuccess: async (g) => {
