@@ -25,6 +25,8 @@ import {
   useJoinGroup,
   useLeaveGroup,
   useMyGroup,
+  useMyGroups,
+  MAX_GROUPS,
   useNewReactions,
   useProfile,
   useToggleReaction,
@@ -32,6 +34,7 @@ import {
   isGoalActive,
 } from "@/lib/store";
 import { GoalCard } from "@/components/GoalCard";
+import { GroupSwitcher } from "@/components/GroupSwitcher";
 
 export const Route = createFileRoute("/_authenticated/group")({
   head: () => ({
@@ -256,6 +259,9 @@ function GroupPage() {
   const deleteChallenge = useDeleteChallenge();
   const [groupName, setGroupName] = useState("");
   const [joinCode, setJoinCode] = useState("");
+  const [showAddGroup, setShowAddGroup] = useState(false);
+  const { data: myGroups = [] } = useMyGroups();
+  const atGroupLimit = myGroups.length >= MAX_GROUPS;
   const [showChallengeForm, setShowChallengeForm] = useState(false);
   const [challengeTitle, setChallengeTitle] = useState("");
   const [challengeTarget, setChallengeTarget] = useState(1000);
@@ -348,6 +354,7 @@ function GroupPage() {
       const g = await create.mutateAsync(groupName.trim());
       toast.success(`Groupe ${g.name} créé !`);
       setGroupName("");
+      setShowAddGroup(false);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erreur");
     }
@@ -359,6 +366,7 @@ function GroupPage() {
       const g = await join.mutateAsync(joinCode);
       toast.success(`Bienvenue dans ${g.name} !`);
       setJoinCode("");
+      setShowAddGroup(false);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Code invalide");
     }
@@ -386,15 +394,8 @@ function GroupPage() {
     );
   }
 
-  if (!group) {
-    return (
-      <AppShell>
-        <header className="px-5 pt-8 pb-4">
-          <p className="text-[10px] text-zinc-400 uppercase tracking-widest font-medium">Groupe</p>
-          <h1 className="text-3xl font-semibold tracking-tight">Rejoins la battle</h1>
-          <p className="text-sm text-muted-foreground mt-2">Crée ton propre groupe ou rejoins celui d'un ami.</p>
-        </header>
-
+  const groupForms = (
+    <>
         <section className="px-5 py-4">
           <div className="p-5 rounded-[24px] bg-card ring-1 ring-white/5 space-y-3">
             <div className="flex items-center gap-2">
@@ -439,6 +440,19 @@ function GroupPage() {
             </button>
           </div>
         </section>
+    </>
+  );
+
+  if (!group) {
+    return (
+      <AppShell>
+        <header className="px-5 pt-8 pb-4">
+          <p className="text-[10px] text-zinc-400 uppercase tracking-widest font-medium">Groupe</p>
+          <h1 className="text-3xl font-semibold tracking-tight">Rejoins la battle</h1>
+          <p className="text-sm text-muted-foreground mt-2">Crée ton propre groupe ou rejoins celui d'un ami.</p>
+        </header>
+
+        {groupForms}
       </AppShell>
     );
   }
@@ -455,7 +469,10 @@ function GroupPage() {
       <header className="px-5 pt-8 pb-4">
         <p className="text-[10px] text-zinc-400 uppercase tracking-widest font-medium">Groupe</p>
        <div className="flex items-center justify-between">
-  <h1 className="text-3xl font-semibold tracking-tight">{group.name}</h1>
+  <div className="min-w-0">
+    <GroupSwitcher />
+    <h1 className="mt-2 text-3xl font-semibold tracking-tight truncate">{group.name}</h1>
+  </div>
   <Link 
     to="/friends" 
     className="text-xs font-bold text-brand bg-brand/10 px-3 py-2 rounded-xl ring-1 ring-brand/20"
@@ -463,7 +480,17 @@ function GroupPage() {
     Mes amis
   </Link>
 </div>
+        <button
+          type="button"
+          onClick={() => setShowAddGroup((v) => !v)}
+          disabled={atGroupLimit}
+          className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-muted-foreground bg-card ring-1 ring-white/10 px-3 py-2 rounded-xl active:scale-95 disabled:opacity-40"
+        >
+          <Plus className="size-3.5" /> Créer ou rejoindre un autre groupe
+        </button>
+        {atGroupLimit && <p className="mt-1 text-[11px] text-muted-foreground">Tu as atteint la limite de {MAX_GROUPS} groupes.</p>}
       </header>
+      {showAddGroup && !atGroupLimit && groupForms}
 
       <section className="px-5 py-4">
         <div className="p-5 rounded-[24px] bg-gradient-to-br from-brand/20 via-card to-card ring-1 ring-brand/30">
