@@ -151,18 +151,47 @@ const VERDICT: Record<WeeklyReview["verdict"], string> = {
 };
 const MS_ICON = { fait: "✅", en_cours: "🔥", a_venir: "⬜" } as const;
 const ACTION_LABEL = { garder: "Garder", ajuster: "Ajuster", remplacer: "Remplacer", ajouter: "Ajouter" } as const;
-const RKEY = "xpwars.weeklyReview";
+const RKEY = "xpwars.weeklyReviews";
+const RKEY_OLD = "xpwars.weeklyReview";
+
+type SavedReview = { weekStart: string; review: WeeklyReview };
+
+function weekStartOf(d = new Date()): string {
+  const x = new Date(d);
+  x.setDate(x.getDate() - 6);
+  return x.toISOString().slice(0, 10);
+}
+
+function loadReviews(): SavedReview[] {
+  try {
+    const raw = localStorage.getItem(RKEY);
+    if (raw) {
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr)) return arr.filter((r) => r?.weekStart && r?.review);
+    }
+    // Migration : ancien bilan unique
+    const old = localStorage.getItem(RKEY_OLD);
+    if (old) {
+      const migrated: SavedReview[] = [{ weekStart: weekStartOf(), review: JSON.parse(old) }];
+      localStorage.setItem(RKEY, JSON.stringify(migrated));
+      localStorage.removeItem(RKEY_OLD);
+      return migrated;
+    }
+  } catch {}
+  return [];
+}
 
 function WeeklyReviewSection({ minutes, goal, groupId, onAdd, canAdd }: {
   minutes: number; goal: string; groupId: string | null;
   onAdd: (q: CoachPlan["quests"][number]) => void; canAdd: boolean;
 }) {
-  const [review, setReview] = useState<WeeklyReview | null>(null);
+  const [history, setHistory] = useState<SavedReview[]>([]);
   const [loading, setLoading] = useState(false);
   const gen = useServerFn(generateWeeklyReview);
+  const review = history[0]?.review ?? null;
 
   useEffect(() => {
-    try { const r = localStorage.getItem(RKEY); if (r) setReview(JSON.parse(r)); } catch {}
+    setHistory(loadReviews());
   }, []);
 
   const run = async () => {
@@ -170,8 +199,12 @@ function WeeklyReviewSection({ minutes, goal, groupId, onAdd, canAdd }: {
     setLoading(true);
     try {
       const r = await gen({ data: { minutesPerDay: minutes, seasonGoal: goal.trim(), groupId } });
-      setReview(r);
-      try { localStorage.setItem(RKEY, JSON.stringify(r)); } catch {}
+      const ws = weekStartOf();
+      setHistory((prev) => {
+        const next = [{ weekStart: ws, review: r }, ...prev.filter((s) => s.weekStart !== ws)].slice(0, 12);
+        try { localStorage.setItem(RKEY, JSON.stringify(next)); } catch {}
+        return next;
+      });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erreur");
     } finally {
@@ -186,6 +219,7 @@ function WeeklyReviewSection({ minutes, goal, groupId, onAdd, canAdd }: {
         className="w-full py-3 rounded-xl bg-card ring-1 ring-brand/40 text-brand font-bold flex items-center justify-center gap-2 active:scale-95 transition-transform disabled:opacity-50">
         <CalendarCheck className="size-4" /> {loading ? "Analyse en cours..." : review ? "Refaire mon bilan" : "Faire mon bilan"}
       </button>
+      {history.length > 1 && <Evolution history={history} />}
       {review && (
         <>
           <div className="p-4 rounded-2xl bg-card ring-1 ring-white/5 space-y-2">
