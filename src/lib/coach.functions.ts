@@ -25,6 +25,11 @@ export const generateCoachPlan = createServerFn({ method: "POST" })
   .inputValidator((d) => Input.parse(d))
   .handler(async ({ data, context }): Promise<CoachPlan> => {
     const { supabase, userId } = context;
+
+    // Quota journalier anti-abus : doit partir avant tout appel IA / chargement.
+    const { error: quotaError } = await supabase.rpc("consume_coach_quota", { _limit: 3 });
+    if (quotaError) throw new Error(quotaError.message);
+
     const { data: profile } = await supabase
       .from("profiles")
       .select("pseudo, level, xp, streak, total_points")
@@ -61,6 +66,7 @@ export const generateCoachPlan = createServerFn({ method: "POST" })
     const prompt = `Tu es le coach de XP Wars, une app de quêtes gamifiée (max 3 quêtes/jour; facile=10, moyenne=20, difficile=30 pts).
 Propose un plan personnalisé de exactement 3 quêtes quotidiennes répétables, en français, avec tutoiement, ton motivant et concret.
 La somme des minutes doit tenir dans le temps disponible. Adapte la difficulté au taux de réussite récent (faible = plus facile).
+Au maximum une seule quête de difficulté difficile dans le plan.
 Utilise le classement du groupe pour situer le joueur (écart avec la place au-dessus) dans la stratégie.
 Catégories autorisées: ${CATS.join(", ")}. Difficultés: facile, moyenne, difficile.
 Titre: 40 caractères max. Description: 90 caractères max. summary et strategy: 2 phrases max chacun.
