@@ -46,6 +46,27 @@ export type Database = {
           },
         ]
       }
+      app_sounds: {
+        Row: {
+          data_b64: string
+          mime: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          data_b64: string
+          mime?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          data_b64?: string
+          mime?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       coach_plans: {
         Row: {
           minutes_per_day: number
