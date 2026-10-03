@@ -4,6 +4,8 @@ import { AppShell } from "@/components/AppShell";
 import { Avatar } from "@/components/Avatar";
 import { GroupSwitcher } from "@/components/GroupSwitcher";
 import { useGroupMembers, useMyGroup, useProfile, type Friend } from "@/lib/store";
+import { ChevronDown } from "lucide-react";
+import { SEASON_REWARDS, seasonDaysLeft, seasonLabel, trophyIcon, useResolveSeasons, useSeasonPodiums } from "@/lib/seasons";
 
 type Range = "today" | "week" | "month";
 
@@ -28,6 +30,9 @@ function LeaderboardPage() {
   const { data: group } = useMyGroup();
   const { data: friends = [] } = useGroupMembers(group?.id);
   const [range, setRange] = useState<Range>("today");
+  const [showPast, setShowPast] = useState(false);
+  useResolveSeasons(group?.id);
+  const { data: past = [], isLoading: pastLoading } = useSeasonPodiums(group?.id, showPast);
   const sorted = [...friends].sort((a, b) => pick(b, range) - pick(a, range));
   const podium = sorted.slice(0, 3);
   const medals = ["🥇", "🥈", "🥉"];
@@ -51,12 +56,67 @@ function LeaderboardPage() {
     );
   }
 
+  const daysLeft = seasonDaysLeft();
+
   return (
     <AppShell>
       <header className="px-5 pt-8 pb-4">
         <GroupSwitcher />
         <h1 className="mt-2 text-3xl font-semibold tracking-tight">Classement</h1>
       </header>
+
+      <section className="px-5 pb-4">
+        <div className="p-4 rounded-2xl bg-card ring-1 ring-white/5">
+          <div className="flex items-center justify-between gap-2">
+            <p className="font-semibold">
+              Saison <span className="capitalize">{seasonLabel(new Date())}</span>
+            </p>
+            <span className="text-xs text-muted-foreground">
+              {daysLeft <= 1 ? "se termine aujourd'hui" : `se termine dans ${daysLeft} jours`}
+            </span>
+          </div>
+          <div className="mt-3 flex gap-2">
+            {SEASON_REWARDS.map((r) => (
+              <span key={r.rank} className="flex-1 text-center text-xs font-semibold py-1.5 rounded-full bg-black/40 ring-1 ring-white/10">
+                {r.icon} +{r.xp} XP
+              </span>
+            ))}
+          </div>
+          <button
+            onClick={() => setShowPast((v) => !v)}
+            className="mt-3 w-full flex items-center justify-center gap-1 text-xs text-brand font-semibold"
+          >
+            Saisons passées <ChevronDown className={`size-3.5 transition-transform ${showPast ? "rotate-180" : ""}`} />
+          </button>
+          {showPast && (
+            <div className="mt-3 space-y-3">
+              {pastLoading ? (
+                <p className="text-xs text-muted-foreground text-center">Chargement…</p>
+              ) : past.length === 0 ? (
+                <p className="text-xs text-muted-foreground text-center">Aucune saison terminée pour l'instant.</p>
+              ) : (
+                past.map((s) => (
+                  <div key={s.season} className="p-3 rounded-xl bg-black/30 ring-1 ring-white/5">
+                    <p className="text-xs font-semibold capitalize mb-2">{seasonLabel(s.season, true)}</p>
+                    <div className="space-y-1.5">
+                      {s.podium.map((p) => (
+                        <div key={p.rank} className="flex items-center gap-2 text-sm">
+                          <span className="w-6">{trophyIcon(p.rank)}</span>
+                          <div className="size-6 rounded-full bg-zinc-800 flex items-center justify-center text-sm overflow-hidden">
+                            <Avatar value={p.avatar} />
+                          </div>
+                          <span className="flex-1 truncate">{p.pseudo}</span>
+                          <span className="text-xs text-muted-foreground tabular-nums">{p.points} pts</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+        </div>
+      </section>
 
       <section className="px-5 pb-4">
         <div className="grid grid-cols-3 gap-1 p-1 bg-card rounded-full ring-1 ring-white/5">
@@ -102,6 +162,11 @@ function LeaderboardPage() {
               );
             })}
           </div>
+          {range === "month" && (
+            <p className="text-xs text-muted-foreground text-center">
+              Les 3 premiers à la fin du mois gagnent des récompenses.
+            </p>
+          )}
         </section>
       )}
 
