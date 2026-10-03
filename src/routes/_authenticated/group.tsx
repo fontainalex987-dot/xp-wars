@@ -133,7 +133,7 @@ function ActivityFeedItem({ activity, profile }: { activity: import("@/lib/store
   return (
     <>
       <li
-        className="p-3 rounded-2xl bg-card ring-1 ring-white/5 select-none"
+        className="p-3 rounded-[20px] bg-card ring-1 ring-white/5 select-none"
         onPointerDown={onPointerDown}
         onPointerUp={onPointerUp}
         onPointerLeave={onPointerLeave}
@@ -150,7 +150,7 @@ function ActivityFeedItem({ activity, profile }: { activity: import("@/lib/store
               <span className="text-muted-foreground"> a fini </span>
               <span className="font-medium">{activity.title}</span>
             </p>
-            <p className="text-[10px] text-muted-foreground">{formatRelative(activity.doneAt)}</p>
+            <p className="text-[11px] text-muted-foreground">{formatRelative(activity.doneAt)}</p>
           </div>
           <span className="text-sm font-bold text-brand shrink-0">+{activity.points}</span>
         </div>
@@ -164,18 +164,18 @@ function ActivityFeedItem({ activity, profile }: { activity: import("@/lib/store
                 className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs ${
                   r.userReacted
                     ? "bg-brand/20 text-brand ring-1 ring-brand/40"
-                    : "bg-zinc-800/60 text-zinc-400"
+                    : "bg-zinc-800/60 text-text-subtle"
                 }`}
               >
                 <span>{r.emoji}</span>
                 {r.count > 1 && <span className="font-medium">{r.count}</span>}
               </span>
             ))}
-            <span className="text-[10px] text-zinc-600 ml-1">maintenir pour réagir</span>
+            <span className="text-[11px] text-zinc-600 ml-1">maintenir pour réagir</span>
           </div>
         )}
         {localReactions.length === 0 && (
-          <p className="mt-1 pl-12 text-[10px] text-zinc-600">Maintenir pour réagir</p>
+          <p className="mt-1 pl-12 text-[11px] text-zinc-600">Maintenir pour réagir</p>
         )}
       </li>
 
@@ -201,7 +201,7 @@ function ActivityFeedItem({ activity, profile }: { activity: import("@/lib/store
                       setShowPicker(false);
                     }}
                     disabled={toggle.isPending}
-                    className={`text-4xl p-4 rounded-2xl transition-all active:scale-75 ${
+                    className={`text-4xl p-4 rounded-[20px] transition-all active:scale-75 ${
                       alreadyReacted
                         ? "bg-brand/20 ring-2 ring-brand"
                         : "bg-zinc-800/50 hover:bg-zinc-700"
@@ -214,7 +214,7 @@ function ActivityFeedItem({ activity, profile }: { activity: import("@/lib/store
             </div>
             <button
               onClick={() => setShowPicker(false)}
-              className="text-xs text-zinc-500 hover:text-zinc-300 mt-1"
+              className="text-xs text-text-subtle hover:text-zinc-300 mt-1"
             >
               Annuler
             </button>
@@ -390,7 +390,7 @@ function GroupPage() {
       <AppShell>
         <div className="px-5 pt-10 space-y-6">
           <SkeletonBar className="h-8 w-48" />
-          <SkeletonBar className="h-28 w-full rounded-2xl" />
+          <SkeletonBar className="h-28 w-full rounded-[20px]" />
           <FeedSkeleton />
         </div>
       </AppShell>
@@ -400,7 +400,7 @@ function GroupPage() {
   const groupForms = (
     <>
         <section className="px-5 py-4">
-          <div className="p-5 rounded-[24px] bg-card ring-1 ring-white/5 space-y-3">
+          <div className="p-5 rounded-[20px] bg-card ring-1 ring-white/5 space-y-3">
             <div className="flex items-center gap-2">
               <Plus className="size-4 text-brand" />
               <h2 className="font-semibold">Créer un groupe</h2>
@@ -423,7 +423,7 @@ function GroupPage() {
         </section>
 
         <section className="px-5 py-4">
-          <div className="p-5 rounded-[24px] bg-card ring-1 ring-white/5 space-y-3">
+          <div className="p-5 rounded-[20px] bg-card ring-1 ring-white/5 space-y-3">
             <div className="flex items-center gap-2">
               <UserPlus className="size-4 text-brand" />
               <h2 className="font-semibold">Rejoindre avec un code</h2>
@@ -450,7 +450,7 @@ function GroupPage() {
     return (
       <AppShell>
         <header className="px-5 pt-8 pb-4">
-          <p className="text-[10px] text-zinc-400 uppercase tracking-widest font-medium">Groupe</p>
+          <p className="text-[11px] text-text-subtle uppercase tracking-widest font-medium">Groupe</p>
           <h1 className="text-3xl font-semibold tracking-tight">Rejoins la battle</h1>
           <p className="text-sm text-muted-foreground mt-2">Crée ton propre groupe ou rejoins celui d'un ami.</p>
         </header>
@@ -470,7 +470,7 @@ function GroupPage() {
     <AppShell>
       <PullToRefresh onRefresh={handleRefresh}>
       <header className="px-5 pt-8 pb-4">
-        <p className="text-[10px] text-zinc-400 uppercase tracking-widest font-medium">Groupe</p>
+        <p className="text-[11px] text-text-subtle uppercase tracking-widest font-medium">Groupe</p>
        <div className="flex items-center justify-between">
   <div className="min-w-0">
     <GroupSwitcher />
@@ -496,8 +496,8 @@ function GroupPage() {
       {showAddGroup && !atGroupLimit && groupForms}
 
       <section className="px-5 py-4">
-        <div className="p-5 rounded-[24px] bg-gradient-to-br from-brand/20 via-card to-card ring-1 ring-brand/30">
-          <p className="text-[10px] text-brand uppercase tracking-widest font-bold">Code d'invitation</p>
+        <div className="p-5 rounded-[20px] bg-gradient-to-br from-brand/20 via-card to-card ring-1 ring-brand/30">
+          <p className="text-[11px] text-brand uppercase tracking-widest font-bold">Code d'invitation</p>
           <div className="mt-2 flex items-center justify-between gap-3">
             <p className="text-2xl font-bold tracking-widest font-mono">{group.code}</p>
             <div className="flex items-center gap-2">
@@ -521,28 +521,28 @@ function GroupPage() {
       </section>
 
       <section className="px-5 py-2 grid grid-cols-3 gap-3">
-        <div className="p-4 rounded-2xl bg-card ring-1 ring-white/5 text-center">
+        <div className="p-4 rounded-[20px] bg-card ring-1 ring-white/5 text-center">
           <p className="text-2xl font-bold">{friends.length}</p>
-          <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-1">Membres</p>
+          <p className="text-[11px] uppercase tracking-widest text-muted-foreground mt-1">Membres</p>
         </div>
-        <div className="p-4 rounded-2xl bg-card ring-1 ring-white/5 text-center">
+        <div className="p-4 rounded-[20px] bg-card ring-1 ring-white/5 text-center">
           <p className="text-2xl font-bold">{totalPointsWeek}</p>
-          <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-1">Pts semaine</p>
+          <p className="text-[11px] uppercase tracking-widest text-muted-foreground mt-1">Pts semaine</p>
         </div>
-        <div className="p-4 rounded-2xl bg-card ring-1 ring-white/5 text-center">
+        <div className="p-4 rounded-[20px] bg-card ring-1 ring-white/5 text-center">
           <p className="text-2xl font-bold">{avgLevel}</p>
-          <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-1">Niveau moyen</p>
+          <p className="text-[11px] uppercase tracking-widest text-muted-foreground mt-1">Niveau moyen</p>
         </div>
       </section>
 
       <section className="px-5 py-4">
         {challenge ? (
-          <div className={`p-5 rounded-[24px] bg-card space-y-3 ${challenge.ended ? "ring-1 ring-amber-400/30" : "ring-1 ring-brand/20"}`}>
+          <div className={`p-5 rounded-[20px] bg-card space-y-3 ${challenge.ended ? "ring-1 ring-amber-400/30" : "ring-1 ring-brand/20"}`}>
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <div className={`flex items-center gap-2 ${challenge.ended ? "text-amber-400" : "text-brand"}`}>
                   <Target className="size-4" />
-                  <p className="text-[10px] uppercase tracking-widest font-bold">
+                  <p className="text-[11px] uppercase tracking-widest font-bold">
                     {challenge.ended ? "Défi terminé" : "Défi de groupe"}
                   </p>
                 </div>
@@ -552,7 +552,7 @@ function GroupPage() {
                 <button
                   onClick={handleDeleteChallenge}
                   aria-label="Supprimer le défi"
-                  className="text-zinc-500 hover:text-red-400 p-1"
+                  className="text-text-subtle hover:text-danger-text p-1"
                 >
                   <Trash2 className="size-4" />
                 </button>
@@ -582,7 +582,7 @@ function GroupPage() {
             })()}
             {contributors.length > 0 && (
               <div className="space-y-1.5 pt-1">
-                <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">
+                <p className="text-[11px] uppercase tracking-widest text-muted-foreground font-bold">
                   {challenge.ended ? "Classement final" : "Top contributeurs"}
                 </p>
                 {contributors.slice(0, 3).map((c) => {
@@ -605,7 +605,7 @@ function GroupPage() {
                       </span>
                       <span className="text-xs font-bold text-muted-foreground">{c.points} pts</span>
                       {reward > 0 && (
-                        <span className="text-[10px] font-bold text-amber-300 bg-amber-400/10 ring-1 ring-amber-400/30 px-1.5 py-0.5 rounded-md whitespace-nowrap">
+                        <span className="text-[11px] font-bold text-amber-300 bg-amber-400/10 ring-1 ring-amber-400/30 px-1.5 py-0.5 rounded-lg whitespace-nowrap">
                           🏆 +{reward} XP
                         </span>
                       )}
@@ -616,7 +616,7 @@ function GroupPage() {
             )}
           </div>
         ) : isOwner ? (
-          <div className="p-5 rounded-[24px] bg-card ring-1 ring-white/5 space-y-3">
+          <div className="p-5 rounded-[20px] bg-card ring-1 ring-white/5 space-y-3">
             <div className="flex items-center gap-2">
               <Target className="size-4 text-brand" />
               <h2 className="font-semibold">Lancer un défi de groupe</h2>
@@ -639,7 +639,7 @@ function GroupPage() {
                 />
                 <div className="grid grid-cols-2 gap-3">
                   <label className="block">
-                    <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Objectif (pts)</span>
+                    <span className="text-[11px] uppercase tracking-widest text-muted-foreground">Objectif (pts)</span>
                     <input
                       type="number"
                       min={100}
@@ -650,7 +650,7 @@ function GroupPage() {
                     />
                   </label>
                   <label className="block">
-                    <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Durée (jours)</span>
+                    <span className="text-[11px] uppercase tracking-widest text-muted-foreground">Durée (jours)</span>
                     <input
                       type="number"
                       min={1}
@@ -680,7 +680,7 @@ function GroupPage() {
             )}
           </div>
         ) : (
-          <div className="p-4 rounded-2xl bg-card/60 ring-1 ring-white/5 text-center">
+          <div className="p-4 rounded-[20px] bg-card/60 ring-1 ring-white/5 text-center">
             <p className="text-sm text-muted-foreground">Aucun défi en cours. Le propriétaire du groupe peut en lancer un.</p>
           </div>
         )}
@@ -701,7 +701,7 @@ function GroupPage() {
           </Link>
         </div>
         {groupGoals.filter(isGoalActive).length === 0 ? (
-          <div className="p-4 rounded-2xl bg-card/60 ring-1 ring-white/5 text-center">
+          <div className="p-4 rounded-[20px] bg-card/60 ring-1 ring-white/5 text-center">
             <p className="text-sm text-muted-foreground">
               Aucun objectif commun. Lancez-en un : chaque quête liée de chaque membre le fait avancer.
             </p>
@@ -731,7 +731,7 @@ function GroupPage() {
         </div>
 
         {showDuelForm && (
-          <div className="p-4 rounded-2xl bg-card ring-1 ring-white/5 space-y-3 mb-3">
+          <div className="p-4 rounded-[20px] bg-card ring-1 ring-white/5 space-y-3 mb-3">
             <p className="text-sm text-muted-foreground">Choisis un adversaire :</p>
             <div className="grid grid-cols-2 gap-2">
               {friends
@@ -773,7 +773,7 @@ function GroupPage() {
         )}
 
         {duels.length === 0 ? (
-          <div className="p-4 rounded-2xl bg-card/60 ring-1 ring-white/5 text-center">
+          <div className="p-4 rounded-[20px] bg-card/60 ring-1 ring-white/5 text-center">
             <p className="text-sm text-muted-foreground">Aucun duel en cours. Défie un pote !</p>
           </div>
         ) : (
@@ -785,7 +785,7 @@ function GroupPage() {
               const challengerPct = total > 0 ? Math.round((d.challengerPoints / total) * 100) : 50;
 
               return (
-                <div key={d.id} className="p-4 rounded-2xl bg-card ring-1 ring-white/5">
+                <div key={d.id} className="p-4 rounded-[20px] bg-card ring-1 ring-white/5">
                   {/* Header */}
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
@@ -793,10 +793,10 @@ function GroupPage() {
                         {d.status === "pending" ? "En attente" : d.status === "active" ? "En cours" : d.status === "cancelled" ? "Annulé" : "Terminé"}
                       </span>
                       {d.daysLeft > 0 && d.status === "active" && (
-                        <span className="text-[10px] text-muted-foreground">{d.daysLeft}j restants</span>
+                        <span className="text-[11px] text-muted-foreground">{d.daysLeft}j restants</span>
                       )}
-                      <span className="text-[10px] text-muted-foreground">{d.durationDays}j</span>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-400/10 text-amber-300 ring-1 ring-amber-400/20">
+                      <span className="text-[11px] text-muted-foreground">{d.durationDays}j</span>
+                      <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-400/10 text-amber-300 ring-1 ring-amber-400/20">
                         +{d.rewardXp} XP
                       </span>
                     </div>
@@ -811,7 +811,7 @@ function GroupPage() {
                             toast.error("Erreur");
                           }
                         }}
-                        className="text-[10px] text-zinc-500 hover:text-red-400"
+                        className="text-[11px] text-text-subtle hover:text-danger-text"
                       >
                         {d.status === "active" ? "Abandonner" : "Supprimer"}
                       </button>
@@ -841,7 +841,7 @@ function GroupPage() {
                       <p className="text-xs font-semibold mt-1 truncate">{d.challengerPseudo}</p>
                       <p className="text-lg font-bold text-brand">{d.challengerPoints}</p>
                     </div>
-                    <div className="text-xs font-bold text-zinc-500 uppercase tracking-widest">VS</div>
+                    <div className="text-xs font-bold text-text-subtle uppercase tracking-widest">VS</div>
                     <div className="flex-1 text-center">
                       <div className="mx-auto size-10 flex items-center justify-center text-2xl"><Avatar value={d.challengedAvatar} /></div>
                       <p className="text-xs font-semibold mt-1 truncate">{d.challengedPseudo}</p>
@@ -895,7 +895,7 @@ function GroupPage() {
         {activityLoading ? (
           <FeedSkeleton />
         ) : activity.length === 0 ? (
-          <div className="p-4 rounded-2xl bg-card/60 ring-1 ring-white/5 text-center">
+          <div className="p-4 rounded-[20px] bg-card/60 ring-1 ring-white/5 text-center">
             <p className="text-sm text-muted-foreground">Aucune quête validée cette semaine.</p>
           </div>
         ) : (
@@ -921,7 +921,7 @@ function GroupPage() {
           {friends.map((f) => {
             const weekPct = Math.min(100, Math.round((f.pointsWeek / bestWeek) * 100));
             return (
-              <div key={f.id} className="p-4 rounded-2xl bg-card ring-1 ring-white/5">
+              <div key={f.id} className="p-4 rounded-[20px] bg-card ring-1 ring-white/5">
                 <Link
                   to="/member/$memberId"
                   params={{ memberId: f.id }}
@@ -937,7 +937,7 @@ function GroupPage() {
                 <div className="mt-3 h-1.5 bg-black/40 rounded-full overflow-hidden">
                   <div className="h-full bg-brand xp-glow" style={{ width: `${weekPct}%` }} />
                 </div>
-                <div className="mt-1 flex justify-between text-[10px] text-muted-foreground">
+                <div className="mt-1 flex justify-between text-[11px] text-muted-foreground">
                   <span>Semaine</span>
                   <span>{f.pointsWeek} pts</span>
                 </div>

@@ -39,7 +39,7 @@ export function BottomNav() {
         className="relative mx-auto flex max-w-md justify-between items-center"
       >
         <motion.div
-          className="absolute top-0 rounded-2xl bg-brand/15 border border-brand/20 blur-[2px] pointer-events-none"
+          className="absolute top-0 rounded-[20px] bg-brand/15 border border-brand/20 blur-[2px] pointer-events-none"
           animate={{
             x: pill.x,
             width: pill.width,
@@ -64,7 +64,7 @@ export function BottomNav() {
               className={`relative flex flex-col items-center gap-1 px-1.5 min-[380px]:px-2 py-2 transition-colors duration-200 ${
                 active
                   ? "text-brand"
-                  : "text-zinc-400 opacity-60 hover:opacity-100 hover:text-zinc-200"
+                  : "text-text-subtle opacity-60 hover:opacity-100 hover:text-zinc-200"
               }`}
             >
               <div className="relative">
@@ -89,7 +89,7 @@ export function BottomNav() {
                 />
               </div>
               <span
-                className={`text-[9px] min-[380px]:text-[10px] tracking-wide uppercase whitespace-nowrap ${
+                className={`text-[9px] min-[380px]:text-[11px] tracking-wide uppercase whitespace-nowrap ${
                   active ? "font-extrabold" : "font-medium"
                 }`}
               >

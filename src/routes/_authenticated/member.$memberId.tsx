@@ -70,7 +70,7 @@ function MemberProfilePage() {
   return (
     <AppShell>
       <header className="px-5 pt-8 pb-4">
-        <Link to="/group" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-brand">
+        <Link to="/group" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground">
           <ArrowLeft className="size-4" /> Groupe
         </Link>
         <div className="mt-4 flex items-center gap-4">
@@ -89,7 +89,7 @@ function MemberProfilePage() {
       </header>
 
       <section className="px-5 py-2">
-        <div className="p-4 rounded-2xl bg-card ring-1 ring-white/5">
+        <div className="p-4 rounded-[20px] bg-card ring-1 ring-white/5">
           <div className="flex justify-between text-xs mb-2">
             <span className="text-muted-foreground">XP niveau {member.level}</span>
             <span className="font-semibold">{member.xp} / {xpToNext(member.level)}</span>
@@ -130,10 +130,10 @@ function MemberProfilePage() {
 
 function Stat({ icon, label, value }: { icon?: React.ReactNode; label: string; value: number | string }) {
   return (
-    <div className="p-4 rounded-2xl bg-card ring-1 ring-white/5">
+    <div className="p-4 rounded-[20px] bg-card ring-1 ring-white/5">
       <div className="flex items-center gap-1.5">
         {icon}
-        <p className="text-[10px] uppercase tracking-widest text-muted-foreground">{label}</p>
+        <p className="text-[11px] uppercase tracking-widest text-muted-foreground">{label}</p>
       </div>
       <p className="text-2xl font-bold mt-1 tabular-nums">{value}</p>
     </div>

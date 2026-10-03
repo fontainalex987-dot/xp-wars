@@ -69,10 +69,10 @@ function ProfilePage() {
 
       {profile.goal && (
         <section className="px-5 py-2">
-          <div className="p-4 rounded-2xl bg-brand/5 ring-1 ring-brand/20 flex items-center gap-3">
+          <div className="p-4 rounded-[20px] bg-brand/5 ring-1 ring-brand/20 flex items-center gap-3">
             <Target className="size-5 text-brand shrink-0" />
             <div className="min-w-0">
-              <p className="text-[10px] text-brand uppercase tracking-widest font-bold">Objectif</p>
+              <p className="text-[11px] text-brand uppercase tracking-widest font-bold">Objectif</p>
               <p className="text-sm font-semibold truncate">{profile.goal}</p>
             </div>
           </div>
@@ -80,10 +80,10 @@ function ProfilePage() {
       )}
 
       <section className="px-5 py-4">
-        <div className="p-5 rounded-[24px] bg-card ring-1 ring-white/5">
+        <div className="p-5 rounded-[20px] bg-card ring-1 ring-white/5">
           <div className="flex justify-between items-end mb-3">
             <div>
-              <p className="text-[10px] text-zinc-400 uppercase tracking-widest">Niveau actuel</p>
+              <p className="text-[11px] text-text-subtle uppercase tracking-widest">Niveau actuel</p>
               <p className="text-4xl font-bold">{profile.level}</p>
             </div>
             <p className="text-sm text-brand font-semibold">{profile.xp}/{xpToNext(profile.level)} XP</p>
@@ -99,7 +99,7 @@ function ProfilePage() {
       </section>
 
       <section className="px-5 py-4 space-y-3">
-        <div className="p-4 rounded-2xl bg-card ring-1 ring-white/5">
+        <div className="p-4 rounded-[20px] bg-card ring-1 ring-white/5">
           <div className="flex items-center gap-3">
             <div className={`size-10 rounded-full flex items-center justify-center ${push.enabled ? "bg-brand/20 text-brand xp-glow" : "bg-zinc-800 text-muted-foreground"}`}>
               <Bell className="size-5" />
@@ -142,7 +142,7 @@ function ProfilePage() {
           {badges.map((b) => (
             <div
               key={b.id}
-              className={`p-3 rounded-2xl ring-1 flex flex-col items-center text-center gap-2 ${
+              className={`p-3 rounded-[20px] ring-1 flex flex-col items-center text-center gap-2 ${
                 b.unlocked ? "bg-card ring-brand/30" : "bg-card/40 ring-white/5 opacity-40"
               }`}
             >
@@ -150,7 +150,7 @@ function ProfilePage() {
                 {b.icon}
               </div>
               <p className="text-xs font-semibold leading-tight">{b.label}</p>
-              <p className="text-[10px] text-muted-foreground leading-tight">{b.description}</p>
+              <p className="text-[11px] text-muted-foreground leading-tight">{b.description}</p>
             </div>
           ))}
         </div>
@@ -166,7 +166,7 @@ function ProfilePage() {
             <div key={t.id} className="p-3 rounded-xl bg-card ring-1 ring-white/5 flex items-center justify-between">
               <div className="min-w-0">
                 <p className={`text-sm font-medium truncate ${t.done ? "line-through text-muted-foreground" : ""}`}>{t.title}</p>
-                <p className="text-[10px] uppercase tracking-widest text-muted-foreground">{t.difficulty}</p>
+                <p className="text-[11px] uppercase tracking-widest text-muted-foreground">{t.difficulty}</p>
               </div>
               <span className={`text-sm font-bold ${t.done ? "text-brand" : "text-muted-foreground"}`}>
                 {t.done ? "+" : ""}{t.points} pts
@@ -194,10 +194,10 @@ function ProfilePage() {
 
 function StatBox({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="p-4 rounded-2xl bg-card ring-1 ring-white/5 text-center">
+    <div className="p-4 rounded-[20px] bg-card ring-1 ring-white/5 text-center">
       <div className="flex items-center justify-center text-brand mb-1">{icon}</div>
       <p className="text-xl font-bold">{value}</p>
-      <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-1">{label}</p>
+      <p className="text-[11px] uppercase tracking-widest text-muted-foreground mt-1">{label}</p>
     </div>
   );
 }

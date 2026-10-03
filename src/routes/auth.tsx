@@ -60,7 +60,7 @@ function AuthPage() {
     <div className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center px-5">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center size-16 rounded-2xl bg-brand/15 ring-1 ring-brand/30 mb-4 text-3xl">⚔️</div>
+          <div className="inline-flex items-center justify-center size-16 rounded-[20px] bg-brand/15 ring-1 ring-brand/30 mb-4 text-3xl">⚔️</div>
           <h1 className="text-3xl font-bold tracking-tight">XP Wars</h1>
           <p className="text-sm text-muted-foreground mt-1">Défie tes amis. Gagne l'XP.</p>
         </div>

@@ -41,7 +41,7 @@ function LeaderboardPage() {
     return (
       <AppShell>
         <header className="px-5 pt-8 pb-4">
-          <p className="text-[10px] text-zinc-400 uppercase tracking-widest font-medium">Classement</p>
+          <p className="text-[11px] text-text-subtle uppercase tracking-widest font-medium">Classement</p>
           <h1 className="text-3xl font-semibold tracking-tight">Aucun groupe</h1>
         </header>
         <div className="px-5 py-8 text-center">
@@ -66,7 +66,7 @@ function LeaderboardPage() {
       </header>
 
       <section className="px-5 pb-4">
-        <div className="p-4 rounded-2xl bg-card ring-1 ring-white/5">
+        <div className="p-4 rounded-[20px] bg-card ring-1 ring-white/5">
           <div className="flex items-center justify-between gap-2">
             <p className="font-semibold">
               Saison <span className="capitalize">{seasonLabel(new Date())}</span>
@@ -150,11 +150,11 @@ function LeaderboardPage() {
               const heights = { 1: "h-24", 2: "h-16", 3: "h-10" } as const;
               return (
                 <div key={f.id} className="flex flex-col items-center gap-2 flex-1">
-                  <span className="text-[10px] text-muted-foreground font-bold truncate">{f.pseudo}</span>
+                  <span className="text-[11px] text-muted-foreground font-bold truncate">{f.pseudo}</span>
                   <div className={`rounded-full p-1 ring-2 ${isFirst ? "ring-brand size-20" : rank === 2 ? "ring-zinc-500/40 size-14" : "ring-orange-900/40 size-14"}`}>
                     <div className="size-full rounded-full bg-zinc-800 flex items-center justify-center text-3xl"><Avatar value={f.avatar} /></div>
                   </div>
-                  <div className={`w-full max-w-[80px] rounded-t-lg flex flex-col items-center justify-center font-bold ${heights[rank]} ${isFirst ? "bg-brand text-primary-foreground" : "bg-zinc-800/80 text-zinc-400"}`}>
+                  <div className={`w-full max-w-[80px] rounded-t-lg flex flex-col items-center justify-center font-bold ${heights[rank]} ${isFirst ? "bg-brand text-primary-foreground" : "bg-zinc-800/80 text-text-subtle"}`}>
                     <span className="text-2xl">{medals[rank - 1]}</span>
                     <span className="text-xs">{pick(f, range)} pts</span>
                   </div>
@@ -178,7 +178,7 @@ function LeaderboardPage() {
               key={f.id}
               to="/member/$memberId"
               params={{ memberId: f.id }}
-              className={`p-3 rounded-2xl flex items-center gap-3 ring-1 active:scale-[0.99] transition-transform ${
+              className={`p-3 rounded-[20px] flex items-center gap-3 ring-1 active:scale-[0.99] transition-transform ${
                 isMe ? "bg-brand/10 ring-brand/30" : "bg-card ring-white/5"
               }`}
             >

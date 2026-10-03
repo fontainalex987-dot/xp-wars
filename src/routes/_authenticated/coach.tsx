@@ -97,13 +97,13 @@ function CoachPage() {
           <ArrowLeft className="size-4" />
         </Link>
         <div className="min-w-0">
-          <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium">Coach IA</p>
+          <p className="text-[11px] text-muted-foreground uppercase tracking-widest font-medium">Coach IA</p>
           <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight truncate">Ton plan de saison</h1>
         </div>
       </header>
 
       <form onSubmit={submit} className="px-5 space-y-4">
-        <div className="p-4 rounded-2xl bg-card ring-1 ring-white/5 space-y-4">
+        <div className="p-4 rounded-[20px] bg-card ring-1 ring-white/5 space-y-4">
           <div>
             <label className="text-xs uppercase tracking-widest text-muted-foreground">Temps dispo par jour</label>
             <div className="mt-2 grid grid-cols-3 gap-2">
@@ -130,14 +130,14 @@ function CoachPage() {
 
       {plan && (
         <section className="px-5 py-5 space-y-3">
-          <div className="p-4 rounded-2xl bg-card ring-1 ring-brand/30">
+          <div className="p-4 rounded-[20px] bg-card ring-1 ring-brand/30">
             <p className="text-sm">{plan.summary}</p>
             {plan.strategy && <p className="text-xs text-muted-foreground mt-2">{plan.strategy}</p>}
           </div>
           {plan.quests.map((q, i) => {
             const cat = CATEGORIES[q.category as Category] ?? CATEGORIES.autre;
             return (
-              <div key={i} className="p-4 rounded-2xl bg-card ring-1 ring-white/5 flex gap-3 items-start">
+              <div key={i} className="p-4 rounded-[20px] bg-card ring-1 ring-white/5 flex gap-3 items-start">
                 <span className="size-10 shrink-0 rounded-xl bg-black/30 ring-1 ring-white/10 flex items-center justify-center text-lg">{cat.icon}</span>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold leading-snug break-words">{q.title}</p>
@@ -242,7 +242,7 @@ function WeeklyReviewSection({ minutes, goal, groupId, onAdd, canAdd }: {
       {history.length > 1 && <Evolution history={history} />}
       {review && (
         <>
-          <div className="p-4 rounded-2xl bg-card ring-1 ring-white/5 space-y-2">
+          <div className="p-4 rounded-[20px] bg-card ring-1 ring-white/5 space-y-2">
             <p className="font-semibold">{VERDICT[review.verdict]}</p>
             <p className="text-sm">{review.summary}</p>
             <p className="text-xs text-muted-foreground">
@@ -251,7 +251,7 @@ function WeeklyReviewSection({ minutes, goal, groupId, onAdd, canAdd }: {
             </p>
           </div>
           {review.milestones.length > 0 && (
-            <div className="p-4 rounded-2xl bg-card ring-1 ring-white/5 space-y-2">
+            <div className="p-4 rounded-[20px] bg-card ring-1 ring-white/5 space-y-2">
               <p className="text-xs uppercase tracking-widest text-muted-foreground">Étapes de ton objectif</p>
               {review.milestones.map((m, i) => (
                 <p key={i} className={`text-sm flex gap-2 ${m.status === "a_venir" ? "text-muted-foreground" : ""}`}>
@@ -261,9 +261,9 @@ function WeeklyReviewSection({ minutes, goal, groupId, onAdd, canAdd }: {
             </div>
           )}
           {review.adjustments.map((a, i) => (
-            <div key={i} className="p-4 rounded-2xl bg-card ring-1 ring-white/5 flex gap-3 items-start">
+            <div key={i} className="p-4 rounded-[20px] bg-card ring-1 ring-white/5 flex gap-3 items-start">
               <div className="flex-1 min-w-0">
-                <p className="text-[10px] uppercase tracking-widest text-brand font-semibold">
+                <p className="text-[11px] uppercase tracking-widest text-brand font-semibold">
                   {ACTION_LABEL[a.action]}{a.current ? ` · ${a.current}` : ""}
                 </p>
                 {a.quest && <p className="font-semibold mt-1">{a.quest.title}</p>}
@@ -302,7 +302,7 @@ function Evolution({ history }: { history: SavedReview[] }) {
   };
 
   return (
-    <div className="p-4 rounded-2xl bg-card ring-1 ring-white/5 space-y-3">
+    <div className="p-4 rounded-[20px] bg-card ring-1 ring-white/5 space-y-3">
       <button onClick={() => setOpen((o) => !o)} className="w-full flex items-center justify-between">
         <p className="text-xs uppercase tracking-widest text-muted-foreground">Évolution · {weeks.length} semaines</p>
         <span className="text-xs text-brand font-semibold">{open ? "Masquer" : "Voir"}</span>
@@ -339,12 +339,12 @@ function Evolution({ history }: { history: SavedReview[] }) {
               const total = w.review.milestones.length;
               return (
                 <div key={w.weekStart} className="flex items-center gap-2">
-                  <span className="text-[10px] text-muted-foreground w-14 shrink-0">{label(w.weekStart)}</span>
+                  <span className="text-[11px] text-muted-foreground w-14 shrink-0">{label(w.weekStart)}</span>
                   <div className="flex-1 h-2 rounded-full bg-black/40 overflow-hidden">
                     <div className="h-full rounded-full bg-brand" style={{ width: total ? `${(fait / total) * 100}%` : "0%" }} />
                   </div>
-                  <span className="text-[10px] text-muted-foreground shrink-0">{fait}/{total} ✅</span>
-                  <span className="text-[10px] shrink-0">{VERDICT[w.review.verdict].split(" ")[0]}</span>
+                  <span className="text-[11px] text-muted-foreground shrink-0">{fait}/{total} ✅</span>
+                  <span className="text-[11px] shrink-0">{VERDICT[w.review.verdict].split(" ")[0]}</span>
                 </div>
               );
             })}

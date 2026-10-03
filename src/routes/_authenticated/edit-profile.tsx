@@ -69,7 +69,7 @@ function EditProfilePage() {
           <ArrowLeft className="size-5" />
         </button>
         <div>
-          <p className="text-[10px] text-zinc-400 uppercase tracking-widest font-medium">Profil</p>
+          <p className="text-[11px] text-text-subtle uppercase tracking-widest font-medium">Profil</p>
           <h1 className="text-2xl font-semibold tracking-tight">Modifier</h1>
         </div>
       </header>

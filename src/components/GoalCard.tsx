@@ -5,12 +5,12 @@ export function GoalCard({ goal, showContributors = false, action }: { goal: Goa
   const pct = Math.min(100, Math.round((goal.progress / goal.targetCount) * 100));
   const done = !!goal.completedAt;
   return (
-    <div className={`p-4 rounded-2xl bg-card ring-1 ${done ? "ring-brand/30" : "ring-white/5"}`}>
+    <div className={`p-4 rounded-[20px] bg-card ring-1 ${done ? "ring-brand/30" : "ring-white/5"}`}>
       <div className="flex items-center gap-3">
         <div className="size-10 rounded-xl bg-brand/10 flex items-center justify-center text-xl shrink-0">{goal.emoji}</div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold truncate">{goal.title}</p>
-          <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+          <p className="text-[11px] uppercase tracking-widest text-muted-foreground">
             {goal.groupId ? "Groupe" : "Perso"} ·{" "}
             {done ? "Atteint 🎉" : goal.daysLeft > 0 ? `${goal.daysLeft} j restants` : "Dernier jour"}
           </p>

@@ -96,7 +96,7 @@ export function AvatarPicker({ value, onChange }: { value: string; onChange: (v:
               onClick={() => onChange(v)}
               aria-label={`Choisir cet avatar`}
               aria-pressed={selected}
-              className={`aspect-square rounded-2xl p-1 transition-all active:scale-95 ${
+              className={`aspect-square rounded-[20px] p-1 transition-all active:scale-95 ${
                 selected ? "bg-brand/20 ring-2 ring-brand" : "bg-card ring-1 ring-white/5"
               }`}
             >

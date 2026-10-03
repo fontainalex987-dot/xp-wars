@@ -7,10 +7,10 @@ export function XpBar({ value, max }: { value: number; max: number }) {
       aria-valuemax={max}
       aria-valuenow={value}
       aria-label={`Expérience : ${value} sur ${max}`}
-      className="relative w-full h-8 bg-black/40 rounded-[12px] p-1 ring-1 ring-white/5"
+      className="relative w-full h-8 bg-black/40 rounded-xl p-1 ring-1 ring-white/5"
     >
       <div
-        className="h-full bg-brand rounded-[8px] xp-glow transition-all duration-700 ease-out animate-xp-fill"
+        className="h-full bg-brand rounded-lg xp-glow transition-all duration-700 ease-out animate-xp-fill"
         style={{ width: `${pct}%` }}
       />
     </div>
