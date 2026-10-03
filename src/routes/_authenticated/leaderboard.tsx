@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { AppShell } from "@/components/AppShell";
+import { GroupSwitcher } from "@/components/GroupSwitcher";
 import { useGroupMembers, useMyGroup, useProfile, type Friend } from "@/lib/store";
 
 type Range = "today" | "week" | "month";
@@ -52,8 +53,8 @@ function LeaderboardPage() {
   return (
     <AppShell>
       <header className="px-5 pt-8 pb-4">
-        <p className="text-[10px] text-zinc-400 uppercase tracking-widest font-medium">{group.name}</p>
-        <h1 className="text-3xl font-semibold tracking-tight">Classement</h1>
+        <GroupSwitcher />
+        <h1 className="mt-2 text-3xl font-semibold tracking-tight">Classement</h1>
       </header>
 
       <section className="px-5 pb-4">
