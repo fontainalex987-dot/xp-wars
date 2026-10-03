@@ -270,7 +270,7 @@ function WeeklyReviewSection({ minutes, goal, groupId, onAdd, canAdd }: {
                 {a.quest && <p className="text-xs text-muted-foreground">{a.quest.description}</p>}
                 <p className="text-xs text-muted-foreground mt-1 italic">{a.reason}</p>
                 {a.quest && (
-                  <div className="mt-2 flex gap-3 text-[11px] text-muted-foreground">
+                  <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
                     <span className="flex items-center gap-1"><Clock className="size-3" />{a.quest.minutes} min</span>
                     <span className="text-brand font-semibold">+{DIFFICULTY_POINTS[a.quest.difficulty]} pts</span>
                   </div>
