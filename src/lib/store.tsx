@@ -518,20 +518,71 @@ export function useStatsByCategory(from: string, to: string) {
 
 // ------- Groups ---------
 
-export function useMyGroup() {
+export const MAX_GROUPS = 5;
+const activeKey = (uid: string) => `xpwars.activeGroup.${uid}`;
+const activeListeners = new Set<() => void>();
+function readActive(uid: string | null): string | null {
+  if (!uid || typeof window === "undefined") return null;
+  try { return window.localStorage.getItem(activeKey(uid)); } catch { return null; }
+}
+function writeActive(uid: string, id: string | null) {
+  try {
+    if (id) window.localStorage.setItem(activeKey(uid), id);
+    else window.localStorage.removeItem(activeKey(uid));
+  } catch { /* ignore */ }
+  activeListeners.forEach((l) => l());
+}
+
+export function useMyGroups() {
   const { userId } = useAuth();
   return useQuery({
-    queryKey: ["myGroup", userId],
+    queryKey: ["myGroups", userId],
     enabled: !!userId,
-    queryFn: async (): Promise<Group | null> => {
-      const { data: gm, error } = await supabase.from("group_members").select("group_id").eq("user_id", userId!).maybeSingle();
+    queryFn: async (): Promise<Group[]> => {
+      const { data: gm, error } = await supabase
+        .from("group_members").select("group_id, joined_at").eq("user_id", userId!).order("joined_at");
       if (error) throw error;
-      if (!gm) return null;
-      const { data: g, error: gErr } = await supabase.from("groups").select("*").eq("id", gm.group_id).maybeSingle();
+      const ids = (gm ?? []).map((r) => r.group_id);
+      if (ids.length === 0) return [];
+      const { data: gs, error: gErr } = await supabase.from("groups").select("*").in("id", ids);
       if (gErr) throw gErr;
-      return (g as Group) ?? null;
+      const byId = new Map((gs ?? []).map((g) => [g.id, g as Group]));
+      return ids.map((id) => byId.get(id)).filter((g): g is Group => !!g);
     },
   });
+}
+
+function useActiveGroupId() {
+  const { userId } = useAuth();
+  const [id, setId] = useState<string | null>(null);
+  useEffect(() => {
+    const sync = () => setId(readActive(userId));
+    sync();
+    activeListeners.add(sync);
+    return () => { activeListeners.delete(sync); };
+  }, [userId]);
+  return id;
+}
+
+export function useSetActiveGroup() {
+  const { userId } = useAuth();
+  const qc = useQueryClient();
+  return useCallback((id: string | null) => {
+    if (!userId) return;
+    writeActive(userId, id);
+    for (const k of ["members", "challenge", "challenge-contributors", "activity", "duels", "goals", "memberProfile"]) {
+      qc.invalidateQueries({ queryKey: [k] });
+    }
+  }, [userId, qc]);
+}
+
+/** Returns the active group (falls back to the first group). */
+export function useMyGroup() {
+  const q = useMyGroups();
+  const activeId = useActiveGroupId();
+  const groups = q.data;
+  const data = groups === undefined ? undefined : (groups.find((g) => g.id === activeId) ?? groups[0] ?? null);
+  return { ...q, data } as Omit<typeof q, "data"> & { data: Group | null | undefined };
 }
 
 export function useGroupMembers(groupId: string | undefined) {
