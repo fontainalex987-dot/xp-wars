@@ -322,6 +322,109 @@ export type Database = {
         }
         Relationships: []
       }
+      leaderboard_snapshot: {
+        Row: {
+          captured_on: string
+          group_id: string
+          rank: number
+          user_id: string
+        }
+        Insert: {
+          captured_on: string
+          group_id: string
+          rank: number
+          user_id: string
+        }
+        Update: {
+          captured_on?: string
+          group_id?: string
+          rank?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leaderboard_snapshot_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leaderboard_snapshot_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_prefs: {
+        Row: {
+          enabled: boolean
+          type: string
+          user_id: string
+        }
+        Insert: {
+          enabled?: boolean
+          type: string
+          user_id: string
+        }
+        Update: {
+          enabled?: boolean
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_prefs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          read_at: string | null
+          title: string
+          type: string
+          url: string | null
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          title: string
+          type: string
+          url?: string | null
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          title?: string
+          type?: string
+          url?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar: string
@@ -740,6 +843,7 @@ export type Database = {
         }
       }
       dispatch_daily_reminders: { Args: never; Returns: undefined }
+      dispatch_overtake_alerts: { Args: never; Returns: undefined }
       duel_points: {
         Args: { _ends: string; _starts: string; _user: string }
         Returns: number
@@ -983,6 +1087,16 @@ export type Database = {
       normalize_level: {
         Args: { _level: number; _xp: number }
         Returns: Record<string, unknown>
+      }
+      push_notify: {
+        Args: {
+          _body: string
+          _title: string
+          _type: string
+          _url?: string
+          _user: string
+        }
+        Returns: undefined
       }
       reject_friend_request: { Args: { _request: string }; Returns: undefined }
       remove_friend: { Args: { _friend: string }; Returns: undefined }

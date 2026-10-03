@@ -20,6 +20,7 @@ export const Route = createFileRoute("/api/public/send-push")({
           auth?: string;
           title?: string;
           body?: string;
+          url?: string;
         };
         try {
           payload = await request.json();
@@ -30,7 +31,7 @@ export const Route = createFileRoute("/api/public/send-push")({
           });
         }
 
-        const { endpoint, p256dh, auth, title, body } = payload;
+        const { endpoint, p256dh, auth, title, body, url } = payload;
         if (!endpoint || !p256dh || !auth) {
           return new Response(JSON.stringify({ error: "Missing subscription fields" }), {
             status: 400,
@@ -48,8 +49,9 @@ export const Route = createFileRoute("/api/public/send-push")({
           const pushPayload = await buildPushPayload(
             {
               data: {
-                title: title ?? "XP Wars",
+                title: title ?? "Quest Log",
                 body: body ?? "Une petite quête t'attend.",
+                url: url ?? "/",
               },
             },
             subscription,
