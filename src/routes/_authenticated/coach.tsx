@@ -151,18 +151,47 @@ const VERDICT: Record<WeeklyReview["verdict"], string> = {
 };
 const MS_ICON = { fait: "✅", en_cours: "🔥", a_venir: "⬜" } as const;
 const ACTION_LABEL = { garder: "Garder", ajuster: "Ajuster", remplacer: "Remplacer", ajouter: "Ajouter" } as const;
-const RKEY = "xpwars.weeklyReview";
+const RKEY = "xpwars.weeklyReviews";
+const RKEY_OLD = "xpwars.weeklyReview";
+
+type SavedReview = { weekStart: string; review: WeeklyReview };
+
+function weekStartOf(d = new Date()): string {
+  const x = new Date(d);
+  x.setDate(x.getDate() - 6);
+  return x.toISOString().slice(0, 10);
+}
+
+function loadReviews(): SavedReview[] {
+  try {
+    const raw = localStorage.getItem(RKEY);
+    if (raw) {
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr)) return arr.filter((r) => r?.weekStart && r?.review);
+    }
+    // Migration : ancien bilan unique
+    const old = localStorage.getItem(RKEY_OLD);
+    if (old) {
+      const migrated: SavedReview[] = [{ weekStart: weekStartOf(), review: JSON.parse(old) }];
+      localStorage.setItem(RKEY, JSON.stringify(migrated));
+      localStorage.removeItem(RKEY_OLD);
+      return migrated;
+    }
+  } catch {}
+  return [];
+}
 
 function WeeklyReviewSection({ minutes, goal, groupId, onAdd, canAdd }: {
   minutes: number; goal: string; groupId: string | null;
   onAdd: (q: CoachPlan["quests"][number]) => void; canAdd: boolean;
 }) {
-  const [review, setReview] = useState<WeeklyReview | null>(null);
+  const [history, setHistory] = useState<SavedReview[]>([]);
   const [loading, setLoading] = useState(false);
   const gen = useServerFn(generateWeeklyReview);
+  const review = history[0]?.review ?? null;
 
   useEffect(() => {
-    try { const r = localStorage.getItem(RKEY); if (r) setReview(JSON.parse(r)); } catch {}
+    setHistory(loadReviews());
   }, []);
 
   const run = async () => {
@@ -170,8 +199,12 @@ function WeeklyReviewSection({ minutes, goal, groupId, onAdd, canAdd }: {
     setLoading(true);
     try {
       const r = await gen({ data: { minutesPerDay: minutes, seasonGoal: goal.trim(), groupId } });
-      setReview(r);
-      try { localStorage.setItem(RKEY, JSON.stringify(r)); } catch {}
+      const ws = weekStartOf();
+      setHistory((prev) => {
+        const next = [{ weekStart: ws, review: r }, ...prev.filter((s) => s.weekStart !== ws)].slice(0, 12);
+        try { localStorage.setItem(RKEY, JSON.stringify(next)); } catch {}
+        return next;
+      });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erreur");
     } finally {
@@ -186,6 +219,7 @@ function WeeklyReviewSection({ minutes, goal, groupId, onAdd, canAdd }: {
         className="w-full py-3 rounded-xl bg-card ring-1 ring-brand/40 text-brand font-bold flex items-center justify-center gap-2 active:scale-95 transition-transform disabled:opacity-50">
         <CalendarCheck className="size-4" /> {loading ? "Analyse en cours..." : review ? "Refaire mon bilan" : "Faire mon bilan"}
       </button>
+      {history.length > 1 && <Evolution history={history} />}
       {review && (
         <>
           <div className="p-4 rounded-2xl bg-card ring-1 ring-white/5 space-y-2">
@@ -233,5 +267,70 @@ function WeeklyReviewSection({ minutes, goal, groupId, onAdd, canAdd }: {
         </>
       )}
     </section>
+  );
+}
+
+function Evolution({ history }: { history: SavedReview[] }) {
+  const [open, setOpen] = useState(false);
+  // Plus ancien → plus récent pour le graphique
+  const weeks = [...history].reverse();
+  const maxPts = Math.max(1, ...weeks.map((w) => w.review.stats.pointsWeek));
+  const maxDone = Math.max(1, ...weeks.map((w) => w.review.stats.doneWeek));
+  const label = (ws: string) => {
+    const d = new Date(ws + "T12:00:00");
+    return d.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+  };
+
+  return (
+    <div className="p-4 rounded-2xl bg-card ring-1 ring-white/5 space-y-3">
+      <button onClick={() => setOpen((o) => !o)} className="w-full flex items-center justify-between">
+        <p className="text-xs uppercase tracking-widest text-muted-foreground">Évolution · {weeks.length} semaines</p>
+        <span className="text-xs text-brand font-semibold">{open ? "Masquer" : "Voir"}</span>
+      </button>
+      {open && (
+        <div className="space-y-4">
+          <div>
+            <p className="text-[11px] text-muted-foreground mb-1.5">Points par semaine</p>
+            <div className="flex items-end gap-1.5 h-20">
+              {weeks.map((w) => (
+                <div key={w.weekStart} className="flex-1 flex flex-col items-center gap-1 min-w-0">
+                  <span className="text-[9px] text-muted-foreground">{w.review.stats.pointsWeek}</span>
+                  <div className="w-full rounded-t bg-brand/80" style={{ height: `${Math.max(6, (w.review.stats.pointsWeek / maxPts) * 100)}%` }} />
+                  <span className="text-[8px] text-muted-foreground truncate w-full text-center">{label(w.weekStart)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="text-[11px] text-muted-foreground mb-1.5">Quêtes validées par semaine</p>
+            <div className="flex items-end gap-1.5 h-16">
+              {weeks.map((w) => (
+                <div key={w.weekStart} className="flex-1 flex flex-col items-center gap-1 min-w-0">
+                  <span className="text-[9px] text-muted-foreground">{w.review.stats.doneWeek}</span>
+                  <div className="w-full rounded-t bg-white/25" style={{ height: `${Math.max(6, (w.review.stats.doneWeek / maxDone) * 100)}%` }} />
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="space-y-2">
+            <p className="text-[11px] text-muted-foreground">Étapes de l'objectif</p>
+            {weeks.map((w) => {
+              const fait = w.review.milestones.filter((m) => m.status === "fait").length;
+              const total = w.review.milestones.length;
+              return (
+                <div key={w.weekStart} className="flex items-center gap-2">
+                  <span className="text-[10px] text-muted-foreground w-14 shrink-0">{label(w.weekStart)}</span>
+                  <div className="flex-1 h-2 rounded-full bg-black/40 overflow-hidden">
+                    <div className="h-full rounded-full bg-brand" style={{ width: total ? `${(fait / total) * 100}%` : "0%" }} />
+                  </div>
+                  <span className="text-[10px] text-muted-foreground shrink-0">{fait}/{total} ✅</span>
+                  <span className="text-[10px] shrink-0">{VERDICT[w.review.verdict].split(" ")[0]}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
