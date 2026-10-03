@@ -94,7 +94,23 @@ ${JSON.stringify(context_)}`;
         minutes: Math.max(1, Math.round(Number(o.minutes) || 10)),
       };
     });
-    return { summary: String(parsed.summary ?? ""), strategy: String(parsed.strategy ?? ""), quests };
+    // Anti-triche XP : au maximum une seule quête "difficile" dans le plan.
+    let hardSeen = false;
+    for (const q of quests) {
+      if (q.difficulty === "difficile") {
+        if (hardSeen) q.difficulty = "moyenne";
+        else hardSeen = true;
+      }
+    }
+    const plan: CoachPlan = { summary: String(parsed.summary ?? ""), strategy: String(parsed.strategy ?? ""), quests };
+    await supabase.from("coach_plans").upsert({
+      user_id: userId,
+      minutes_per_day: data.minutesPerDay,
+      season_goal: data.seasonGoal,
+      plan,
+      updated_at: new Date().toISOString(),
+    });
+    return plan;
   });
 
 async function askCoach(prompt: string): Promise<string> {
