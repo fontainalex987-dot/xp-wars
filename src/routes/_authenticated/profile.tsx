@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { BarChart3, Bell, Flame, LogOut, Pencil, Target, Trophy, Zap } from "lucide-react";
+import { useState } from "react";
+import { BarChart3, Bell, Flame, LogOut, Pencil, Target, Trophy, Volume2, Zap } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { Avatar } from "@/components/Avatar";
 import { ProfileSkeleton } from "@/components/Skeletons";
@@ -7,6 +8,7 @@ import { XpBar } from "@/components/XpBar";
 import { useAuth, useBadges, useProfile, useTodayTasks, xpToNext } from "@/lib/store";
 import { usePushNotifications } from "@/lib/push-notifications";
 import { TrophyShowcase } from "@/lib/seasons";
+import { isSoundEnabled, setSoundEnabled, playSound } from "@/lib/sounds";
 
 export const Route = createFileRoute("/_authenticated/profile")({
   head: () => ({
@@ -27,6 +29,7 @@ function ProfilePage() {
   const push = usePushNotifications();
   const { signOut } = useAuth();
   const navigate = useNavigate();
+  const [soundOn, setSoundOn] = useState(isSoundEnabled);
   const handleSignOut = async () => {
     await signOut();
     navigate({ to: "/auth", replace: true });
