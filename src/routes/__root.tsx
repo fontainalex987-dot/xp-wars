@@ -20,6 +20,7 @@ import { BadgeUnlockProvider } from "@/lib/badge-unlock";
 import { BottomNav } from "@/components/BottomNav";
 import { PointsBurst } from "@/components/PointsBurst";
 import { CelebrationOverlay } from "@/components/CelebrationOverlay";
+import { SeasonRewardsWatcher } from "@/lib/seasons";
 import { Toaster } from "sonner";
 
 function NotFoundComponent() {
@@ -151,6 +152,7 @@ function RootComponent() {
             <BottomNav />
             <PointsBurst />
             <CelebrationOverlay />
+            <SeasonRewardsWatcher />
             <Toaster theme="dark" position="top-center" richColors />
             </BadgeUnlockProvider>
           </PushNotificationsProvider>

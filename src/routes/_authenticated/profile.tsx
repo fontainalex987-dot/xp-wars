@@ -6,6 +6,7 @@ import { ProfileSkeleton } from "@/components/Skeletons";
 import { XpBar } from "@/components/XpBar";
 import { useAuth, useBadges, useProfile, useTodayTasks, xpToNext } from "@/lib/store";
 import { usePushNotifications } from "@/lib/push-notifications";
+import { TrophyShowcase } from "@/lib/seasons";
 
 export const Route = createFileRoute("/_authenticated/profile")({
   head: () => ({
@@ -174,6 +175,8 @@ function ProfilePage() {
           ))}
         </div>
       </section>
+
+      <TrophyShowcase userId={profile?.id} />
 
       <section className="px-5 py-4">
         <button
