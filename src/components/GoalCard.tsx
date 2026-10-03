@@ -1,3 +1,4 @@
+import { Avatar } from "@/components/Avatar";
 import type { Goal } from "@/lib/store";
 
 export function GoalCard({ goal, showContributors = false, action }: { goal: Goal; showContributors?: boolean; action?: React.ReactNode }) {
@@ -24,7 +25,7 @@ export function GoalCard({ goal, showContributors = false, action }: { goal: Goa
         <div className="mt-3 flex flex-wrap gap-2">
           {goal.contributors.map((c) => (
             <span key={c.userId} className="text-[11px] px-2 py-0.5 rounded-full bg-black/30 ring-1 ring-white/10">
-              {c.avatar} {c.pseudo} · {c.count}
+              <span className="inline-flex size-4 align-[-3px]"><Avatar value={c.avatar} /></span> {c.pseudo} · {c.count}
             </span>
           ))}
         </div>
