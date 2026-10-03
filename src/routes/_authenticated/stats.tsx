@@ -232,12 +232,12 @@ function BarChart({
     <div className="flex items-end gap-1.5 h-44">
       {data.map((d, i) => (
         <div key={d.date} className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
-          <span className="text-[9px] text-text-subtle">{d.points > 0 ? d.points : ""}</span>
+          <span className="text-[11px] text-text-subtle">{d.points > 0 ? d.points : ""}</span>
           <div
             className={`w-full rounded-t-md transition-all ${i === currentIndex ? "bg-brand" : "bg-zinc-700"}`}
             style={{ height: `${Math.max(2, (d.points / max) * 100)}%` }}
           />
-          <span className={`text-[9px] ${i === currentIndex ? "text-brand" : "text-text-subtle"}`}>
+          <span className={`text-[11px] ${i === currentIndex ? "text-brand" : "text-text-subtle"}`}>
             {labelOf(d.date)}
           </span>
         </div>

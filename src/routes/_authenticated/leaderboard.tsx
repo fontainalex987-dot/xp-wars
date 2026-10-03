@@ -84,7 +84,7 @@ function LeaderboardPage() {
           </div>
           <button
             onClick={() => setShowPast((v) => !v)}
-            className="mt-3 w-full flex items-center justify-center gap-1 text-xs text-brand font-semibold"
+            className="mt-3 w-full flex items-center justify-center gap-1 text-xs text-foreground underline underline-offset-4 decoration-text-subtle font-semibold"
           >
             Saisons passées <ChevronDown className={`size-3.5 transition-transform ${showPast ? "rotate-180" : ""}`} />
           </button>

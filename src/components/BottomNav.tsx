@@ -87,7 +87,7 @@ export function BottomNav() {
                 />
               </div>
               <span
-                className={`text-[9px] min-[380px]:text-[11px] tracking-wide uppercase whitespace-nowrap ${
+                className={`text-[11px] tracking-normal min-[380px]:tracking-wide uppercase whitespace-nowrap ${
                   active ? "font-extrabold" : "font-medium"
                 }`}
               >
