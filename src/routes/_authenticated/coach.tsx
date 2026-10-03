@@ -269,3 +269,68 @@ function WeeklyReviewSection({ minutes, goal, groupId, onAdd, canAdd }: {
     </section>
   );
 }
+
+function Evolution({ history }: { history: SavedReview[] }) {
+  const [open, setOpen] = useState(false);
+  // Plus ancien → plus récent pour le graphique
+  const weeks = [...history].reverse();
+  const maxPts = Math.max(1, ...weeks.map((w) => w.review.stats.pointsWeek));
+  const maxDone = Math.max(1, ...weeks.map((w) => w.review.stats.doneWeek));
+  const label = (ws: string) => {
+    const d = new Date(ws + "T12:00:00");
+    return d.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+  };
+
+  return (
+    <div className="p-4 rounded-2xl bg-card ring-1 ring-white/5 space-y-3">
+      <button onClick={() => setOpen((o) => !o)} className="w-full flex items-center justify-between">
+        <p className="text-xs uppercase tracking-widest text-muted-foreground">Évolution · {weeks.length} semaines</p>
+        <span className="text-xs text-brand font-semibold">{open ? "Masquer" : "Voir"}</span>
+      </button>
+      {open && (
+        <div className="space-y-4">
+          <div>
+            <p className="text-[11px] text-muted-foreground mb-1.5">Points par semaine</p>
+            <div className="flex items-end gap-1.5 h-20">
+              {weeks.map((w) => (
+                <div key={w.weekStart} className="flex-1 flex flex-col items-center gap-1 min-w-0">
+                  <span className="text-[9px] text-muted-foreground">{w.review.stats.pointsWeek}</span>
+                  <div className="w-full rounded-t bg-brand/80" style={{ height: `${Math.max(6, (w.review.stats.pointsWeek / maxPts) * 100)}%` }} />
+                  <span className="text-[8px] text-muted-foreground truncate w-full text-center">{label(w.weekStart)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="text-[11px] text-muted-foreground mb-1.5">Quêtes validées par semaine</p>
+            <div className="flex items-end gap-1.5 h-16">
+              {weeks.map((w) => (
+                <div key={w.weekStart} className="flex-1 flex flex-col items-center gap-1 min-w-0">
+                  <span className="text-[9px] text-muted-foreground">{w.review.stats.doneWeek}</span>
+                  <div className="w-full rounded-t bg-white/25" style={{ height: `${Math.max(6, (w.review.stats.doneWeek / maxDone) * 100)}%` }} />
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="space-y-2">
+            <p className="text-[11px] text-muted-foreground">Étapes de l'objectif</p>
+            {weeks.map((w) => {
+              const fait = w.review.milestones.filter((m) => m.status === "fait").length;
+              const total = w.review.milestones.length;
+              return (
+                <div key={w.weekStart} className="flex items-center gap-2">
+                  <span className="text-[10px] text-muted-foreground w-14 shrink-0">{label(w.weekStart)}</span>
+                  <div className="flex-1 h-2 rounded-full bg-black/40 overflow-hidden">
+                    <div className="h-full rounded-full bg-brand" style={{ width: total ? `${(fait / total) * 100}%` : "0%" }} />
+                  </div>
+                  <span className="text-[10px] text-muted-foreground shrink-0">{fait}/{total} ✅</span>
+                  <span className="text-[10px] shrink-0">{VERDICT[w.review.verdict].split(" ")[0]}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
