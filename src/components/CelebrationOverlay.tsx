@@ -43,7 +43,7 @@ export function CelebrationOverlay() {
           role="dialog"
           aria-modal="true"
           aria-label={current.kind === "badge" ? `Badge obtenu : ${current.label}` : `Niveau ${current.level} atteint`}
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/85 backdrop-blur-md px-8"
+          className="fixed inset-0 z-[60] flex items-center justify-center overflow-hidden bg-black/85 backdrop-blur-md px-8"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
