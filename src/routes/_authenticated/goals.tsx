@@ -43,7 +43,7 @@ function GoalsPage() {
     <AppShell>
       <header className="px-5 pt-8 pb-4 flex items-end justify-between">
         <div>
-          <p className="text-[10px] text-zinc-400 uppercase tracking-widest font-medium">Ambitions</p>
+          <p className="text-[11px] text-text-subtle uppercase tracking-widest font-medium">Ambitions</p>
           <h1 className="text-2xl font-semibold tracking-tight">Objectifs</h1>
         </div>
         <button onClick={() => setOpen(true)} className="inline-flex items-center gap-1.5 bg-brand text-primary-foreground text-sm font-bold py-2 px-4 rounded-full active:scale-95">

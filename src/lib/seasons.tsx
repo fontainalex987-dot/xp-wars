@@ -109,10 +109,10 @@ export function TrophyShowcase({ userId }: { userId: string | undefined | null }
       <h2 className="text-lg font-medium mb-3">Trophées</h2>
       <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
         {trophies.map((t) => (
-          <div key={t.id} className="shrink-0 w-28 p-3 rounded-2xl bg-card ring-1 ring-white/5 text-center">
+          <div key={t.id} className="shrink-0 w-28 p-3 rounded-[20px] bg-card ring-1 ring-white/5 text-center">
             <div className="text-3xl">{trophyIcon(t.rank)}</div>
             <p className="mt-1 text-xs font-semibold capitalize">{seasonLabel(t.season, true)}</p>
-            <p className="text-[10px] text-muted-foreground truncate">{t.groupName}</p>
+            <p className="text-[11px] text-muted-foreground truncate">{t.groupName}</p>
           </div>
         ))}
       </div>

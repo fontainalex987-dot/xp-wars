@@ -25,7 +25,7 @@ export function GroupSwitcher() {
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute left-0 mt-2 z-50 min-w-[200px] bg-card rounded-2xl ring-1 ring-white/10 p-1 shadow-xl">
+          <div className="absolute left-0 mt-2 z-50 min-w-[200px] bg-card rounded-[20px] ring-1 ring-white/10 p-1 shadow-xl">
             {groups.map((g) => (
               <button
                 key={g.id}

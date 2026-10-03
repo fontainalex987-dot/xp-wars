@@ -99,13 +99,13 @@ function StatsPage() {
           <ChevronLeft className="size-5" />
         </Link>
         <div className="flex-1">
-          <p className="text-[10px] text-zinc-400 uppercase tracking-widest font-medium">Progression</p>
+          <p className="text-[11px] text-text-subtle uppercase tracking-widest font-medium">Progression</p>
           <h1 className="text-3xl font-semibold tracking-tight">Statistiques</h1>
         </div>
       </header>
 
       <section className="px-5">
-        <div className="grid grid-cols-4 gap-1 p-1 rounded-2xl bg-card ring-1 ring-white/5">
+        <div className="grid grid-cols-4 gap-1 p-1 rounded-[20px] bg-card ring-1 ring-white/5">
           {PERIODS.map((p) => (
             <button
               key={p.key}
@@ -124,14 +124,14 @@ function StatsPage() {
       </section>
 
       <section className="px-5 pt-7 pb-5 text-center">
-        <p className="text-6xl font-bold tracking-tight text-brand">
+        <p className="text-6xl font-display tabular-nums font-bold tracking-tight text-brand">
           {total.toLocaleString("fr-FR")}
         </p>
         <p className="mt-2 text-xs text-muted-foreground">{HERO_LABEL[period]}</p>
       </section>
 
       <section className="px-5">
-        <div className="p-4 rounded-[24px] bg-card ring-1 ring-white/5">
+        <div className="p-4 rounded-[20px] bg-card ring-1 ring-white/5">
           {period === "jour" ? (
             <Heatmap days={daily.data ?? []} loading={daily.isLoading} />
           ) : (
@@ -170,7 +170,7 @@ function Heatmap({ days, loading }: { days: DailyStat[]; loading: boolean }) {
 
   return (
     <div>
-      <p className="text-[10px] uppercase tracking-widest text-zinc-400 mb-3">35 derniers jours</p>
+      <p className="text-[11px] uppercase tracking-widest text-text-subtle mb-3">35 derniers jours</p>
       <div className="grid grid-cols-7 gap-1.5">
         {cells.map((c) => {
           const ratio = c.points > 0 ? c.points / max : c.totalCount > 0 ? (c.doneCount / c.totalCount) * 0.3 : 0;
@@ -180,7 +180,7 @@ function Heatmap({ days, loading }: { days: DailyStat[]; loading: boolean }) {
                 <button
                   onClick={() => haptics.light()}
                   aria-label={`${c.date} — ${c.points} points`}
-                  className="aspect-square rounded-md ring-1 ring-white/5 active:scale-95 transition-transform"
+                  className="aspect-square rounded-lg ring-1 ring-white/5 active:scale-95 transition-transform"
                   style={{
                     backgroundColor:
                       ratio <= 0 ? "rgba(255,255,255,0.04)" : `rgba(190, 242, 100, ${0.15 + ratio * 0.85})`,
@@ -197,7 +197,7 @@ function Heatmap({ days, loading }: { days: DailyStat[]; loading: boolean }) {
           );
         })}
       </div>
-      <div className="mt-3 flex items-center justify-end gap-1.5 text-[10px] text-zinc-500">
+      <div className="mt-3 flex items-center justify-end gap-1.5 text-[11px] text-text-subtle">
         <span>Moins</span>
         {[0.04, 0.3, 0.55, 0.8, 1].map((a, i) => (
           <span
@@ -232,12 +232,12 @@ function BarChart({
     <div className="flex items-end gap-1.5 h-44">
       {data.map((d, i) => (
         <div key={d.date} className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end">
-          <span className="text-[9px] text-zinc-500">{d.points > 0 ? d.points : ""}</span>
+          <span className="text-[11px] text-text-subtle">{d.points > 0 ? d.points : ""}</span>
           <div
             className={`w-full rounded-t-md transition-all ${i === currentIndex ? "bg-brand" : "bg-zinc-700"}`}
             style={{ height: `${Math.max(2, (d.points / max) * 100)}%` }}
           />
-          <span className={`text-[9px] ${i === currentIndex ? "text-brand" : "text-zinc-500"}`}>
+          <span className={`text-[11px] ${i === currentIndex ? "text-brand" : "text-text-subtle"}`}>
             {labelOf(d.date)}
           </span>
         </div>
@@ -272,7 +272,7 @@ function CategoryBars({
       {data.map((c) => {
         const share = Math.round((c.points / total) * 100);
         return (
-          <div key={c.category} className="p-3 rounded-2xl bg-card ring-1 ring-white/5">
+          <div key={c.category} className="p-3 rounded-[20px] bg-card ring-1 ring-white/5">
             <div className="flex items-center justify-between text-sm mb-2">
               <span className="font-medium">
                 {CATEGORIES[c.category].icon} {CATEGORIES[c.category].label}
@@ -282,7 +282,7 @@ function CategoryBars({
             <div className="h-2 rounded-full bg-zinc-800 overflow-hidden">
               <div className="h-full rounded-full bg-brand" style={{ width: `${share}%` }} />
             </div>
-            <p className="mt-1 text-[10px] text-muted-foreground">
+            <p className="mt-1 text-[11px] text-muted-foreground">
               {share}% · {c.doneCount} quêtes validées
             </p>
           </div>

@@ -75,18 +75,18 @@ export function StreakFlame() {
     <div className="flex flex-col items-end gap-1 shrink-0">
       <div
         className={`relative flex items-center gap-1.5 px-2.5 py-1 rounded-full ring-1 transition-colors duration-500 ${
-          frozen ? "bg-sky-400/15 ring-sky-400/40" : "bg-brand/10 ring-brand/20"
+          frozen ? "bg-streak-freeze/15 ring-streak-freeze/40" : "bg-brand/10 ring-brand/20"
         }`}
       >
         {frozen ? (
           <span className="relative flex items-center">
-            <Flame className="size-4 text-sky-300 animate-pulse" strokeWidth={2.5} />
-            <Snowflake className="absolute -top-1.5 -right-2 size-3 text-sky-200 animate-spin [animation-duration:3s]" />
+            <Flame className="size-4 text-streak-freeze animate-pulse" strokeWidth={2.5} />
+            <Snowflake className="absolute -top-1.5 -right-2 size-3 text-streak-freeze animate-spin [animation-duration:3s]" />
           </span>
         ) : (
           <Flame className="size-4 text-brand" strokeWidth={2.5} />
         )}
-        <span className={`text-sm font-semibold ${frozen ? "text-sky-200" : "text-brand"}`}>
+        <span className={`text-sm font-semibold ${frozen ? "text-streak-freeze" : "text-brand"}`}>
           {profile.streak} {profile.streak > 1 ? "JOURS" : "JOUR"}
         </span>
       </div>
@@ -98,7 +98,7 @@ export function StreakFlame() {
         {Array.from({ length: MAX_FREEZES }).map((_, i) => (
           <Snowflake
             key={i}
-            className={`size-3 ${i < available ? "text-sky-300" : "text-zinc-700"}`}
+            className={`size-3 ${i < available ? "text-streak-freeze" : "text-zinc-700"}`}
             strokeWidth={2.5}
           />
         ))}

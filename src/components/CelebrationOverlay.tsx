@@ -109,7 +109,7 @@ export function CelebrationOverlay() {
               <p className="mt-2 text-sm text-muted-foreground">
                 {current.kind === "badge" ? current.description : "Tu montes en grade. Ta constance paie, continue comme ça !"}
               </p>
-              <p className="mt-8 text-xs text-zinc-500">
+              <p className="mt-8 text-xs text-text-subtle">
                 Touche l'écran pour continuer{queue.length > 1 ? ` (${queue.length - 1} de plus)` : ""}
               </p>
             </motion.div>

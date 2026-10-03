@@ -7,24 +7,24 @@ export function GoalChip({ goalId }: { goalId?: string | null }) {
   const g = goalId ? goals.find((x) => x.id === goalId) : null;
   if (!g) return null;
   return (
-    <span className="inline-flex max-w-full items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-semibold bg-brand/10 text-brand ring-1 ring-brand/20 truncate">
+    <span className="inline-flex max-w-full items-center gap-1 text-[11px] px-2 py-0.5 rounded-full font-semibold bg-secondary text-foreground truncate">
       {g.emoji} <span className="truncate">{g.title}</span>
     </span>
   );
 }
 
 const diffStyles: Record<Task["difficulty"], string> = {
-  facile: "bg-emerald-500/10 text-emerald-400 ring-emerald-500/20",
-  moyenne: "bg-amber-500/10 text-amber-400 ring-amber-500/20",
-  difficile: "bg-orange-500/10 text-orange-400 ring-orange-500/20",
+  facile: "bg-difficulty-easy/10 text-difficulty-easy ring-difficulty-easy/20",
+  moyenne: "bg-difficulty-medium/10 text-difficulty-medium ring-difficulty-medium/20",
+  difficile: "bg-difficulty-hard/10 text-difficulty-hard ring-difficulty-hard/20",
 };
 
 export function CategoryChip({ category, muted = false }: { category: Task["category"]; muted?: boolean }) {
   const c = CATEGORIES[category];
   return (
     <span
-      className={`whitespace-nowrap text-[10px] px-2 py-0.5 rounded-full font-semibold ring-1 ${
-        muted ? "bg-zinc-800 text-zinc-400 ring-transparent" : "bg-sky-500/10 text-sky-300 ring-sky-500/20"
+      className={`whitespace-nowrap text-[11px] px-2 py-0.5 rounded-full font-semibold ring-1 ${
+        muted ? "bg-zinc-800 text-text-subtle ring-transparent" : "bg-category/10 text-category ring-category/20"
       }`}
       title={c.label}
     >
@@ -46,19 +46,19 @@ export function TaskCard({
 }) {
   if (task.done) {
     return (
-      <div className="p-4 rounded-[18px] bg-card/40 ring-1 ring-white/5 flex items-center gap-4 opacity-60">
+      <div className="p-4 rounded-[20px] bg-card/40 ring-1 ring-white/5 flex items-center gap-4 opacity-60">
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-1.5 mb-1">
-            <span className="whitespace-nowrap text-[10px] px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400 font-semibold capitalize">
+            <span className="whitespace-nowrap text-[11px] px-2 py-0.5 rounded-full bg-zinc-800 text-text-subtle font-semibold capitalize">
               {task.difficulty}
             </span>
             <CategoryChip category={task.category} muted />
-            <span className="whitespace-nowrap text-[10px] text-brand font-medium">+{task.points} pts</span>
+            <span className="whitespace-nowrap text-[11px] text-brand font-medium">+{task.points} pts</span>
           </div>
           <h3 className="text-base font-medium line-through decoration-zinc-600 truncate">{task.title}</h3>
           <GoalChip goalId={task.goalId} />
         </div>
-        <div className="size-12 shrink-0 rounded-xl bg-zinc-800 flex items-center justify-center text-zinc-500 ring-1 ring-white/5">
+        <div className="size-12 shrink-0 rounded-xl bg-zinc-800 flex items-center justify-center text-text-subtle ring-1 ring-white/5">
           <Check className="size-6" strokeWidth={2.5} />
         </div>
       </div>
@@ -66,18 +66,18 @@ export function TaskCard({
   }
 
   return (
-    <div className="group p-4 rounded-[18px] bg-card ring-1 ring-white/5 flex items-center gap-3 transition-colors duration-150 active:bg-zinc-800/60">
+    <div className="group p-4 rounded-[20px] bg-card ring-1 ring-white/5 flex items-center gap-3 transition-colors duration-150 active:bg-zinc-800/60">
 
       <div className="flex-1 min-w-0">
         <div className="flex flex-wrap items-center gap-1.5 mb-1.5">
-          <span className={`inline-flex items-center gap-1 whitespace-nowrap text-[10px] px-2 py-0.5 rounded-full font-semibold ring-1 capitalize ${diffStyles[task.difficulty]}`}>
+          <span className={`inline-flex items-center gap-1 whitespace-nowrap text-[11px] px-2 py-0.5 rounded-full font-semibold ring-1 capitalize ${diffStyles[task.difficulty]}`}>
             <span className="size-1.5 rounded-full bg-current" />
             {task.difficulty}
           </span>
           <CategoryChip category={task.category} />
-          <span className="whitespace-nowrap text-[10px] text-brand font-semibold">+{task.points} pts</span>
+          <span className="whitespace-nowrap text-[11px] text-brand font-semibold">+{task.points} pts</span>
           {task.templateId && (
-            <span className="whitespace-nowrap text-[10px] text-zinc-500 font-medium">↻ Quotidienne</span>
+            <span className="whitespace-nowrap text-[11px] text-text-subtle font-medium">↻ Quotidienne</span>
           )}
         </div>
         <h3 className="text-base font-medium leading-snug line-clamp-2 break-words">{task.title}</h3>
@@ -89,7 +89,7 @@ export function TaskCard({
           <button
             onClick={() => onEdit(task)}
             aria-label="Modifier la tâche"
-            className="size-9 rounded-lg bg-black/30 ring-1 ring-white/10 flex items-center justify-center text-muted-foreground hover:text-brand active:scale-90 transition-all"
+            className="size-9 rounded-lg bg-black/30 ring-1 ring-white/10 flex items-center justify-center text-muted-foreground hover:text-foreground active:scale-90 transition-all"
           >
             <Pencil className="size-4" />
           </button>
@@ -98,7 +98,7 @@ export function TaskCard({
           <button
             onClick={() => onDelete(task)}
             aria-label="Supprimer la tâche"
-            className="size-9 rounded-lg bg-black/30 ring-1 ring-white/10 flex items-center justify-center text-muted-foreground hover:text-red-400 active:scale-90 transition-all"
+            className="size-9 rounded-lg bg-black/30 ring-1 ring-white/10 flex items-center justify-center text-muted-foreground hover:text-danger-text active:scale-90 transition-all"
           >
             <Trash2 className="size-4" />
           </button>

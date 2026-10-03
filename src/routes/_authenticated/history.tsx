@@ -67,7 +67,7 @@ function HistoryPage() {
           <ChevronLeft className="size-5" />
         </Link>
         <div className="flex-1">
-          <p className="text-[10px] text-zinc-400 uppercase tracking-widest font-medium">
+          <p className="text-[11px] text-text-subtle uppercase tracking-widest font-medium">
             {selected ? "Date sélectionnée" : "30 derniers jours"}
           </p>
           <h1 className="text-3xl font-semibold tracking-tight">Historique</h1>
@@ -123,7 +123,7 @@ function HistoryPage() {
           <div className="p-8 text-center text-muted-foreground">Chargement…</div>
         )}
         {!isLoading && filtered.length === 0 && (
-          <div className="p-8 text-center text-muted-foreground border border-dashed border-white/10 rounded-2xl">
+          <div className="p-8 text-center text-muted-foreground border border-dashed border-white/10 rounded-[20px]">
             {selected
               ? "Aucune quête pour cette date."
               : "Aucune quête passée. Reviens demain pour voir ton historique."}
@@ -143,19 +143,19 @@ function HistoryPage() {
                 {day.tasks.map((t) => (
                   <div
                     key={t.id}
-                    className={`p-3 rounded-2xl ring-1 flex items-center gap-3 ${
+                    className={`p-3 rounded-[20px] ring-1 flex items-center gap-3 ${
                       t.done ? "bg-card/40 ring-white/5" : "bg-card ring-white/5"
                     }`}
                   >
                     <div className="flex-1 min-w-0">
                       <div className="flex gap-2 mb-0.5">
-                        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-zinc-800 text-zinc-400 font-bold uppercase tracking-wide">
+                        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-zinc-800 text-text-subtle font-bold uppercase tracking-wide">
                           {t.difficulty}
                         </span>
-                        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-zinc-800 text-zinc-400 font-bold tracking-wide">
+                        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-zinc-800 text-text-subtle font-bold tracking-wide">
                           {CATEGORIES[t.category].icon} {CATEGORIES[t.category].short}
                         </span>
-                        <span className={`text-[10px] font-medium ${t.done ? "text-brand" : "text-zinc-500"}`}>
+                        <span className={`text-[11px] font-medium ${t.done ? "text-brand" : "text-text-subtle"}`}>
                           {t.done ? `+${t.points} pts` : `${t.points} pts manqués`}
                         </span>
                       </div>
@@ -167,7 +167,7 @@ function HistoryPage() {
                       className={`size-9 shrink-0 rounded-xl flex items-center justify-center ring-1 ${
                         t.done
                           ? "bg-brand/15 text-brand ring-brand/30"
-                          : "bg-zinc-800/60 text-zinc-500 ring-white/5"
+                          : "bg-zinc-800/60 text-text-subtle ring-white/5"
                       }`}
                       aria-label={t.done ? "Validée" : "Non validée"}
                     >

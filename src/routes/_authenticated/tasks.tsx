@@ -124,7 +124,7 @@ function TasksPage() {
     <AppShell>
       <header className="px-5 pt-8 pb-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
         <div className="min-w-0">
-          <p className="text-[10px] text-zinc-400 uppercase tracking-widest font-medium">Aujourd'hui</p>
+          <p className="text-[11px] text-text-subtle uppercase tracking-widest font-medium">Aujourd'hui</p>
           <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight truncate">Mes quêtes</h1>
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
@@ -138,7 +138,7 @@ function TasksPage() {
           <Link
             to="/history"
             aria-label="Historique"
-            className="flex items-center justify-center size-9 rounded-full ring-1 ring-white/10 text-muted-foreground hover:text-brand shrink-0"
+            className="flex items-center justify-center size-9 rounded-full ring-1 ring-white/10 text-muted-foreground hover:text-foreground shrink-0"
           >
             <History className="size-4" />
           </Link>
@@ -155,7 +155,7 @@ function TasksPage() {
       </header>
 
       <section className="px-5 pb-4">
-        <div className="p-4 rounded-2xl bg-card ring-1 ring-white/5">
+        <div className="p-4 rounded-[20px] bg-card ring-1 ring-white/5">
           <div className="flex justify-between text-sm mb-2">
             <span className="text-muted-foreground">Progression du jour</span>
             <span className="font-semibold">{done}/{tasks.length} terminées</span>
@@ -189,7 +189,7 @@ function TasksPage() {
             <button
               key={`slot-${i}`}
               onClick={() => setOpen(true)}
-              className="w-full p-4 rounded-[18px] border-2 border-dashed border-white/10 text-muted-foreground text-sm hover:border-brand/40 hover:text-brand transition-colors"
+              className="w-full p-4 rounded-[20px] border-2 border-dashed border-white/10 text-muted-foreground text-sm hover:border-brand/40 hover:text-foreground transition-colors"
             >
               + Slot libre — ajouter une quête
             </button>
@@ -276,7 +276,7 @@ function NewTaskSheet({
                 }`}
               >
                 <div>{r.label}</div>
-                <div className="text-[10px] mt-0.5 opacity-70 normal-case tracking-normal">{r.hint}</div>
+                <div className="text-[11px] mt-0.5 opacity-70 normal-case tracking-normal">{r.hint}</div>
               </button>
             ))}
           </div>
@@ -297,7 +297,7 @@ function NewTaskSheet({
                 }`}
               >
                 <div>{d}</div>
-                <div className="text-[10px] mt-0.5 opacity-70">+{DIFFICULTY_POINTS[d]} pts</div>
+                <div className="text-[11px] mt-0.5 opacity-70">+{DIFFICULTY_POINTS[d]} pts</div>
               </button>
             ))}
           </div>
@@ -312,7 +312,7 @@ function NewTaskSheet({
                 key={c}
                 onClick={() => setCategory(c)}
                 title={CATEGORIES[c].label}
-                className={`p-2 rounded-xl text-[10px] font-semibold transition-all flex flex-col items-center gap-1 ${
+                className={`p-2 rounded-xl text-[11px] font-semibold transition-all flex flex-col items-center gap-1 ${
                   category === c
                     ? "bg-brand text-primary-foreground ring-2 ring-brand"
                     : "bg-black/40 text-muted-foreground ring-1 ring-white/10"
@@ -403,7 +403,7 @@ function EditTaskSheet({
                 }`}
               >
                 <div>{d}</div>
-                <div className="text-[10px] mt-0.5 opacity-70">+{DIFFICULTY_POINTS[d]} pts</div>
+                <div className="text-[11px] mt-0.5 opacity-70">+{DIFFICULTY_POINTS[d]} pts</div>
               </button>
             ))}
           </div>

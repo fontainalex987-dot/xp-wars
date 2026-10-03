@@ -66,7 +66,7 @@ function HomePage() {
             <Avatar value={profile.avatar} />
           </div>
           <div className="min-w-0">
-            <p className="text-[10px] text-zinc-400 uppercase tracking-widest font-medium">Niveau {profile.level}</p>
+            <p className="text-[11px] text-text-subtle uppercase tracking-widest font-medium">Niveau {profile.level}</p>
             <p className="text-base font-semibold truncate">{profile.pseudo}</p>
           </div>
         </div>
@@ -74,7 +74,7 @@ function HomePage() {
       </header>
 
       <section className="px-5 py-4">
-        <div className="relative p-6 rounded-[24px] bg-gradient-to-b from-white/[0.06] to-card bg-card ring-1 ring-white/10 overflow-hidden">
+        <div className="relative p-6 rounded-[20px] bg-gradient-to-b from-white/[0.06] to-card bg-card ring-1 ring-white/10 overflow-hidden">
           {doneCount >= 2 && (
             <div className="absolute top-4 right-4">
               <div className="combo-glow px-3 py-1 bg-brand text-primary-foreground text-xs font-bold rounded-full rotate-3">
@@ -83,7 +83,7 @@ function HomePage() {
             </div>
           )}
           <div className="mb-4">
-            <h1 className="text-4xl font-semibold leading-tight tracking-tight">Niveau {profile.level}</h1>
+            <h1 className="text-4xl font-display tabular-nums font-semibold leading-tight tracking-tight">Niveau {profile.level}</h1>
             <p className="text-muted-foreground text-base mt-1 max-w-[40ch]">
               Encore {xpToNext(profile.level) - profile.xp} XP pour le prochain grade
             </p>
@@ -91,8 +91,8 @@ function HomePage() {
           <XpBar value={profile.xp} max={xpToNext(profile.level)} />
           <div className="mt-4 flex justify-between items-end gap-3">
             <div className="flex flex-col min-w-0">
-              <span className="text-[10px] text-zinc-500 uppercase tracking-tighter">Points totaux</span>
-              <span className="text-xl font-semibold tracking-tight">{profile.totalPoints.toLocaleString("fr-FR")}</span>
+              <span className="text-[11px] text-text-subtle uppercase tracking-tighter">Points totaux</span>
+              <span className="text-xl font-display tabular-nums font-semibold tracking-tight">{profile.totalPoints.toLocaleString("fr-FR")}</span>
             </div>
             <Link
               to="/tasks"
@@ -112,29 +112,29 @@ function HomePage() {
       </section>
 
       <section className="px-5 py-2 grid grid-cols-3 gap-3">
-        <div className="p-4 rounded-2xl bg-card ring-1 ring-white/5">
-          <div className="flex items-center gap-2 text-zinc-400">
+        <div className="p-4 rounded-[20px] bg-card ring-1 ring-white/5">
+          <div className="flex items-center gap-2 text-text-subtle">
             <Target className="size-4" />
-            <span className="text-[10px] uppercase tracking-widest">Aujourd'hui</span>
+            <span className="text-[11px] uppercase tracking-widest">Aujourd'hui</span>
           </div>
-          <p className="mt-2 text-2xl font-bold">{doneCount}/{tasks.length}</p>
+          <p className="mt-2 text-2xl font-display tabular-nums font-bold">{doneCount}/{tasks.length}</p>
           <p className="text-xs text-muted-foreground">quêtes terminées</p>
         </div>
-        <div className="p-4 rounded-2xl bg-card ring-1 ring-white/5">
-          <div className="flex items-center gap-2 text-zinc-400">
+        <div className="p-4 rounded-[20px] bg-card ring-1 ring-white/5">
+          <div className="flex items-center gap-2 text-text-subtle">
             <Trophy className="size-4" />
-            <span className="text-[10px] uppercase tracking-widest">Ton rang</span>
+            <span className="text-[11px] uppercase tracking-widest">Ton rang</span>
           </div>
-          <p className="mt-2 text-2xl font-bold">{group ? `#${myRank || "-"}` : "—"}</p>
+          <p className="mt-2 text-2xl font-display tabular-nums font-bold">{group ? `#${myRank || "-"}` : "—"}</p>
           <p className="text-xs text-muted-foreground truncate">{group ? group.name : "Aucun groupe"}</p>
         </div>
         <Link
           to="/friends"
-          className="p-4 rounded-2xl bg-card ring-1 ring-white/5 flex flex-col justify-between active:scale-95 transition-transform"
+          className="p-4 rounded-[20px] bg-card ring-1 ring-white/5 flex flex-col justify-between active:scale-95 transition-transform"
         >
-          <div className="flex items-center gap-2 text-zinc-400">
+          <div className="flex items-center gap-2 text-text-subtle">
             <Users className="size-4" />
-            <span className="text-[10px] uppercase tracking-widest">Amis</span>
+            <span className="text-[11px] uppercase tracking-widest">Amis</span>
           </div>
           <p className="mt-2 text-xs text-muted-foreground">Gérer</p>
         </Link>
@@ -142,9 +142,9 @@ function HomePage() {
 
       <section className="px-5 pt-2">
         <div
-          className={`p-5 rounded-2xl ring-1 flex items-start gap-4 ${
+          className={`p-5 rounded-[20px] ring-1 flex items-start gap-4 ${
             streakInfo.tone === "risk"
-              ? "bg-orange-500/10 ring-orange-500/40"
+              ? "bg-streak-risk/10 ring-streak-risk/40"
               : streakInfo.tone === "safe"
                 ? "bg-brand/10 ring-brand/30"
                 : "bg-card ring-white/5"
@@ -152,10 +152,10 @@ function HomePage() {
         >
           <div className="flex flex-col items-center shrink-0">
             <Flame
-              className={`size-8 ${streakInfo.tone === "risk" ? "text-orange-400 animate-pulse" : streakInfo.tone === "safe" ? "text-brand" : "text-zinc-500"}`}
+              className={`size-8 ${streakInfo.tone === "risk" ? "text-streak-risk animate-pulse" : streakInfo.tone === "safe" ? "text-brand" : "text-text-subtle"}`}
               strokeWidth={2.5}
             />
-            <span className="text-2xl font-bold leading-none mt-1">{profile.streak}</span>
+            <span className="text-2xl font-display tabular-nums font-bold leading-none mt-1">{profile.streak}</span>
           </div>
           <div className="min-w-0">
             <p className="text-base font-semibold">{streakInfo.title}</p>
@@ -168,7 +168,7 @@ function HomePage() {
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-medium">Mes objectifs</h2>
           {activeGoals.length > 0 && (
-            <Link to="/goals" className="text-sm text-brand font-medium">
+            <Link to="/goals" className="text-sm text-foreground underline underline-offset-4 decoration-text-subtle font-medium">
               Voir tout →
             </Link>
           )}
@@ -176,7 +176,7 @@ function HomePage() {
         {activeGoals.length === 0 ? (
           <Link
             to="/goals"
-            className="p-4 rounded-2xl bg-card/60 border-2 border-dashed border-white/10 flex items-center gap-3 active:scale-[0.99] transition-transform"
+            className="p-4 rounded-[20px] bg-card/60 border-2 border-dashed border-white/10 flex items-center gap-3 active:scale-[0.99] transition-transform"
           >
             <div className="size-10 rounded-xl bg-brand/10 flex items-center justify-center text-xl shrink-0">🎯</div>
             <div className="min-w-0">
@@ -194,14 +194,14 @@ function HomePage() {
       </section>
 
       <section className="px-5 pt-2">
-        <div className="p-5 rounded-2xl bg-card ring-1 ring-white/5">
+        <div className="p-5 rounded-[20px] bg-card ring-1 ring-white/5">
           <p className="text-base font-semibold">{encouragement.title}</p>
           <p className="text-sm text-muted-foreground mt-1">{encouragement.body}</p>
           {profile.goal && (
             <div className="mt-4 pt-4 border-t border-white/5 flex items-start gap-2">
               <Target className="size-4 text-brand shrink-0 mt-0.5" />
               <div className="min-w-0">
-                <p className="text-[10px] text-brand uppercase tracking-widest font-bold">Mon objectif</p>
+                <p className="text-[11px] text-text-subtle uppercase tracking-widest font-bold">Mon objectif</p>
                 <p className="text-sm font-medium break-words">{profile.goal}</p>
               </div>
             </div>
@@ -211,9 +211,9 @@ function HomePage() {
 
       {tasks.length > 0 && (
         <section className="px-5 py-4">
-          <div className="p-4 rounded-2xl bg-brand/5 ring-1 ring-brand/20 flex items-center justify-between">
+          <div className="p-4 rounded-[20px] bg-brand/5 ring-1 ring-brand/20 flex items-center justify-between">
             <div>
-              <p className="text-[10px] text-brand uppercase tracking-widest font-bold">Points potentiels</p>
+              <p className="text-[11px] text-brand uppercase tracking-widest font-bold">Points potentiels</p>
               <p className="text-xl font-semibold">+{potentialPoints} pts à gagner</p>
             </div>
             <Link to="/tasks" className="text-sm text-brand font-semibold hover:underline">
@@ -224,10 +224,10 @@ function HomePage() {
       )}
 
       <section className="px-5 py-4">
-        <div className="p-5 rounded-[24px] bg-card/50 ring-1 ring-white/5">
+        <div className="p-5 rounded-[20px] bg-card/50 ring-1 ring-white/5">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-medium">Podium du jour</h2>
-            <Link to="/leaderboard" className="text-sm text-brand font-medium">
+            <Link to="/leaderboard" className="text-sm text-foreground underline underline-offset-4 decoration-text-subtle font-medium">
               Voir tout
             </Link>
           </div>
@@ -254,7 +254,7 @@ function HomePage() {
                     <div className={`rounded-full p-1 ring-2 ${isFirst ? "ring-brand size-16" : rank === 2 ? "ring-zinc-500/40 size-12" : "ring-orange-900/40 size-12"}`}>
                       <div className="size-full rounded-full bg-zinc-800 flex items-center justify-center text-2xl"><Avatar value={f.avatar} /></div>
                     </div>
-                    <div className={`w-14 rounded-t-lg flex items-center justify-center font-bold ${heights[rank]} ${isFirst ? "bg-brand text-primary-foreground text-xl" : "bg-zinc-800/80 text-zinc-400"}`}>
+                    <div className={`w-14 rounded-t-lg flex items-center justify-center font-bold ${heights[rank]} ${isFirst ? "bg-brand text-primary-foreground text-xl" : "bg-zinc-800/80 text-text-subtle"}`}>
                       {rank}
                     </div>
                   </div>

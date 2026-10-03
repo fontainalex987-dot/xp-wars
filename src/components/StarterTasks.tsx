@@ -33,15 +33,15 @@ export function StarterTasks({ onAdd }: { onAdd: (t: { title: string; descriptio
           const isAdded = added.has(task.title);
           return (
             <button key={task.title} onClick={() => handleAdd(task)} disabled={isAdded}
-              className={`flex items-center gap-3 p-3 rounded-2xl text-left transition-all active:scale-95 ${isAdded ? "bg-emerald-950/30 ring-1 ring-emerald-500/20 opacity-60" : "bg-card ring-1 ring-white/5"}`}>
+              className={`flex items-center gap-3 p-3 rounded-[20px] text-left transition-all active:scale-95 ${isAdded ? "bg-emerald-950/30 ring-1 ring-emerald-500/20 opacity-60" : "bg-card ring-1 ring-white/5"}`}>
               <span className="text-2xl">{task.icon}</span>
               <div className="flex-1 min-w-0">
                 <p className={`text-sm font-medium ${isAdded ? "text-emerald-400" : ""}`}>{task.title}</p>
-                <p className="text-[10px] text-muted-foreground">{task.description}</p>
+                <p className="text-[11px] text-muted-foreground">{task.description}</p>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold text-brand">+{task.points}</span>
-                {isAdded ? <span className="text-[10px] text-emerald-400 font-bold">Ajouté</span> : <div className="size-7 rounded-full bg-brand/10 flex items-center justify-center"><Plus className="size-4 text-brand" /></div>}
+                {isAdded ? <span className="text-[11px] text-emerald-400 font-bold">Ajouté</span> : <div className="size-7 rounded-full bg-brand/10 flex items-center justify-center"><Plus className="size-4 text-brand" /></div>}
               </div>
             </button>
           );

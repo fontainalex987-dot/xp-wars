@@ -84,7 +84,7 @@ function FriendsPage() {
 
       {/* Tabs */}
       <div className="px-5 mb-4">
-        <div className="flex p-1 rounded-2xl bg-black/40 ring-1 ring-white/5">
+        <div className="flex p-1 rounded-[20px] bg-black/40 ring-1 ring-white/5">
           {(["friends", "requests", "search"] as const).map((tab) => (
             <button
               key={tab}
@@ -107,9 +107,9 @@ function FriendsPage() {
       {activeTab === "friends" && (
         <div className="px-5 space-y-3 pb-8">
           {friends.length === 0 ? (
-            <div className="p-6 rounded-2xl bg-card/60 ring-1 ring-white/5 text-center">
+            <div className="p-6 rounded-[20px] bg-card/60 ring-1 ring-white/5 text-center">
               <p className="text-sm text-muted-foreground">Tu n'as pas encore d'amis.</p>
-              <p className="text-xs text-zinc-500 mt-1">Va dans l'onglet Rechercher pour en ajouter !</p>
+              <p className="text-xs text-text-subtle mt-1">Va dans l'onglet Rechercher pour en ajouter !</p>
             </div>
           ) : (
             friends.map((f) => {
@@ -122,7 +122,7 @@ function FriendsPage() {
               return (
                 <div key={f.id} className="space-y-2">
                 <div
-                  className="p-4 rounded-2xl bg-card ring-1 ring-white/5 flex items-center gap-3"
+                  className="p-4 rounded-[20px] bg-card ring-1 ring-white/5 flex items-center gap-3"
                 >
                   <div className="size-12 rounded-full bg-zinc-800 flex items-center justify-center text-2xl shrink-0">
                     <Avatar value={f.avatar} />
@@ -162,7 +162,7 @@ function FriendsPage() {
                         toast.error("Erreur");
                       }
                     }}
-                    className="text-zinc-600 hover:text-red-400 transition-colors"
+                    className="text-zinc-600 hover:text-danger-text transition-colors"
                     title="Retirer"
                   >
                     <UserX className="size-4" />
@@ -170,7 +170,7 @@ function FriendsPage() {
                 </div>
 
                 {challengeTarget === f.id && (
-                  <div className="p-4 rounded-2xl bg-card ring-1 ring-brand/20 space-y-3">
+                  <div className="p-4 rounded-[20px] bg-card ring-1 ring-brand/20 space-y-3">
                     <DuelDurationPicker value={duelDays} onChange={setDuelDays} />
                     <button
                       onClick={async () => {
@@ -204,19 +204,19 @@ function FriendsPage() {
             <Swords className="size-4 text-brand" />
             <h2 className="text-sm font-bold">Duels privés</h2>
           </div>
-          <p className="text-[11px] text-zinc-500 mb-2">Visibles uniquement par toi et ton adversaire.</p>
+          <p className="text-[11px] text-text-subtle mb-2">Visibles uniquement par toi et ton adversaire.</p>
           {privateDuels.map((d) => {
             const isChallenger = d.challengerId === profile?.id;
             const isChallenged = d.challengedId === profile?.id;
             return (
-              <div key={d.id} className="p-4 rounded-2xl bg-card ring-1 ring-white/5">
+              <div key={d.id} className="p-4 rounded-[20px] bg-card ring-1 ring-white/5">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-brand/10 text-brand ring-1 ring-brand/20 uppercase">
                       {d.status === "pending" ? "En attente" : d.status === "active" ? "En cours" : "Terminé"}
                     </span>
-                    <span className="text-[10px] text-muted-foreground">{d.durationDays}j</span>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-400/10 text-amber-300 ring-1 ring-amber-400/20">
+                    <span className="text-[11px] text-muted-foreground">{d.durationDays}j</span>
+                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-400/10 text-amber-300 ring-1 ring-amber-400/20">
                       +{d.rewardXp} XP
                     </span>
                   </div>
@@ -247,7 +247,7 @@ function FriendsPage() {
                             toast.error("Erreur");
                           }
                         }}
-                        className="text-[10px] text-zinc-500 hover:text-red-400"
+                        className="text-[11px] text-text-subtle hover:text-danger-text"
                       >
                         {d.status === "active" ? "Abandonner" : "Supprimer"}
                       </button>
@@ -260,7 +260,7 @@ function FriendsPage() {
                     <p className="text-xs font-semibold mt-1 truncate">{d.challengerPseudo}</p>
                     <p className="text-lg font-bold text-brand">{d.challengerPoints}</p>
                   </div>
-                  <div className="text-xs font-bold text-zinc-500 uppercase tracking-widest">VS</div>
+                  <div className="text-xs font-bold text-text-subtle uppercase tracking-widest">VS</div>
                   <div className="flex-1 text-center">
                     <div className="mx-auto size-10 flex items-center justify-center text-2xl"><Avatar value={d.challengedAvatar} /></div>
                     <p className="text-xs font-semibold mt-1 truncate">{d.challengedPseudo}</p>
@@ -268,7 +268,7 @@ function FriendsPage() {
                   </div>
                 </div>
                 {d.status === "active" && d.daysLeft > 0 && (
-                  <p className="text-[10px] text-muted-foreground text-center mt-2">{d.daysLeft}j restants</p>
+                  <p className="text-[11px] text-muted-foreground text-center mt-2">{d.daysLeft}j restants</p>
                 )}
                 {d.status === "completed" && (
                   d.winnerId ? (
@@ -299,14 +299,14 @@ function FriendsPage() {
       {activeTab === "requests" && (
         <div className="px-5 space-y-3 pb-8">
           {requests.length === 0 ? (
-            <div className="p-6 rounded-2xl bg-card/60 ring-1 ring-white/5 text-center">
+            <div className="p-6 rounded-[20px] bg-card/60 ring-1 ring-white/5 text-center">
               <p className="text-sm text-muted-foreground">Aucune demande en attente.</p>
             </div>
           ) : (
             requests.map((r) => (
               <div
                 key={r.id}
-                className="p-4 rounded-2xl bg-card ring-1 ring-white/5 flex items-center gap-3"
+                className="p-4 rounded-[20px] bg-card ring-1 ring-white/5 flex items-center gap-3"
               >
                 <div className="size-12 rounded-full bg-zinc-800 flex items-center justify-center text-2xl shrink-0">
                   <Avatar value={r.senderAvatar} />
@@ -339,7 +339,7 @@ function FriendsPage() {
                       toast.error("Erreur");
                     }
                   }}
-                  className="text-xs font-bold text-zinc-500 bg-zinc-800 px-3 py-2 rounded-xl active:scale-95"
+                  className="text-xs font-bold text-text-subtle bg-zinc-800 px-3 py-2 rounded-xl active:scale-95"
                 >
                   Refuser
                 </button>
@@ -353,27 +353,27 @@ function FriendsPage() {
       {activeTab === "search" && (
         <div className="px-5 space-y-3 pb-8">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-500" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-text-subtle" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Rechercher un joueur..."
-              className="w-full pl-10 pr-4 py-3 rounded-2xl bg-card ring-1 ring-white/5 text-sm placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-brand/50"
+              className="w-full pl-10 pr-4 py-3 rounded-[20px] bg-card ring-1 ring-white/5 text-sm placeholder:text-text-subtle focus:outline-none focus:ring-2 focus:ring-brand/50"
             />
           </div>
 
           {searchQuery.length < 2 ? (
-            <p className="text-center text-xs text-zinc-500 py-8">
+            <p className="text-center text-xs text-text-subtle py-8">
               Tape au moins 2 caractères pour rechercher
             </p>
           ) : searchResults.length === 0 ? (
-            <p className="text-center text-xs text-zinc-500 py-8">Aucun résultat</p>
+            <p className="text-center text-xs text-text-subtle py-8">Aucun résultat</p>
           ) : (
             searchResults.map((u) => (
               <div
                 key={u.id}
-                className="p-4 rounded-2xl bg-card ring-1 ring-white/5 flex items-center gap-3"
+                className="p-4 rounded-[20px] bg-card ring-1 ring-white/5 flex items-center gap-3"
               >
                 <div className="size-12 rounded-full bg-zinc-800 flex items-center justify-center text-2xl shrink-0">
                   <Avatar value={u.avatar} />
@@ -389,7 +389,7 @@ function FriendsPage() {
                     Ami
                   </span>
                 ) : u.requestSent ? (
-                  <span className="text-xs text-zinc-500 px-3 py-2">Demande envoyée</span>
+                  <span className="text-xs text-text-subtle px-3 py-2">Demande envoyée</span>
                 ) : u.requestReceived ? (
                   <span className="text-xs text-brand px-3 py-2">Demande reçue</span>
                 ) : (
