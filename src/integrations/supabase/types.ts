@@ -123,6 +123,53 @@ export type Database = {
         }
         Relationships: []
       }
+      goals: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          emoji: string
+          ends_on: string
+          group_id: string | null
+          id: string
+          starts_on: string
+          target_count: number
+          title: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          emoji?: string
+          ends_on: string
+          group_id?: string | null
+          id?: string
+          starts_on?: string
+          target_count: number
+          title: string
+          user_id?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          emoji?: string
+          ends_on?: string
+          group_id?: string | null
+          id?: string
+          starts_on?: string
+          target_count?: number
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goals_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       group_challenges: {
         Row: {
           created_at: string
@@ -421,6 +468,7 @@ export type Database = {
           created_at: string
           description: string
           difficulty: Database["public"]["Enums"]["difficulty"]
+          goal_id: string | null
           id: string
           points: number
           title: string
@@ -432,6 +480,7 @@ export type Database = {
           created_at?: string
           description?: string
           difficulty: Database["public"]["Enums"]["difficulty"]
+          goal_id?: string | null
           id?: string
           points: number
           title: string
@@ -443,12 +492,21 @@ export type Database = {
           created_at?: string
           description?: string
           difficulty?: Database["public"]["Enums"]["difficulty"]
+          goal_id?: string | null
           id?: string
           points?: number
           title?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "task_templates_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tasks: {
         Row: {
@@ -458,6 +516,7 @@ export type Database = {
           difficulty: Database["public"]["Enums"]["difficulty"]
           done: boolean
           done_at: string | null
+          goal_id: string | null
           id: string
           points: number
           task_date: string
@@ -472,6 +531,7 @@ export type Database = {
           difficulty: Database["public"]["Enums"]["difficulty"]
           done?: boolean
           done_at?: string | null
+          goal_id?: string | null
           id?: string
           points: number
           task_date?: string
@@ -486,6 +546,7 @@ export type Database = {
           difficulty?: Database["public"]["Enums"]["difficulty"]
           done?: boolean
           done_at?: string | null
+          goal_id?: string | null
           id?: string
           points?: number
           task_date?: string
@@ -494,6 +555,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "tasks_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "tasks_template_id_fkey"
             columns: ["template_id"]
@@ -619,6 +687,27 @@ export type Database = {
       }
       dispatch_daily_reminders: { Args: never; Returns: undefined }
       generate_group_code: { Args: never; Returns: string }
+      goal_progress: { Args: { _goal: string }; Returns: number }
+      goal_rows: {
+        Args: { _ids: string[] }
+        Returns: {
+          completed_at: string
+          contributors: Json
+          created_at: string
+          creator_avatar: string
+          creator_pseudo: string
+          days_left: number
+          emoji: string
+          ends_on: string
+          group_id: string
+          id: string
+          progress: number
+          starts_on: string
+          target_count: number
+          title: string
+          user_id: string
+        }[]
+      }
       group_activity: {
         Args: { _group: string; _limit?: number }
         Returns: {
@@ -665,6 +754,26 @@ export type Database = {
           starts_at: string
           status: string
           winner_id: string
+        }[]
+      }
+      group_goals: {
+        Args: { _group: string }
+        Returns: {
+          completed_at: string
+          contributors: Json
+          created_at: string
+          creator_avatar: string
+          creator_pseudo: string
+          days_left: number
+          emoji: string
+          ends_on: string
+          group_id: string
+          id: string
+          progress: number
+          starts_on: string
+          target_count: number
+          title: string
+          user_id: string
         }[]
       }
       group_leaderboard: {
@@ -764,6 +873,26 @@ export type Database = {
           xp: number
         }[]
       }
+      my_goals: {
+        Args: never
+        Returns: {
+          completed_at: string
+          contributors: Json
+          created_at: string
+          creator_avatar: string
+          creator_pseudo: string
+          days_left: number
+          emoji: string
+          ends_on: string
+          group_id: string
+          id: string
+          progress: number
+          starts_on: string
+          target_count: number
+          title: string
+          user_id: string
+        }[]
+      }
       reject_friend_request: { Args: { _request: string }; Returns: undefined }
       remove_friend: { Args: { _friend: string }; Returns: undefined }
       reset_season: { Args: never; Returns: string }
@@ -801,6 +930,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      shares_group: { Args: { _a: string; _b: string }; Returns: boolean }
       sync_today_tasks: {
         Args: never
         Returns: {
@@ -810,6 +940,7 @@ export type Database = {
           difficulty: Database["public"]["Enums"]["difficulty"]
           done: boolean
           done_at: string | null
+          goal_id: string | null
           id: string
           points: number
           task_date: string
@@ -823,6 +954,26 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      user_goals: {
+        Args: { _user: string }
+        Returns: {
+          completed_at: string
+          contributors: Json
+          created_at: string
+          creator_avatar: string
+          creator_pseudo: string
+          days_left: number
+          emoji: string
+          ends_on: string
+          group_id: string
+          id: string
+          progress: number
+          starts_on: string
+          target_count: number
+          title: string
+          user_id: string
+        }[]
       }
       user_stats_by_category: {
         Args: { _from: string; _to: string }
