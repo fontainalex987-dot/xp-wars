@@ -38,7 +38,14 @@ export function categoryOf(value: string | null | undefined): Category {
   return value && value in CATEGORIES ? (value as Category) : "autre";
 }
 
-export const XP_PER_LEVEL = 500;
+// XP nécessaire pour passer du niveau N au niveau N+1 (même formule que SQL xp_to_next).
+export function xpToNext(level: number): number {
+  if (level <= 1) return 100;
+  if (level === 2) return 200;
+  if (level === 3) return 350;
+  if (level === 4) return 500;
+  return 600;
+}
 
 export const AVATARS = ["🥷", "🦁", "🐉", "⚡", "🧿", "🦊", "🐺", "🦅", "🐯", "🐼", "🦄", "👾"];
 
@@ -138,6 +145,12 @@ export function useProfile() {
       const { data, error } = await supabase.from("profiles").select("*").eq("id", userId!).maybeSingle();
       if (error) throw error;
       if (!data) return null;
+      // Garde le fuseau du profil aligné sur celui de l'appareil (journées, séries, stats côté serveur).
+      const tz = deviceTimeZone();
+      if (tz && data.timezone !== tz) {
+        const { error: tzError } = await supabase.from("profiles").update({ timezone: tz }).eq("id", data.id);
+        if (tzError) console.warn("timezone sync failed", tzError);
+      }
       return {
         id: data.id,
         pseudo: data.pseudo,
@@ -184,6 +197,7 @@ export function useCreateProfile() {
         pseudo: input.pseudo,
         avatar: input.avatar,
         goal: input.goal,
+        timezone: deviceTimeZone() ?? "America/Guadeloupe",
       });
       if (error) throw error;
     },
@@ -214,16 +228,24 @@ export type TaskTemplate = {
   active: boolean;
 };
 
-// Today in America/Guadeloupe (UTC-4, no DST) — used only for client-side filters
-// on historical rows. The source of truth for "today" is the server RPC.
-export function todayGuadeloupe(): string {
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: "America/Guadeloupe",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(new Date());
+// Fuseau de l'appareil (ex. "Europe/Paris"), null si indisponible.
+export function deviceTimeZone(): string | null {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || null;
+  } catch {
+    return null;
+  }
 }
+
+// Today (YYYY-MM-DD) in the device's timezone — matches the server's user_today()
+// once the profile timezone is synced.
+export function todayLocal(): string {
+  const tz = deviceTimeZone() ?? "America/Guadeloupe";
+  return new Intl.DateTimeFormat("en-CA", { timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+}
+
+/** @deprecated use todayLocal() */
+export const todayGuadeloupe = todayLocal;
 
 export function useTodayTasks() {
   const { userId } = useAuth();
