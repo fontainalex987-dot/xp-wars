@@ -6,7 +6,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { haptics } from "@/lib/haptics";
 import {
   CATEGORIES,
-  todayGuadeloupe,
+  todayLocal,
   useStatsByCategory,
   useStatsDaily,
   useStatsMonthly,
@@ -43,14 +43,14 @@ const HERO_LABEL: Record<Period, string> = {
 };
 
 function isoFromToday(offsetDays: number) {
-  const [y, m, d] = todayGuadeloupe().split("-").map(Number);
+  const [y, m, d] = todayLocal().split("-").map(Number);
   const dt = new Date(Date.UTC(y, m - 1, d, 12));
   dt.setUTCDate(dt.getUTCDate() + offsetDays);
   return dt.toISOString().slice(0, 10);
 }
 
 function isoFromTodayMonths(offsetMonths: number) {
-  const [y, m] = todayGuadeloupe().split("-").map(Number);
+  const [y, m] = todayLocal().split("-").map(Number);
   const dt = new Date(Date.UTC(y, m - 1 + offsetMonths, 1, 12));
   return dt.toISOString().slice(0, 10);
 }
@@ -65,7 +65,7 @@ function parseISO(iso: string) {
 
 function StatsPage() {
   const [period, setPeriod] = useState<Period>("jour");
-  const today = todayGuadeloupe();
+  const today = todayLocal();
 
   const range = useMemo(() => {
     if (period === "jour") return { from: isoFromToday(-34), to: today };

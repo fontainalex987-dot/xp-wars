@@ -5,7 +5,7 @@ import { StreakFlame } from "@/components/StreakFlame";
 import { HomeSkeleton } from "@/components/Skeletons";
 import { XpBar } from "@/components/XpBar";
 import { GoalCard } from "@/components/GoalCard";
-import { isGoalActive, useGroupMembers, useMyGoals, useMyGroup, useProfile, useTodayTasks, XP_PER_LEVEL } from "@/lib/store";
+import { isGoalActive, useGroupMembers, useMyGoals, useMyGroup, useProfile, useTodayTasks, xpToNext } from "@/lib/store";
 
 export const Route = createFileRoute("/_authenticated/")({
   head: () => ({
@@ -84,10 +84,10 @@ function HomePage() {
           <div className="mb-4">
             <h1 className="text-4xl font-semibold leading-tight tracking-tight">Niveau {profile.level}</h1>
             <p className="text-muted-foreground text-base mt-1 max-w-[40ch]">
-              Encore {XP_PER_LEVEL - profile.xp} XP pour le prochain grade
+              Encore {xpToNext(profile.level) - profile.xp} XP pour le prochain grade
             </p>
           </div>
-          <XpBar value={profile.xp} max={XP_PER_LEVEL} />
+          <XpBar value={profile.xp} max={xpToNext(profile.level)} />
           <div className="mt-4 flex justify-between items-end gap-3">
             <div className="flex flex-col min-w-0">
               <span className="text-[10px] text-zinc-500 uppercase tracking-tighter">Points totaux</span>

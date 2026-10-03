@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Flame, Snowflake } from "lucide-react";
 import { toast } from "sonner";
 import { haptics } from "@/lib/haptics";
-import { useAuth, useProfile, useRecentStreakFreeze, todayGuadeloupe } from "@/lib/store";
+import { useAuth, useProfile, useRecentStreakFreeze, todayLocal } from "@/lib/store";
 
 const MAX_FREEZES = 2;
 const SEEN_KEY = "taskbattle.seenStreakFreezes";
@@ -30,7 +30,7 @@ function writeSeen(userId: string, ids: Set<string>) {
 }
 
 function yesterdayGuadeloupe(): string {
-  const today = todayGuadeloupe();
+  const today = todayLocal();
   const d = new Date(`${today}T12:00:00Z`);
   d.setUTCDate(d.getUTCDate() - 1);
   return d.toISOString().slice(0, 10);

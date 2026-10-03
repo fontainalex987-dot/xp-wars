@@ -24,7 +24,7 @@ const fmt = new Intl.DateTimeFormat("fr-FR", {
   weekday: "long",
   day: "numeric",
   month: "long",
-  timeZone: "America/Guadeloupe",
+  
 });
 
 function formatDay(iso: string) {

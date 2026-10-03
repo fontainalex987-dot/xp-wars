@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
 import { GoalCard } from "@/components/GoalCard";
-import { isGoalActive, useGroupMembers, useMemberProfile, useMyGroup, useMyGroups, useUserGoals, XP_PER_LEVEL } from "@/lib/store";
+import { isGoalActive, useGroupMembers, useMemberProfile, useMyGroup, useMyGroups, useUserGoals, xpToNext } from "@/lib/store";
 
 export const Route = createFileRoute("/_authenticated/member/$memberId")({
   head: () => ({
@@ -63,7 +63,7 @@ function MemberProfilePage() {
     );
   }
 
-  const xpPct = Math.min(100, Math.round((member.xp / XP_PER_LEVEL) * 100));
+  const xpPct = Math.min(100, Math.round((member.xp / xpToNext(member.level)) * 100));
 
   return (
     <AppShell>
@@ -90,7 +90,7 @@ function MemberProfilePage() {
         <div className="p-4 rounded-2xl bg-card ring-1 ring-white/5">
           <div className="flex justify-between text-xs mb-2">
             <span className="text-muted-foreground">XP niveau {member.level}</span>
-            <span className="font-semibold">{member.xp} / {XP_PER_LEVEL}</span>
+            <span className="font-semibold">{member.xp} / {xpToNext(member.level)}</span>
           </div>
           <div className="h-2 bg-black/40 rounded-full overflow-hidden">
             <div className="h-full bg-brand xp-glow transition-all duration-500" style={{ width: `${xpPct}%` }} />

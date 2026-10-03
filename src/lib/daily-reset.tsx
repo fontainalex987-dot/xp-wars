@@ -4,7 +4,7 @@ import { useAuth } from "@/lib/store";
 
 /**
  * Force un refetch des queries dépendantes du jour au retour au premier plan.
- * La détection du "jour" est faite côté serveur (America/Guadeloupe) via la
+ * La détection du "jour" est faite côté serveur (fuseau du profil) via la
  * RPC `sync_today_tasks`, seule source de vérité. Ce provider ne fait plus
  * de reset côté client à minuit local — il déclenche seulement une
  * revalidation quand l'utilisateur revient sur l'app.
