@@ -129,6 +129,12 @@ function TasksPage() {
         </div>
         <div className="flex items-center gap-2">
           <Link
+            to="/coach"
+            className="text-xs font-semibold uppercase tracking-wide text-brand py-2 px-3 rounded-full ring-1 ring-brand/30"
+          >
+            Coach IA
+          </Link>
+          <Link
             to="/history"
             className="text-xs font-semibold uppercase tracking-wide text-muted-foreground hover:text-brand py-2 px-3 rounded-full ring-1 ring-white/10"
           >
