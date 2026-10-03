@@ -2,7 +2,7 @@ import { StarterTasks } from "@/components/StarterTasks";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Plus, X } from "lucide-react";
+import { History, Plus, X } from "lucide-react";
 import { motion } from "framer-motion";
 import { AppShell } from "@/components/AppShell";
 import { TaskCard } from "@/components/TaskCard";
