@@ -1,8 +1,10 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { ArrowLeft, Flame, Target, Trophy, Zap } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
 import { GoalCard } from "@/components/GoalCard";
-import { isGoalActive, useGroupMembers, useMemberProfile, useMyGroup, useUserGoals, XP_PER_LEVEL } from "@/lib/store";
+import { isGoalActive, useGroupMembers, useMemberProfile, useMyGroup, useMyGroups, useUserGoals, XP_PER_LEVEL } from "@/lib/store";
 
 export const Route = createFileRoute("/_authenticated/member/$memberId")({
   head: () => ({
@@ -18,8 +20,21 @@ export const Route = createFileRoute("/_authenticated/member/$memberId")({
 
 function MemberProfilePage() {
   const { memberId } = useParams({ from: "/_authenticated/member/$memberId" });
-  const { data: group } = useMyGroup();
-  const { data: member, isLoading } = useMemberProfile(group?.id, memberId);
+  const { data: activeGroup } = useMyGroup();
+  const { data: myGroups = [] } = useMyGroups();
+  const { data: sharedGroupId, isLoading: findingGroup } = useQuery({
+    queryKey: ["sharedGroup", memberId, myGroups.map((g) => g.id).join(","), activeGroup?.id],
+    enabled: myGroups.length > 0,
+    queryFn: async (): Promise<string | null> => {
+      const ordered = [...myGroups].sort((a, b) => (a.id === activeGroup?.id ? -1 : b.id === activeGroup?.id ? 1 : 0));
+      const { data } = await supabase.from("group_members").select("group_id").eq("user_id", memberId).in("group_id", ordered.map((g) => g.id));
+      const ids = new Set((data ?? []).map((r) => r.group_id));
+      return ordered.find((g) => ids.has(g.id))?.id ?? null;
+    },
+  });
+  const group = myGroups.find((g) => g.id === sharedGroupId) ?? activeGroup;
+  const { data: member, isLoading: loadingMember } = useMemberProfile(sharedGroupId ?? undefined, memberId);
+  const isLoading = findingGroup || loadingMember;
   const { data: friends = [] } = useGroupMembers(group?.id);
   const { data: goals = [] } = useUserGoals(memberId);
   const activeGoals = goals.filter(isGoalActive);

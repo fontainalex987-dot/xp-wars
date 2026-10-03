@@ -61,12 +61,12 @@ function GoalsPage() {
           {past.map((g) => <GoalCard key={g.id} goal={g} showContributors={!!g.groupId} action={action(g)} />)}
         </section>
       )}
-      {open && <NewGoalSheet groupId={group?.id ?? null} onClose={() => setOpen(false)} />}
+      {open && <NewGoalSheet groupId={group?.id ?? null} groupName={group?.name ?? null} onClose={() => setOpen(false)} />}
     </AppShell>
   );
 }
 
-function NewGoalSheet({ groupId, onClose }: { groupId: string | null; onClose: () => void }) {
+function NewGoalSheet({ groupId, groupName, onClose }: { groupId: string | null; groupName: string | null; onClose: () => void }) {
   const create = useCreateGoal();
   const [title, setTitle] = useState("");
   const [emoji, setEmoji] = useState(GOAL_EMOJIS[0]);
@@ -122,6 +122,9 @@ function NewGoalSheet({ groupId, onClose }: { groupId: string | null; onClose: (
             </button>
           ))}
         </div>
+        {scope === "groupe" && groupName && (
+          <p className="text-xs text-muted-foreground">Objectif partagé avec le groupe <span className="text-brand font-semibold">{groupName}</span></p>
+        )}
         <button type="submit" disabled={create.isPending} className="w-full py-3 rounded-xl bg-brand text-primary-foreground font-bold active:scale-95 disabled:opacity-50">
           {create.isPending ? "..." : "Créer l'objectif"}
         </button>
