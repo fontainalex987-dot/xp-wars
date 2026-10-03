@@ -27,8 +27,7 @@ function LeaderboardPage() {
   const { data: friends = [] } = useGroupMembers(group?.id);
   const [range, setRange] = useState<Range>("today");
   const sorted = [...friends].sort((a, b) => pick(b, range) - pick(a, range));
-  // Seuls les membres qui ont marqué sur la période montent sur le podium.
-  const podium = sorted.filter((f) => pick(f, range) > 0).slice(0, 3);
+  const podium = sorted.slice(0, 3);
   const medals = ["🥇", "🥈", "🥉"];
 
   if (!group) {
@@ -82,8 +81,9 @@ function LeaderboardPage() {
       {podium.length > 0 && (
         <section className="px-5 py-4">
           <div className="flex items-end justify-center gap-4 py-4">
-            {[podium[1], podium[0], podium[2]].filter(Boolean).map((f, i) => {
-              const rank = i === 0 ? 2 : i === 1 ? 1 : 3;
+            {/* Ordre d'affichage 2-1-3 ; le rang est porté explicitement pour rester juste avec moins de 3 membres. */}
+            {([[podium[1], 2], [podium[0], 1], [podium[2], 3]] as const).filter(([f]) => f).map(([member, rank]) => {
+              const f = member!;
               const isFirst = rank === 1;
               const heights = { 1: "h-24", 2: "h-16", 3: "h-10" } as const;
               return (

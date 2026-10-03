@@ -34,8 +34,7 @@ function HomePage() {
 
   const doneCount = tasks.filter((t) => t.done).length;
   const potentialPoints = tasks.filter((t) => !t.done).reduce((s, t) => s + t.points, 0);
-  // Seuls les membres qui ont marqué montent sur le podium.
-  const podium = [...friends].filter((f) => f.pointsToday > 0).sort((a, b) => b.pointsToday - a.pointsToday).slice(0, 3);
+  const podium = [...friends].sort((a, b) => b.pointsToday - a.pointsToday).slice(0, 3);
   const myRank = [...friends].sort((a, b) => b.pointsToday - a.pointsToday).findIndex((f) => f.id === profile.id) + 1;
 
   const total = tasks.length;
@@ -212,8 +211,9 @@ function HomePage() {
             </div>
           ) : (
             <div className="flex items-end justify-center gap-4 py-2">
-              {[podium[1], podium[0], podium[2]].filter(Boolean).map((f, i) => {
-                const rank = i === 0 ? 2 : i === 1 ? 1 : 3;
+              {/* Ordre d'affichage 2-1-3 ; le rang est porté explicitement pour rester juste avec moins de 3 membres. */}
+              {([[podium[1], 2], [podium[0], 1], [podium[2], 3]] as const).filter(([f]) => f).map(([member, rank]) => {
+                const f = member!;
                 const isFirst = rank === 1;
                 const heights = { 1: "h-20", 2: "h-12", 3: "h-8" } as const;
                 return (
