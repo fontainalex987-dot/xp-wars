@@ -69,45 +69,7 @@ Réponds UNIQUEMENT avec un JSON: {"summary":string,"strategy":string,"quests":[
 Données:
 ${JSON.stringify(context_)}`;
 
-    const { createOpenAI } = await import("@ai-sdk/openai");
-    const { streamText } = await import("ai");
-    const apiKey = process.env.LOVABLE_API_KEY;
-    if (!apiKey) throw new Error("Le coach n'est pas configuré.");
-    const provider = createOpenAI({
-      baseURL: "https://ai.gateway.lovable.dev/v1",
-      apiKey,
-      headers: { "Lovable-API-Key": apiKey, "X-Lovable-AIG-SDK": "vercel-ai-sdk" },
-    });
-    let failure: unknown = null;
-    const result = streamText({
-      model: provider.responses("openai/gpt-6-astra"),
-      prompt,
-      onError: ({ error }) => {
-        failure = error;
-      },
-      providerOptions: {
-        openai: {
-          forceReasoning: true,
-          reasoningEffort: "low",
-          reasoningSummary: "auto",
-          store: false,
-          include: ["reasoning.encrypted_content"],
-        },
-      },
-    });
-    let text = "";
-    try {
-      text = await result.text;
-    } catch (e) {
-      failure = failure ?? e;
-    }
-    if (failure || !text) {
-      const status = (failure as { statusCode?: number } | null)?.statusCode;
-      if (status === 429) throw new Error("Le coach est très demandé, réessaie dans un instant.");
-      if (status === 402 || status === 403) throw new Error("Le coach IA n'est pas disponible pour le moment (crédits IA).");
-      throw new Error("Le coach n'a pas pu générer ton plan. Réessaie.");
-    }
-
+    const text = await askCoach(prompt);
     const match = text.match(/\{[\s\S]*\}/);
     let parsed: { summary?: unknown; strategy?: unknown; quests?: unknown[] } = {};
     try {
