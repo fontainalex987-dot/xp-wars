@@ -1,9 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Check, ChevronRight, Plus } from "lucide-react";
+import { Flame, Plus, Trophy, Target, Users } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
-import { Avatar } from "@/components/Avatar";
 import { StreakFlame } from "@/components/StreakFlame";
 import { HomeSkeleton } from "@/components/Skeletons";
+import { XpBar } from "@/components/XpBar";
+import { Avatar } from "@/components/Avatar";
+import { GoalCard } from "@/components/GoalCard";
 import { isGoalActive, useGroupMembers, useMyGoals, useMyGroup, useProfile, useTodayTasks, xpToNext } from "@/lib/store";
 
 export const Route = createFileRoute("/_authenticated/")({
@@ -17,49 +19,6 @@ export const Route = createFileRoute("/_authenticated/")({
   }),
   component: HomePage,
 });
-
-// Accueil volontairement épuré : une carte « Aujourd'hui » (les 3 quêtes),
-// puis deux lignes discrètes (objectif en cours, groupe). Le reste vit dans
-// les onglets dédiés.
-
-function greeting() {
-  const h = new Date().getHours();
-  if (h < 5) return "Bonne nuit";
-  if (h < 12) return "Bonjour";
-  if (h < 18) return "Bon après-midi";
-  return "Bonsoir";
-}
-
-function ProgressRing({ done, total }: { done: number; total: number }) {
-  const r = 30;
-  const c = 2 * Math.PI * r;
-  const pct = total ? done / total : 0;
-  return (
-    <div className="relative size-[76px] shrink-0">
-      <svg viewBox="0 0 76 76" className="size-full -rotate-90">
-        <circle cx="38" cy="38" r={r} fill="none" stroke="currentColor" strokeWidth="7" className="text-white/5" />
-        <circle
-          cx="38"
-          cy="38"
-          r={r}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="7"
-          strokeLinecap="round"
-          strokeDasharray={c}
-          strokeDashoffset={c * (1 - pct)}
-          className="text-brand transition-[stroke-dashoffset] duration-700 ease-out"
-        />
-      </svg>
-      <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-lg font-bold tabular-nums">
-          {done}
-          <span className="text-muted-foreground font-medium">/{total || 3}</span>
-        </span>
-      </div>
-    </div>
-  );
-}
 
 function HomePage() {
   const { data: profile } = useProfile();
@@ -76,185 +35,234 @@ function HomePage() {
     );
   }
 
-  const total = tasks.length;
   const doneCount = tasks.filter((t) => t.done).length;
-  const xpMax = xpToNext(profile.level);
-  const xpPct = Math.min(100, Math.round((profile.xp / xpMax) * 100));
+  const potentialPoints = tasks.filter((t) => !t.done).reduce((s, t) => s + t.points, 0);
+  const podium = [...friends].sort((a, b) => b.pointsToday - a.pointsToday).slice(0, 3);
+  const myRank = [...friends].sort((a, b) => b.pointsToday - a.pointsToday).findIndex((f) => f.id === profile.id) + 1;
 
-  const headline =
+  const activeGoals = goals.filter(isGoalActive);
+  const total = tasks.length;
+  const encouragement =
     total === 0
-      ? { title: "3 choses importantes. Pas plus.", body: "Choisis tes quêtes du jour pour lancer ta journée." }
+      ? { title: "Aujourd'hui, 3 choses importantes. Pas plus.", body: "Choisis tes 3 quêtes du jour. Ce sont les petites actions répétées qui mènent loin." }
       : doneCount === total
-        ? { title: "Journée accomplie 🎉", body: "Tu as tenu tes engagements. À demain pour continuer." }
+        ? { title: "Journée accomplie 🎉", body: "Tu as tenu tes engagements envers toi-même. Continue demain, tu seras encore plus proche de ton objectif." }
         : doneCount > 0
-          ? { title: "Tu avances 💪", body: "Même si tu ne finis pas tout, tu as avancé aujourd'hui." }
+          ? { title: "Tu avances 💪", body: `${doneCount} sur ${total} déjà faite${doneCount > 1 ? "s" : ""}. Même si tu ne finis pas tout, tu as avancé aujourd'hui.` }
           : { title: "Prêt à démarrer ?", body: "Une seule petite action suffit pour lancer ta journée." };
-  const streakAtRisk = doneCount === 0 && profile.streak > 0;
-
-  const activeGoals = goals.filter(isGoalActive).sort((a, b) => a.endsOn.localeCompare(b.endsOn));
-  const goal = activeGoals[0];
-
-  const ranked = [...friends].sort((a, b) => b.pointsToday - a.pointsToday);
-  const myRank = ranked.findIndex((f) => f.id === profile.id) + 1;
+  const freezes = profile.streakFreezesAvailable;
+  const streakInfo =
+    doneCount > 0
+      ? { tone: "safe", title: "Série sécurisée pour aujourd'hui ✅", body: `${profile.streak} jour${profile.streak > 1 ? "s" : ""} d'affilée. Reviens demain pour la prolonger.` }
+      : profile.streak > 0
+        ? { tone: "risk", title: `Ta série de ${profile.streak} jour${profile.streak > 1 ? "s" : ""} est en jeu`, body: `Valide au moins une quête aujourd'hui pour la garder. ${freezes > 0 ? `${freezes} gel${freezes > 1 ? "s" : ""} en secours cette semaine.` : "Plus aucun gel en secours cette semaine !"}` }
+        : { tone: "start", title: "Lance une nouvelle série", body: "Une quête validée aujourd'hui = jour 1. La constance commence maintenant." };
 
   return (
     <AppShell>
-      <header className="px-5 pt-8 pb-5 flex items-center justify-between gap-3">
-        <Link to="/profile" className="flex items-center gap-3 min-w-0">
-          <div className="size-12 shrink-0 rounded-full bg-card ring-2 ring-brand/40 flex items-center justify-center text-2xl overflow-hidden">
+      <header className="px-5 pt-8 pb-4 flex items-center justify-between">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="size-10 shrink-0 rounded-full bg-card ring-1 ring-white/10 flex items-center justify-center text-xl overflow-hidden">
             <Avatar value={profile.avatar} />
           </div>
           <div className="min-w-0">
-            <p className="text-xs text-muted-foreground">{greeting()},</p>
-            <p className="text-lg font-semibold leading-tight truncate">{profile.pseudo}</p>
-            <div className="mt-1 flex items-center gap-2">
-              <span className="text-[10px] font-bold text-brand uppercase tracking-widest">Niv. {profile.level}</span>
-              <div
-                className="h-1 w-20 rounded-full bg-white/10 overflow-hidden"
-                role="progressbar"
-                aria-valuemin={0}
-                aria-valuemax={xpMax}
-                aria-valuenow={profile.xp}
-                aria-label={`Expérience : ${profile.xp} sur ${xpMax}`}
-              >
-                <div className="h-full bg-brand rounded-full" style={{ width: `${xpPct}%` }} />
-              </div>
-            </div>
+            <p className="text-[10px] text-zinc-400 uppercase tracking-widest font-medium">Niveau {profile.level}</p>
+            <p className="text-base font-semibold truncate">{profile.pseudo}</p>
           </div>
-        </Link>
+        </div>
         <StreakFlame />
       </header>
 
-      {/* ---- AUJOURD'HUI ---- */}
-      <section className="px-5">
-        <div className="p-5 rounded-[28px] bg-card ring-1 ring-white/5">
-          <div className="flex items-center gap-4">
-            <ProgressRing done={doneCount} total={total} />
-            <div className="min-w-0">
-              <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Aujourd'hui</p>
-              <h1 className="text-xl font-semibold leading-snug mt-0.5">{headline.title}</h1>
-              <p className="text-sm text-muted-foreground mt-0.5">{headline.body}</p>
+      <section className="px-5 py-4">
+        <div className="relative p-6 rounded-[24px] bg-card ring-1 ring-white/5 overflow-hidden">
+          {doneCount >= 2 && (
+            <div className="absolute top-4 right-4">
+              <div className="combo-glow px-3 py-1 bg-brand text-primary-foreground text-xs font-bold rounded-full rotate-3">
+                COMBO X{doneCount}
+              </div>
             </div>
-          </div>
-
-          <div className="mt-5 space-y-1">
-            {tasks.map((t) => (
-              <Link
-                key={t.id}
-                to="/tasks"
-                className="flex items-center gap-3 py-2.5 px-2 -mx-2 rounded-xl active:bg-white/5 transition-colors"
-              >
-                <span
-                  className={`size-6 shrink-0 rounded-full flex items-center justify-center ring-1 ${
-                    t.done ? "bg-brand ring-brand text-primary-foreground" : "ring-white/20"
-                  }`}
-                >
-                  {t.done && <Check className="size-3.5" strokeWidth={3} />}
-                </span>
-                <span className={`flex-1 min-w-0 truncate text-[15px] ${t.done ? "text-muted-foreground line-through decoration-white/20" : ""}`}>
-                  {t.title}
-                </span>
-                <span className={`text-xs font-semibold tabular-nums ${t.done ? "text-brand" : "text-muted-foreground"}`}>
-                  +{t.points}
-                </span>
-              </Link>
-            ))}
-            {total < 3 && (
-              <Link
-                to="/tasks"
-                className="flex items-center gap-3 py-2.5 px-2 -mx-2 rounded-xl text-muted-foreground active:bg-white/5 transition-colors"
-              >
-                <span className="size-6 shrink-0 rounded-full flex items-center justify-center border border-dashed border-white/25">
-                  <Plus className="size-3.5" />
-                </span>
-                <span className="text-[15px]">{total === 0 ? "Choisir mes quêtes du jour" : "Ajouter une quête"}</span>
-              </Link>
-            )}
-          </div>
-
-          {streakAtRisk && (
-            <p className="mt-4 pt-4 border-t border-white/5 text-sm text-orange-300">
-              🔥 Ta série de {profile.streak} jour{profile.streak > 1 ? "s" : ""} est en jeu : une quête suffit pour la garder.
+          )}
+          <div className="mb-4">
+            <h1 className="text-4xl font-semibold leading-tight tracking-tight">Niveau {profile.level}</h1>
+            <p className="text-muted-foreground text-base mt-1 max-w-[40ch]">
+              Encore {xpToNext(profile.level) - profile.xp} XP pour le prochain grade
             </p>
+          </div>
+          <XpBar value={profile.xp} max={xpToNext(profile.level)} />
+          <div className="mt-4 flex justify-between items-end gap-3">
+            <div className="flex flex-col min-w-0">
+              <span className="text-[10px] text-zinc-500 uppercase tracking-tighter">Points totaux</span>
+              <span className="text-xl font-semibold tracking-tight">{profile.totalPoints.toLocaleString("fr-FR")}</span>
+            </div>
+            <Link
+              to="/tasks"
+              className="flex items-center bg-zinc-50 text-zinc-950 text-sm font-semibold py-2.5 pr-4 pl-3 rounded-full transition-transform active:scale-95 shrink-0"
+            >
+              {total >= 3 ? (
+                "MES QUÊTES →"
+              ) : (
+                <>
+                  <Plus className="size-4 mr-2 shrink-0" strokeWidth={3} />
+                  NOUVELLE QUÊTE
+                </>
+              )}
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="px-5 py-2 grid grid-cols-3 gap-3">
+        <div className="p-4 rounded-2xl bg-card ring-1 ring-white/5">
+          <div className="flex items-center gap-2 text-zinc-400">
+            <Target className="size-4" />
+            <span className="text-[10px] uppercase tracking-widest">Aujourd'hui</span>
+          </div>
+          <p className="mt-2 text-2xl font-bold">{doneCount}/{tasks.length}</p>
+          <p className="text-xs text-muted-foreground">quêtes terminées</p>
+        </div>
+        <div className="p-4 rounded-2xl bg-card ring-1 ring-white/5">
+          <div className="flex items-center gap-2 text-zinc-400">
+            <Trophy className="size-4" />
+            <span className="text-[10px] uppercase tracking-widest">Ton rang</span>
+          </div>
+          <p className="mt-2 text-2xl font-bold">{group ? `#${myRank || "-"}` : "—"}</p>
+          <p className="text-xs text-muted-foreground truncate">{group ? group.name : "Aucun groupe"}</p>
+        </div>
+        <Link
+          to="/friends"
+          className="p-4 rounded-2xl bg-card ring-1 ring-white/5 flex flex-col justify-between active:scale-95 transition-transform"
+        >
+          <div className="flex items-center gap-2 text-zinc-400">
+            <Users className="size-4" />
+            <span className="text-[10px] uppercase tracking-widest">Amis</span>
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground">Gérer</p>
+        </Link>
+      </section>
+
+      <section className="px-5 pt-2">
+        <div
+          className={`p-5 rounded-2xl ring-1 flex items-start gap-4 ${
+            streakInfo.tone === "risk"
+              ? "bg-orange-500/10 ring-orange-500/40"
+              : streakInfo.tone === "safe"
+                ? "bg-brand/10 ring-brand/30"
+                : "bg-card ring-white/5"
+          }`}
+        >
+          <div className="flex flex-col items-center shrink-0">
+            <Flame
+              className={`size-8 ${streakInfo.tone === "risk" ? "text-orange-400 animate-pulse" : streakInfo.tone === "safe" ? "text-brand" : "text-zinc-500"}`}
+              strokeWidth={2.5}
+            />
+            <span className="text-2xl font-bold leading-none mt-1">{profile.streak}</span>
+          </div>
+          <div className="min-w-0">
+            <p className="text-base font-semibold">{streakInfo.title}</p>
+            <p className="text-sm text-muted-foreground mt-1">{streakInfo.body}</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="px-5 pt-4">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-medium">Mes objectifs</h2>
+          {activeGoals.length > 0 && (
+            <Link to="/goals" className="text-sm text-brand font-medium">
+              Voir tout →
+            </Link>
+          )}
+        </div>
+        {activeGoals.length === 0 ? (
+          <Link
+            to="/goals"
+            className="p-4 rounded-2xl bg-card/60 border-2 border-dashed border-white/10 flex items-center gap-3 active:scale-[0.99] transition-transform"
+          >
+            <div className="size-10 rounded-xl bg-brand/10 flex items-center justify-center text-xl shrink-0">🎯</div>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold">Fixe-toi un objectif sur plusieurs jours</p>
+              <p className="text-xs text-muted-foreground">Relie tes quêtes du jour à une ambition plus grande.</p>
+            </div>
+          </Link>
+        ) : (
+          <div className="space-y-2">
+            {activeGoals.slice(0, 3).map((g) => (
+              <GoalCard key={g.id} goal={g} />
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section className="px-5 pt-2">
+        <div className="p-5 rounded-2xl bg-card ring-1 ring-white/5">
+          <p className="text-base font-semibold">{encouragement.title}</p>
+          <p className="text-sm text-muted-foreground mt-1">{encouragement.body}</p>
+          {profile.goal && (
+            <div className="mt-4 pt-4 border-t border-white/5 flex items-start gap-2">
+              <Target className="size-4 text-brand shrink-0 mt-0.5" />
+              <div className="min-w-0">
+                <p className="text-[10px] text-brand uppercase tracking-widest font-bold">Mon objectif</p>
+                <p className="text-sm font-medium break-words">{profile.goal}</p>
+              </div>
+            </div>
           )}
         </div>
       </section>
 
-      {/* ---- RACCOURCIS ---- */}
-      <section className="px-5 pt-4 space-y-2">
-        <Link
-          to="/goals"
-          className="flex items-center gap-3 p-4 rounded-2xl bg-card/60 ring-1 ring-white/5 active:scale-[0.99] transition-transform"
-        >
-          <div className="size-10 rounded-xl bg-brand/10 flex items-center justify-center text-xl shrink-0">
-            {goal ? goal.emoji : "🎯"}
+      {tasks.length > 0 && (
+        <section className="px-5 py-4">
+          <div className="p-4 rounded-2xl bg-brand/5 ring-1 ring-brand/20 flex items-center justify-between">
+            <div>
+              <p className="text-[10px] text-brand uppercase tracking-widest font-bold">Points potentiels</p>
+              <p className="text-xl font-semibold">+{potentialPoints} pts à gagner</p>
+            </div>
+            <Link to="/tasks" className="text-sm text-brand font-semibold hover:underline">
+              Voir →
+            </Link>
           </div>
-          <div className="flex-1 min-w-0">
-            {goal ? (
-              <>
-                <div className="flex items-center justify-between gap-2">
-                  <p className="text-sm font-semibold truncate">{goal.title}</p>
-                  <span className="text-xs font-bold text-brand tabular-nums shrink-0">
-                    {goal.progress}/{goal.targetCount}
-                  </span>
-                </div>
-                <div className="mt-2 h-1.5 rounded-full bg-white/10 overflow-hidden">
-                  <div
-                    className="h-full bg-brand rounded-full"
-                    style={{ width: `${Math.min(100, Math.round((goal.progress / goal.targetCount) * 100))}%` }}
-                  />
-                </div>
-              </>
-            ) : (
-              <>
-                <p className="text-sm font-semibold">Fixe-toi un objectif</p>
-                <p className="text-xs text-muted-foreground">Relie tes quêtes à une ambition sur plusieurs jours.</p>
-              </>
-            )}
-          </div>
-          {activeGoals.length > 1 && (
-            <span className="text-[10px] font-bold text-muted-foreground bg-white/5 px-2 py-1 rounded-full shrink-0">
-              +{activeGoals.length - 1}
-            </span>
-          )}
-          <ChevronRight className="size-4 text-muted-foreground shrink-0" />
-        </Link>
+        </section>
+      )}
 
-        <Link
-          to={group ? "/leaderboard" : "/group"}
-          className="flex items-center gap-3 p-4 rounded-2xl bg-card/60 ring-1 ring-white/5 active:scale-[0.99] transition-transform"
-        >
-          {group && ranked.length > 0 ? (
-            <div className="flex -space-x-2 shrink-0">
-              {ranked.slice(0, 3).map((f) => (
-                <div
-                  key={f.id}
-                  className="size-8 rounded-full bg-zinc-800 ring-2 ring-background flex items-center justify-center text-sm overflow-hidden"
-                >
-                  <Avatar value={f.avatar} />
-                </div>
-              ))}
+      <section className="px-5 py-4">
+        <div className="p-5 rounded-[24px] bg-card/50 ring-1 ring-white/5">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg font-medium">Podium du jour</h2>
+            <Link to="/leaderboard" className="text-sm text-brand font-medium">
+              Voir tout
+            </Link>
+          </div>
+          {podium.length === 0 ? (
+            <div className="py-6 text-center">
+              <p className="text-sm text-muted-foreground mb-3">
+                {group ? "Personne n'a encore marqué aujourd'hui." : "Rejoins ou crée un groupe pour la battle."}
+              </p>
+              {!group && (
+                <Link to="/group" className="inline-block text-sm bg-brand text-primary-foreground font-bold py-2 px-4 rounded-full">
+                  Aller au groupe
+                </Link>
+              )}
             </div>
           ) : (
-            <div className="size-10 rounded-xl bg-white/5 flex items-center justify-center text-xl shrink-0">👥</div>
+            <div className="flex items-end justify-center gap-4 py-2">
+              {/* Ordre d'affichage 2-1-3 ; le rang est porté explicitement pour rester juste avec moins de 3 membres. */}
+              {([[podium[1], 2], [podium[0], 1], [podium[2], 3]] as const).filter(([f]) => f).map(([member, rank]) => {
+                const f = member!;
+                const isFirst = rank === 1;
+                const heights = { 1: "h-20", 2: "h-12", 3: "h-8" } as const;
+                return (
+                  <div key={f.id} className="flex flex-col items-center gap-2">
+                    <div className={`rounded-full p-1 ring-2 ${isFirst ? "ring-brand size-16" : rank === 2 ? "ring-zinc-500/40 size-12" : "ring-orange-900/40 size-12"}`}>
+                      <div className="size-full rounded-full bg-zinc-800 flex items-center justify-center text-2xl"><Avatar value={f.avatar} /></div>
+                    </div>
+                    <div className={`w-14 rounded-t-lg flex items-center justify-center font-bold ${heights[rank]} ${isFirst ? "bg-brand text-primary-foreground text-xl" : "bg-zinc-800/80 text-zinc-400"}`}>
+                      {rank}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           )}
-          <div className="flex-1 min-w-0">
-            {group ? (
-              <>
-                <p className="text-sm font-semibold truncate">
-                  {myRank > 0 ? `Tu es #${myRank} aujourd'hui` : "Classement du jour"}
-                </p>
-                <p className="text-xs text-muted-foreground truncate">{group.name}</p>
-              </>
-            ) : (
-              <>
-                <p className="text-sm font-semibold">Avance avec tes amis</p>
-                <p className="text-xs text-muted-foreground">Crée ou rejoins un groupe.</p>
-              </>
-            )}
-          </div>
-          <ChevronRight className="size-4 text-muted-foreground shrink-0" />
-        </Link>
+        </div>
       </section>
     </AppShell>
   );
