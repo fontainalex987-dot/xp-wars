@@ -3,7 +3,7 @@ import { BarChart3, Bell, Flame, LogOut, Pencil, Target, Trophy, Zap } from "luc
 import { AppShell } from "@/components/AppShell";
 import { ProfileSkeleton } from "@/components/Skeletons";
 import { XpBar } from "@/components/XpBar";
-import { useAuth, useBadges, useProfile, useTodayTasks, XP_PER_LEVEL } from "@/lib/store";
+import { useAuth, useBadges, useProfile, useTodayTasks, xpToNext } from "@/lib/store";
 import { usePushNotifications } from "@/lib/push-notifications";
 
 export const Route = createFileRoute("/_authenticated/profile")({
@@ -84,9 +84,9 @@ function ProfilePage() {
               <p className="text-[10px] text-zinc-400 uppercase tracking-widest">Niveau actuel</p>
               <p className="text-4xl font-bold">{profile.level}</p>
             </div>
-            <p className="text-sm text-brand font-semibold">{profile.xp}/{XP_PER_LEVEL} XP</p>
+            <p className="text-sm text-brand font-semibold">{profile.xp}/{xpToNext(profile.level)} XP</p>
           </div>
-          <XpBar value={profile.xp} max={XP_PER_LEVEL} />
+          <XpBar value={profile.xp} max={xpToNext(profile.level)} />
         </div>
       </section>
 
