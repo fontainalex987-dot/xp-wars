@@ -124,7 +124,7 @@ function StatsPage() {
       </section>
 
       <section className="px-5 pt-7 pb-5 text-center">
-        <p className="text-6xl font-bold tracking-tight text-brand">
+        <p className="text-6xl font-display tabular-nums font-bold tracking-tight text-brand">
           {total.toLocaleString("fr-FR")}
         </p>
         <p className="mt-2 text-xs text-muted-foreground">{HERO_LABEL[period]}</p>

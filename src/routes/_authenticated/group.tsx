@@ -526,7 +526,7 @@ function GroupPage() {
           <p className="text-[11px] uppercase tracking-widest text-muted-foreground mt-1">Membres</p>
         </div>
         <div className="p-4 rounded-[20px] bg-card ring-1 ring-white/5 text-center">
-          <p className="text-2xl font-bold">{totalPointsWeek}</p>
+          <p className="text-2xl font-display tabular-nums font-bold">{totalPointsWeek}</p>
           <p className="text-[11px] uppercase tracking-widest text-muted-foreground mt-1">Pts semaine</p>
         </div>
         <div className="p-4 rounded-[20px] bg-card ring-1 ring-white/5 text-center">

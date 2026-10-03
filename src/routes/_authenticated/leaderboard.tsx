@@ -106,7 +106,7 @@ function LeaderboardPage() {
                             <Avatar value={p.avatar} />
                           </div>
                           <span className="flex-1 truncate">{p.pseudo}</span>
-                          <span className="text-xs text-muted-foreground tabular-nums">{p.points} pts</span>
+                          <span className="text-xs text-muted-foreground font-display tabular-nums">{p.points} pts</span>
                         </div>
                       ))}
                     </div>
@@ -156,7 +156,7 @@ function LeaderboardPage() {
                   </div>
                   <div className={`w-full max-w-[80px] rounded-t-lg flex flex-col items-center justify-center font-bold ${heights[rank]} ${isFirst ? "bg-brand text-primary-foreground" : "bg-zinc-800/80 text-text-subtle"}`}>
                     <span className="text-2xl">{medals[rank - 1]}</span>
-                    <span className="text-xs">{pick(f, range)} pts</span>
+                    <span className="text-xs font-display tabular-nums">{pick(f, range)} pts</span>
                   </div>
                 </div>
               );
@@ -182,13 +182,13 @@ function LeaderboardPage() {
                 isMe ? "bg-brand/10 ring-brand/30" : "bg-card ring-white/5"
               }`}
             >
-              <span className={`w-8 text-center font-bold ${i < 3 ? "text-brand" : "text-muted-foreground"}`}>#{i + 1}</span>
+              <span className={`w-8 text-center font-display tabular-nums font-bold ${i < 3 ? "text-brand" : "text-muted-foreground"}`}>#{i + 1}</span>
               <div className="size-10 rounded-full bg-zinc-800 flex items-center justify-center text-lg"><Avatar value={f.avatar} /></div>
               <div className="flex-1 min-w-0">
                 <p className="font-semibold truncate">{f.pseudo} {isMe && <span className="text-xs text-brand">(toi)</span>}</p>
                 <p className="text-xs text-muted-foreground">Niveau {f.level}</p>
               </div>
-              <span className="font-bold tabular-nums">{pick(f, range)} pts</span>
+              <span className="font-display font-bold tabular-nums">{pick(f, range)} pts</span>
             </Link>
           );
         })}

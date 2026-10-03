@@ -72,7 +72,7 @@ function ProfilePage() {
           <div className="p-4 rounded-[20px] bg-brand/5 ring-1 ring-brand/20 flex items-center gap-3">
             <Target className="size-5 text-brand shrink-0" />
             <div className="min-w-0">
-              <p className="text-[11px] text-brand uppercase tracking-widest font-bold">Objectif</p>
+              <p className="text-[11px] text-text-subtle uppercase tracking-widest font-bold">Objectif</p>
               <p className="text-sm font-semibold truncate">{profile.goal}</p>
             </div>
           </div>
@@ -84,9 +84,9 @@ function ProfilePage() {
           <div className="flex justify-between items-end mb-3">
             <div>
               <p className="text-[11px] text-text-subtle uppercase tracking-widest">Niveau actuel</p>
-              <p className="text-4xl font-bold">{profile.level}</p>
+              <p className="text-4xl font-display tabular-nums font-bold">{profile.level}</p>
             </div>
-            <p className="text-sm text-brand font-semibold">{profile.xp}/{xpToNext(profile.level)} XP</p>
+            <p className="text-sm text-brand font-display tabular-nums font-semibold">{profile.xp}/{xpToNext(profile.level)} XP</p>
           </div>
           <XpBar value={profile.xp} max={xpToNext(profile.level)} />
         </div>
@@ -196,7 +196,7 @@ function StatBox({ icon, label, value }: { icon: React.ReactNode; label: string;
   return (
     <div className="p-4 rounded-[20px] bg-card ring-1 ring-white/5 text-center">
       <div className="flex items-center justify-center text-brand mb-1">{icon}</div>
-      <p className="text-xl font-bold">{value}</p>
+      <p className="text-xl font-display tabular-nums font-bold">{value}</p>
       <p className="text-[11px] uppercase tracking-widest text-muted-foreground mt-1">{label}</p>
     </div>
   );

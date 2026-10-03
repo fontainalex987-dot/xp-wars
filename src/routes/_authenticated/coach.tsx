@@ -5,9 +5,9 @@ import { toast } from "sonner";
 import { Sparkles, Clock, Plus, CalendarCheck, ArrowLeft } from "lucide-react";
 
 const DIFF_PILL = {
-  facile: "bg-emerald-500/10 text-emerald-400 ring-emerald-500/20",
-  moyenne: "bg-amber-500/10 text-amber-400 ring-amber-500/20",
-  difficile: "bg-orange-500/10 text-orange-400 ring-orange-500/20",
+  facile: "bg-difficulty-easy/10 text-difficulty-easy ring-difficulty-easy/20",
+  moyenne: "bg-difficulty-medium/10 text-difficulty-medium ring-difficulty-medium/20",
+  difficile: "bg-difficulty-hard/10 text-difficulty-hard ring-difficulty-hard/20",
 } as const;
 
 function DiffPill({ d }: { d: keyof typeof DIFF_PILL }) {
@@ -305,7 +305,7 @@ function Evolution({ history }: { history: SavedReview[] }) {
     <div className="p-4 rounded-[20px] bg-card ring-1 ring-white/5 space-y-3">
       <button onClick={() => setOpen((o) => !o)} className="w-full flex items-center justify-between">
         <p className="text-xs uppercase tracking-widest text-muted-foreground">Évolution · {weeks.length} semaines</p>
-        <span className="text-xs text-brand font-semibold">{open ? "Masquer" : "Voir"}</span>
+        <span className="text-xs text-foreground underline underline-offset-4 decoration-text-subtle font-semibold">{open ? "Masquer" : "Voir"}</span>
       </button>
       {open && (
         <div className="space-y-4">

@@ -135,7 +135,7 @@ function Stat({ icon, label, value }: { icon?: React.ReactNode; label: string; v
         {icon}
         <p className="text-[11px] uppercase tracking-widest text-muted-foreground">{label}</p>
       </div>
-      <p className="text-2xl font-bold mt-1 tabular-nums">{value}</p>
+      <p className="text-2xl font-display font-bold mt-1 tabular-nums">{value}</p>
     </div>
   );
 }

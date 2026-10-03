@@ -83,7 +83,7 @@ function HomePage() {
             </div>
           )}
           <div className="mb-4">
-            <h1 className="text-4xl font-semibold leading-tight tracking-tight">Niveau {profile.level}</h1>
+            <h1 className="text-4xl font-display tabular-nums font-semibold leading-tight tracking-tight">Niveau {profile.level}</h1>
             <p className="text-muted-foreground text-base mt-1 max-w-[40ch]">
               Encore {xpToNext(profile.level) - profile.xp} XP pour le prochain grade
             </p>
@@ -92,7 +92,7 @@ function HomePage() {
           <div className="mt-4 flex justify-between items-end gap-3">
             <div className="flex flex-col min-w-0">
               <span className="text-[11px] text-text-subtle uppercase tracking-tighter">Points totaux</span>
-              <span className="text-xl font-semibold tracking-tight">{profile.totalPoints.toLocaleString("fr-FR")}</span>
+              <span className="text-xl font-display tabular-nums font-semibold tracking-tight">{profile.totalPoints.toLocaleString("fr-FR")}</span>
             </div>
             <Link
               to="/tasks"
@@ -117,7 +117,7 @@ function HomePage() {
             <Target className="size-4" />
             <span className="text-[11px] uppercase tracking-widest">Aujourd'hui</span>
           </div>
-          <p className="mt-2 text-2xl font-bold">{doneCount}/{tasks.length}</p>
+          <p className="mt-2 text-2xl font-display tabular-nums font-bold">{doneCount}/{tasks.length}</p>
           <p className="text-xs text-muted-foreground">quêtes terminées</p>
         </div>
         <div className="p-4 rounded-[20px] bg-card ring-1 ring-white/5">
@@ -125,7 +125,7 @@ function HomePage() {
             <Trophy className="size-4" />
             <span className="text-[11px] uppercase tracking-widest">Ton rang</span>
           </div>
-          <p className="mt-2 text-2xl font-bold">{group ? `#${myRank || "-"}` : "—"}</p>
+          <p className="mt-2 text-2xl font-display tabular-nums font-bold">{group ? `#${myRank || "-"}` : "—"}</p>
           <p className="text-xs text-muted-foreground truncate">{group ? group.name : "Aucun groupe"}</p>
         </div>
         <Link
@@ -144,7 +144,7 @@ function HomePage() {
         <div
           className={`p-5 rounded-[20px] ring-1 flex items-start gap-4 ${
             streakInfo.tone === "risk"
-              ? "bg-orange-500/10 ring-orange-500/40"
+              ? "bg-streak-risk/10 ring-streak-risk/40"
               : streakInfo.tone === "safe"
                 ? "bg-brand/10 ring-brand/30"
                 : "bg-card ring-white/5"
@@ -152,10 +152,10 @@ function HomePage() {
         >
           <div className="flex flex-col items-center shrink-0">
             <Flame
-              className={`size-8 ${streakInfo.tone === "risk" ? "text-orange-400 animate-pulse" : streakInfo.tone === "safe" ? "text-brand" : "text-text-subtle"}`}
+              className={`size-8 ${streakInfo.tone === "risk" ? "text-streak-risk animate-pulse" : streakInfo.tone === "safe" ? "text-brand" : "text-text-subtle"}`}
               strokeWidth={2.5}
             />
-            <span className="text-2xl font-bold leading-none mt-1">{profile.streak}</span>
+            <span className="text-2xl font-display tabular-nums font-bold leading-none mt-1">{profile.streak}</span>
           </div>
           <div className="min-w-0">
             <p className="text-base font-semibold">{streakInfo.title}</p>
@@ -168,7 +168,7 @@ function HomePage() {
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-medium">Mes objectifs</h2>
           {activeGoals.length > 0 && (
-            <Link to="/goals" className="text-sm text-brand font-medium">
+            <Link to="/goals" className="text-sm text-foreground underline underline-offset-4 decoration-text-subtle font-medium">
               Voir tout →
             </Link>
           )}
@@ -201,7 +201,7 @@ function HomePage() {
             <div className="mt-4 pt-4 border-t border-white/5 flex items-start gap-2">
               <Target className="size-4 text-brand shrink-0 mt-0.5" />
               <div className="min-w-0">
-                <p className="text-[11px] text-brand uppercase tracking-widest font-bold">Mon objectif</p>
+                <p className="text-[11px] text-text-subtle uppercase tracking-widest font-bold">Mon objectif</p>
                 <p className="text-sm font-medium break-words">{profile.goal}</p>
               </div>
             </div>
@@ -227,7 +227,7 @@ function HomePage() {
         <div className="p-5 rounded-[20px] bg-card/50 ring-1 ring-white/5">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-medium">Podium du jour</h2>
-            <Link to="/leaderboard" className="text-sm text-brand font-medium">
+            <Link to="/leaderboard" className="text-sm text-foreground underline underline-offset-4 decoration-text-subtle font-medium">
               Voir tout
             </Link>
           </div>

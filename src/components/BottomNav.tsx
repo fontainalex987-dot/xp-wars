@@ -39,7 +39,7 @@ export function BottomNav() {
         className="relative mx-auto flex max-w-md justify-between items-center"
       >
         <motion.div
-          className="absolute top-0 rounded-[20px] bg-brand/15 border border-brand/20 blur-[2px] pointer-events-none"
+          className="absolute top-0 rounded-full bg-secondary pointer-events-none"
           animate={{
             x: pill.x,
             width: pill.width,
@@ -63,7 +63,7 @@ export function BottomNav() {
               to={to}
               className={`relative flex flex-col items-center gap-1 px-1.5 min-[380px]:px-2 py-2 transition-colors duration-200 ${
                 active
-                  ? "text-brand"
+                  ? "text-foreground"
                   : "text-text-subtle opacity-60 hover:opacity-100 hover:text-zinc-200"
               }`}
             >
@@ -71,9 +71,7 @@ export function BottomNav() {
                 <motion.div
                   animate={{
                     scale: active ? 1.1 : 1,
-                    filter: active
-                      ? "drop-shadow(0 0 8px rgba(190,242,100,0.55))"
-                      : "drop-shadow(0 0 0px rgba(190,242,100,0))",
+                    
                   }}
                   transition={{ type: "spring", stiffness: 400, damping: 22 }}
                 >

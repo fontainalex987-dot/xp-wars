@@ -7,16 +7,16 @@ export function GoalChip({ goalId }: { goalId?: string | null }) {
   const g = goalId ? goals.find((x) => x.id === goalId) : null;
   if (!g) return null;
   return (
-    <span className="inline-flex max-w-full items-center gap-1 text-[11px] px-2 py-0.5 rounded-full font-semibold bg-brand/10 text-brand ring-1 ring-brand/20 truncate">
+    <span className="inline-flex max-w-full items-center gap-1 text-[11px] px-2 py-0.5 rounded-full font-semibold bg-secondary text-foreground truncate">
       {g.emoji} <span className="truncate">{g.title}</span>
     </span>
   );
 }
 
 const diffStyles: Record<Task["difficulty"], string> = {
-  facile: "bg-emerald-500/10 text-emerald-400 ring-emerald-500/20",
-  moyenne: "bg-amber-500/10 text-amber-400 ring-amber-500/20",
-  difficile: "bg-orange-500/10 text-orange-400 ring-orange-500/20",
+  facile: "bg-difficulty-easy/10 text-difficulty-easy ring-difficulty-easy/20",
+  moyenne: "bg-difficulty-medium/10 text-difficulty-medium ring-difficulty-medium/20",
+  difficile: "bg-difficulty-hard/10 text-difficulty-hard ring-difficulty-hard/20",
 };
 
 export function CategoryChip({ category, muted = false }: { category: Task["category"]; muted?: boolean }) {
@@ -24,7 +24,7 @@ export function CategoryChip({ category, muted = false }: { category: Task["cate
   return (
     <span
       className={`whitespace-nowrap text-[11px] px-2 py-0.5 rounded-full font-semibold ring-1 ${
-        muted ? "bg-zinc-800 text-text-subtle ring-transparent" : "bg-sky-500/10 text-sky-300 ring-sky-500/20"
+        muted ? "bg-zinc-800 text-text-subtle ring-transparent" : "bg-category/10 text-category ring-category/20"
       }`}
       title={c.label}
     >
