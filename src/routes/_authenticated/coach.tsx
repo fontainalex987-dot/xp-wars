@@ -20,6 +20,7 @@ function DiffPill({ d }: { d: keyof typeof DIFF_PILL }) {
 import { AppShell } from "@/components/AppShell";
 import { generateCoachPlan, generateWeeklyReview, type CoachPlan, type WeeklyReview } from "@/lib/coach.functions";
 import { useAddTask, useMyGroup, useTodayTasks, CATEGORIES, DIFFICULTY_POINTS, type Category } from "@/lib/store";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/coach")({
   head: () => ({
@@ -35,7 +36,6 @@ export const Route = createFileRoute("/_authenticated/coach")({
   component: CoachPage,
 });
 
-const KEY = "xpwars.coach";
 const TIMES = [15, 30, 45, 60, 90, 120];
 
 function CoachPage() {
@@ -49,12 +49,21 @@ function CoachPage() {
   const gen = useServerFn(generateCoachPlan);
 
   useEffect(() => {
-    try {
-      const s = JSON.parse(localStorage.getItem(KEY) ?? "{}");
-      if (s.minutes) setMinutes(s.minutes);
-      if (s.goal) setGoal(s.goal);
-      if (s.plan) setPlan(s.plan);
-    } catch {}
+    let cancelled = false;
+    supabase
+      .from("coach_plans")
+      .select("minutes_per_day, season_goal, plan")
+      .eq("user_id", supabase.auth.currentUser?.id ?? "")
+      .maybeSingle()
+      .then(({ data }) => {
+        if (cancelled || !data) return;
+        setMinutes(data.minutes_per_day);
+        setGoal(data.season_goal);
+        if (data.plan) setPlan(data.plan as CoachPlan);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const submit = async (e: React.FormEvent) => {
@@ -64,7 +73,6 @@ function CoachPage() {
     try {
       const p = await gen({ data: { minutesPerDay: minutes, seasonGoal: goal.trim(), groupId: group?.id ?? null } });
       setPlan(p);
-      try { localStorage.setItem(KEY, JSON.stringify({ minutes, goal: goal.trim(), plan: p })); } catch {}
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erreur");
     } finally {
