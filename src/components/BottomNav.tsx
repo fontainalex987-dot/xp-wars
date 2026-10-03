@@ -13,7 +13,6 @@ const items = [
 
 export function BottomNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  if (pathname.startsWith("/auth")) return null;
   const containerRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const [pill, setPill] = useState({ x: 0, width: 0, height: 0 });
@@ -32,6 +31,8 @@ export function BottomNav() {
       });
     }
   }, [pathname]);
+
+  if (pathname.startsWith("/auth")) return null;
 
   return (
     <nav className="fixed bottom-0 inset-x-0 z-40 bg-background/85 backdrop-blur-lg border-t border-white/5 px-4 pt-3 pb-6">
