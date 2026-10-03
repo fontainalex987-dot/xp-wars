@@ -13,6 +13,7 @@ const items = [
 
 export function BottomNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  if (pathname.startsWith("/auth")) return null;
   const containerRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const [pill, setPill] = useState({ x: 0, width: 0, height: 0 });
