@@ -3,6 +3,7 @@ import { ArrowLeft, Flame, Target, Trophy, Zap } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
+import { Avatar } from "@/components/Avatar";
 import { GoalCard } from "@/components/GoalCard";
 import { isGoalActive, useGroupMembers, useMemberProfile, useMyGroup, useMyGroups, useUserGoals, xpToNext } from "@/lib/store";
 
@@ -73,7 +74,7 @@ function MemberProfilePage() {
         </Link>
         <div className="mt-4 flex items-center gap-4">
           <div className="size-16 rounded-full bg-zinc-800 flex items-center justify-center text-3xl ring-1 ring-white/10">
-            {member.avatar}
+            <Avatar value={member.avatar} />
           </div>
           <div className="min-w-0">
             <h1 className="text-2xl font-semibold tracking-tight truncate">{member.pseudo}</h1>

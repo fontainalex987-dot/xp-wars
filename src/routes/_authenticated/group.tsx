@@ -5,6 +5,7 @@ import { ChevronRight, Copy, LogOut, Plus, Share2, Target, Trash2, UserPlus, Zap
 import { motion } from "framer-motion";
 import { DuelDurationPicker } from "@/components/DuelDurationPicker";
 import { AppShell } from "@/components/AppShell";
+import { Avatar } from "@/components/Avatar";
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { haptics } from "@/lib/haptics";
 import { FeedSkeleton, SkeletonBar } from "@/components/Skeletons";
@@ -140,7 +141,7 @@ function ActivityFeedItem({ activity, profile }: { activity: import("@/lib/store
       >
         <div className="flex items-center gap-3 cursor-pointer">
           <div className="size-9 rounded-full bg-zinc-800 flex items-center justify-center text-lg shrink-0">
-            {activity.avatar}
+            <Avatar value={activity.avatar} />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm truncate">
@@ -596,7 +597,7 @@ function GroupPage() {
                       }`}
                     >
                       <span className="text-lg">{medal}</span>
-                      <span className="text-xl">{c.avatar}</span>
+                      <span className="size-7 shrink-0 flex items-center justify-center text-xl"><Avatar value={c.avatar} /></span>
                       <span className={`flex-1 truncate text-sm font-semibold ${challenge.ended && c.rank === 1 ? "text-amber-300" : ""}`}>
                         {c.pseudo}{isMe ? " (toi)" : ""}
                       </span>
@@ -743,7 +744,7 @@ function GroupPage() {
                         : "bg-black/20 ring-1 ring-white/5 hover:bg-white/5"
                     }`}
                   >
-                    <span className="text-lg">{f.avatar}</span>
+                    <span className="size-7 shrink-0 flex items-center justify-center text-lg"><Avatar value={f.avatar} /></span>
                     <span className="text-xs font-medium truncate">{f.pseudo}</span>
                   </button>
                 ))}
@@ -834,13 +835,13 @@ function GroupPage() {
                   {/* VS */}
                   <div className="flex items-center gap-3">
                     <div className="flex-1 text-center">
-                      <div className="text-2xl">{d.challengerAvatar}</div>
+                      <div className="mx-auto size-10 flex items-center justify-center text-2xl"><Avatar value={d.challengerAvatar} /></div>
                       <p className="text-xs font-semibold mt-1 truncate">{d.challengerPseudo}</p>
                       <p className="text-lg font-bold text-brand">{d.challengerPoints}</p>
                     </div>
                     <div className="text-xs font-bold text-zinc-500 uppercase tracking-widest">VS</div>
                     <div className="flex-1 text-center">
-                      <div className="text-2xl">{d.challengedAvatar}</div>
+                      <div className="mx-auto size-10 flex items-center justify-center text-2xl"><Avatar value={d.challengedAvatar} /></div>
                       <p className="text-xs font-semibold mt-1 truncate">{d.challengedPseudo}</p>
                       <p className="text-lg font-bold text-brand">{d.challengedPoints}</p>
                     </div>
@@ -924,7 +925,7 @@ function GroupPage() {
                   params={{ memberId: f.id }}
                   className="flex items-center gap-3 active:scale-[0.99] transition-transform"
                 >
-                  <div className="size-10 rounded-full bg-zinc-800 flex items-center justify-center text-lg">{f.avatar}</div>
+                  <div className="size-10 rounded-full bg-zinc-800 flex items-center justify-center text-lg"><Avatar value={f.avatar} /></div>
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold truncate">{f.pseudo}</p>
                     <p className="text-xs text-muted-foreground">Niveau {f.level} · {f.pointsToday} pts aujourd'hui</p>

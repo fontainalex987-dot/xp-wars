@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { BarChart3, Bell, Flame, LogOut, Pencil, Target, Trophy, Zap } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
+import { Avatar } from "@/components/Avatar";
 import { ProfileSkeleton } from "@/components/Skeletons";
 import { XpBar } from "@/components/XpBar";
 import { useAuth, useBadges, useProfile, useTodayTasks, xpToNext } from "@/lib/store";
@@ -44,7 +45,7 @@ function ProfilePage() {
       <header className="px-5 pt-8 pb-4 flex flex-col items-center text-center">
         <div className="size-24 rounded-full bg-gradient-to-br from-brand/40 to-card ring-2 ring-brand p-1 flex items-center justify-center">
           <div className="size-full rounded-full bg-zinc-900 flex items-center justify-center text-5xl">
-            {profile.avatar}
+            <Avatar value={profile.avatar} />
           </div>
         </div>
         <h1 className="mt-4 text-2xl font-bold">{profile.pseudo}</h1>

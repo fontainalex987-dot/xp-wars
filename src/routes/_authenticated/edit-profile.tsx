@@ -4,7 +4,8 @@ import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { ProfileSkeleton } from "@/components/Skeletons";
-import { AVATARS, useProfile, useUpdateProfile } from "@/lib/store";
+import { useProfile, useUpdateProfile } from "@/lib/store";
+import { Avatar, AvatarPicker, DEFAULT_AVATAR } from "@/components/Avatar";
 
 export const Route = createFileRoute("/_authenticated/edit-profile")({
   head: () => ({
@@ -24,14 +25,16 @@ function EditProfilePage() {
   const navigate = useNavigate();
 
   const [pseudo, setPseudo] = useState("");
-  const [avatar, setAvatar] = useState(AVATARS[0]);
+  const [avatar, setAvatar] = useState(DEFAULT_AVATAR);
   const [goal, setGoal] = useState("");
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     if (profile) {
       setPseudo(profile.pseudo);
       setAvatar(profile.avatar);
       setGoal(profile.goal ?? "");
+      setReady(true);
     }
   }, [profile]);
 
@@ -85,20 +88,18 @@ function EditProfilePage() {
 
         <div>
           <label className="text-xs uppercase tracking-widest text-muted-foreground">Avatar</label>
-          <div className="mt-2 grid grid-cols-6 gap-2">
-            {AVATARS.map((a) => (
-              <button
-                type="button"
-                key={a}
-                onClick={() => setAvatar(a)}
-                className={`aspect-square rounded-xl flex items-center justify-center text-2xl transition-all ${
-                  avatar === a ? "bg-brand/20 ring-2 ring-brand" : "bg-card ring-1 ring-white/5"
-                }`}
-              >
-                {a}
-              </button>
-            ))}
+          <div className="mt-3 flex items-center gap-3">
+            <div className="size-16 rounded-full bg-zinc-900 ring-2 ring-brand flex items-center justify-center text-3xl overflow-hidden">
+              <Avatar value={avatar} />
+            </div>
+            <p className="text-xs text-muted-foreground">Choisis un style, puis ton personnage.</p>
           </div>
+          {/* Monté une fois le profil chargé, pour démarrer sur le style de l'avatar actuel. */}
+          {ready && (
+            <div className="mt-3">
+              <AvatarPicker value={avatar} onChange={setAvatar} />
+            </div>
+          )}
         </div>
 
         <div>

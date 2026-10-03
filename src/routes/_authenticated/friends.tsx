@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { DuelDurationPicker } from "@/components/DuelDurationPicker";
 import { AppShell } from "@/components/AppShell";
+import { Avatar } from "@/components/Avatar";
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { haptics } from "@/lib/haptics";
 import {
@@ -124,7 +125,7 @@ function FriendsPage() {
                   className="p-4 rounded-2xl bg-card ring-1 ring-white/5 flex items-center gap-3"
                 >
                   <div className="size-12 rounded-full bg-zinc-800 flex items-center justify-center text-2xl shrink-0">
-                    {f.avatar}
+                    <Avatar value={f.avatar} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold truncate">{f.pseudo}</p>
@@ -255,13 +256,13 @@ function FriendsPage() {
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="flex-1 text-center">
-                    <div className="text-2xl">{d.challengerAvatar}</div>
+                    <div className="mx-auto size-10 flex items-center justify-center text-2xl"><Avatar value={d.challengerAvatar} /></div>
                     <p className="text-xs font-semibold mt-1 truncate">{d.challengerPseudo}</p>
                     <p className="text-lg font-bold text-brand">{d.challengerPoints}</p>
                   </div>
                   <div className="text-xs font-bold text-zinc-500 uppercase tracking-widest">VS</div>
                   <div className="flex-1 text-center">
-                    <div className="text-2xl">{d.challengedAvatar}</div>
+                    <div className="mx-auto size-10 flex items-center justify-center text-2xl"><Avatar value={d.challengedAvatar} /></div>
                     <p className="text-xs font-semibold mt-1 truncate">{d.challengedPseudo}</p>
                     <p className="text-lg font-bold text-brand">{d.challengedPoints}</p>
                   </div>
@@ -308,7 +309,7 @@ function FriendsPage() {
                 className="p-4 rounded-2xl bg-card ring-1 ring-white/5 flex items-center gap-3"
               >
                 <div className="size-12 rounded-full bg-zinc-800 flex items-center justify-center text-2xl shrink-0">
-                  {r.senderAvatar}
+                  <Avatar value={r.senderAvatar} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold truncate">{r.senderPseudo}</p>
@@ -375,7 +376,7 @@ function FriendsPage() {
                 className="p-4 rounded-2xl bg-card ring-1 ring-white/5 flex items-center gap-3"
               >
                 <div className="size-12 rounded-full bg-zinc-800 flex items-center justify-center text-2xl shrink-0">
-                  {u.avatar}
+                  <Avatar value={u.avatar} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold truncate">{u.pseudo}</p>

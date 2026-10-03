@@ -1,7 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { AVATARS, useCreateProfile } from "@/lib/store";
+import { useCreateProfile } from "@/lib/store";
+import { AvatarPicker, DEFAULT_AVATAR } from "@/components/Avatar";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
   head: () => ({
@@ -17,7 +18,7 @@ export const Route = createFileRoute("/_authenticated/onboarding")({
 
 function OnboardingPage() {
   const [pseudo, setPseudo] = useState("");
-  const [avatar, setAvatar] = useState(AVATARS[0]);
+  const [avatar, setAvatar] = useState(DEFAULT_AVATAR);
   const [goal, setGoal] = useState("");
   const create = useCreateProfile();
   const navigate = useNavigate();
@@ -60,19 +61,8 @@ function OnboardingPage() {
 
           <div>
             <label className="text-xs uppercase tracking-widest text-muted-foreground">Avatar</label>
-            <div className="mt-2 grid grid-cols-6 gap-2">
-              {AVATARS.map((a) => (
-                <button
-                  type="button"
-                  key={a}
-                  onClick={() => setAvatar(a)}
-                  className={`aspect-square rounded-xl flex items-center justify-center text-2xl transition-all ${
-                    avatar === a ? "bg-brand/20 ring-2 ring-brand" : "bg-card ring-1 ring-white/5"
-                  }`}
-                >
-                  {a}
-                </button>
-              ))}
+            <div className="mt-2">
+              <AvatarPicker value={avatar} onChange={setAvatar} />
             </div>
           </div>
 

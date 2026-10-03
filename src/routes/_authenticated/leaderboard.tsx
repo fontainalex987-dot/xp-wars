@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { AppShell } from "@/components/AppShell";
+import { Avatar } from "@/components/Avatar";
 import { GroupSwitcher } from "@/components/GroupSwitcher";
 import { useGroupMembers, useMyGroup, useProfile, type Friend } from "@/lib/store";
 
@@ -91,7 +92,7 @@ function LeaderboardPage() {
                 <div key={f.id} className="flex flex-col items-center gap-2 flex-1">
                   <span className="text-[10px] text-muted-foreground font-bold truncate">{f.pseudo}</span>
                   <div className={`rounded-full p-1 ring-2 ${isFirst ? "ring-brand size-20" : rank === 2 ? "ring-zinc-500/40 size-14" : "ring-orange-900/40 size-14"}`}>
-                    <div className="size-full rounded-full bg-zinc-800 flex items-center justify-center text-3xl">{f.avatar}</div>
+                    <div className="size-full rounded-full bg-zinc-800 flex items-center justify-center text-3xl"><Avatar value={f.avatar} /></div>
                   </div>
                   <div className={`w-full max-w-[80px] rounded-t-lg flex flex-col items-center justify-center font-bold ${heights[rank]} ${isFirst ? "bg-brand text-primary-foreground" : "bg-zinc-800/80 text-zinc-400"}`}>
                     <span className="text-2xl">{medals[rank - 1]}</span>
@@ -117,7 +118,7 @@ function LeaderboardPage() {
               }`}
             >
               <span className={`w-8 text-center font-bold ${i < 3 ? "text-brand" : "text-muted-foreground"}`}>#{i + 1}</span>
-              <div className="size-10 rounded-full bg-zinc-800 flex items-center justify-center text-lg">{f.avatar}</div>
+              <div className="size-10 rounded-full bg-zinc-800 flex items-center justify-center text-lg"><Avatar value={f.avatar} /></div>
               <div className="flex-1 min-w-0">
                 <p className="font-semibold truncate">{f.pseudo} {isMe && <span className="text-xs text-brand">(toi)</span>}</p>
                 <p className="text-xs text-muted-foreground">Niveau {f.level}</p>
