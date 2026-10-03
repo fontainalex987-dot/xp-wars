@@ -2,9 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Sparkles, Clock, Plus } from "lucide-react";
+import { Sparkles, Clock, Plus, CalendarCheck } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
-import { generateCoachPlan, type CoachPlan } from "@/lib/coach.functions";
+import { generateCoachPlan, generateWeeklyReview, type CoachPlan, type WeeklyReview } from "@/lib/coach.functions";
 import { useAddTask, useMyGroup, useTodayTasks, CATEGORIES, DIFFICULTY_POINTS, type Category } from "@/lib/store";
 
 export const Route = createFileRoute("/_authenticated/coach")({
@@ -137,6 +137,101 @@ function CoachPage() {
           })}
         </section>
       )}
+
+      <WeeklyReviewSection minutes={minutes} goal={goal} groupId={group?.id ?? null} onAdd={add}
+        canAdd={!addTask.isPending && tasks.length < 3} />
     </AppShell>
+  );
+}
+
+const VERDICT: Record<WeeklyReview["verdict"], string> = {
+  en_avance: "🚀 En avance",
+  dans_les_temps: "✅ Dans les temps",
+  en_retard: "⏳ En retard",
+};
+const MS_ICON = { fait: "✅", en_cours: "🔥", a_venir: "⬜" } as const;
+const ACTION_LABEL = { garder: "Garder", ajuster: "Ajuster", remplacer: "Remplacer", ajouter: "Ajouter" } as const;
+const RKEY = "xpwars.weeklyReview";
+
+function WeeklyReviewSection({ minutes, goal, groupId, onAdd, canAdd }: {
+  minutes: number; goal: string; groupId: string | null;
+  onAdd: (q: CoachPlan["quests"][number]) => void; canAdd: boolean;
+}) {
+  const [review, setReview] = useState<WeeklyReview | null>(null);
+  const [loading, setLoading] = useState(false);
+  const gen = useServerFn(generateWeeklyReview);
+
+  useEffect(() => {
+    try { const r = localStorage.getItem(RKEY); if (r) setReview(JSON.parse(r)); } catch {}
+  }, []);
+
+  const run = async () => {
+    if (goal.trim().length < 3) return toast.error("Décris d'abord ton objectif de saison.");
+    setLoading(true);
+    try {
+      const r = await gen({ data: { minutesPerDay: minutes, seasonGoal: goal.trim(), groupId } });
+      setReview(r);
+      try { localStorage.setItem(RKEY, JSON.stringify(r)); } catch {}
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erreur");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <section className="px-5 pb-8 space-y-3">
+      <h2 className="text-lg font-medium">Bilan de la semaine</h2>
+      <button onClick={run} disabled={loading}
+        className="w-full py-3 rounded-xl bg-card ring-1 ring-brand/40 text-brand font-bold flex items-center justify-center gap-2 active:scale-95 transition-transform disabled:opacity-50">
+        <CalendarCheck className="size-4" /> {loading ? "Analyse en cours..." : review ? "Refaire mon bilan" : "Faire mon bilan"}
+      </button>
+      {review && (
+        <>
+          <div className="p-4 rounded-2xl bg-card ring-1 ring-white/5 space-y-2">
+            <p className="font-semibold">{VERDICT[review.verdict]}</p>
+            <p className="text-sm">{review.summary}</p>
+            <p className="text-xs text-muted-foreground">
+              {review.stats.doneWeek}/{review.stats.totalWeek} quêtes validées · {review.stats.pointsWeek} pts cette semaine
+              {" "}({review.stats.doneWeek >= review.stats.donePrev ? "+" : ""}{review.stats.doneWeek - review.stats.donePrev} vs semaine d'avant)
+            </p>
+          </div>
+          {review.milestones.length > 0 && (
+            <div className="p-4 rounded-2xl bg-card ring-1 ring-white/5 space-y-2">
+              <p className="text-xs uppercase tracking-widest text-muted-foreground">Étapes de ton objectif</p>
+              {review.milestones.map((m, i) => (
+                <p key={i} className={`text-sm flex gap-2 ${m.status === "a_venir" ? "text-muted-foreground" : ""}`}>
+                  <span>{MS_ICON[m.status]}</span><span>{m.label}</span>
+                </p>
+              ))}
+            </div>
+          )}
+          {review.adjustments.map((a, i) => (
+            <div key={i} className="p-4 rounded-2xl bg-card ring-1 ring-white/5 flex gap-3 items-start">
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] uppercase tracking-widest text-brand font-semibold">
+                  {ACTION_LABEL[a.action]}{a.current ? ` · ${a.current}` : ""}
+                </p>
+                {a.quest && <p className="font-semibold mt-1">{a.quest.title}</p>}
+                {a.quest && <p className="text-xs text-muted-foreground">{a.quest.description}</p>}
+                <p className="text-xs text-muted-foreground mt-1 italic">{a.reason}</p>
+                {a.quest && (
+                  <div className="mt-2 flex gap-3 text-[11px] text-muted-foreground">
+                    <span className="flex items-center gap-1"><Clock className="size-3" />{a.quest.minutes} min</span>
+                    <span className="text-brand font-semibold">+{DIFFICULTY_POINTS[a.quest.difficulty]} pts</span>
+                  </div>
+                )}
+              </div>
+              {a.quest && (
+                <button onClick={() => onAdd(a.quest!)} disabled={!canAdd} aria-label="Ajouter"
+                  className="size-9 shrink-0 rounded-full bg-brand text-primary-foreground flex items-center justify-center disabled:opacity-40">
+                  <Plus className="size-4" strokeWidth={3} />
+                </button>
+              )}
+            </div>
+          ))}
+        </>
+      )}
+    </section>
   );
 }
