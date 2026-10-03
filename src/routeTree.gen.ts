@@ -19,6 +19,7 @@ import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authentic
 import { Route as AuthenticatedLeaderboardRouteImport } from './routes/_authenticated/leaderboard'
 import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticated/history'
 import { Route as AuthenticatedGroupRouteImport } from './routes/_authenticated/group'
+import { Route as AuthenticatedGoalsRouteImport } from './routes/_authenticated/goals'
 import { Route as AuthenticatedFriendsRouteImport } from './routes/_authenticated/friends'
 import { Route as AuthenticatedEditProfileRouteImport } from './routes/_authenticated/edit-profile'
 import { Route as ApiPublicSendPushRouteImport } from './routes/api/public/send-push'
@@ -74,6 +75,11 @@ const AuthenticatedGroupRoute = AuthenticatedGroupRouteImport.update({
   path: '/group',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedGoalsRoute = AuthenticatedGoalsRouteImport.update({
+  id: '/goals',
+  path: '/goals',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedFriendsRoute = AuthenticatedFriendsRouteImport.update({
   id: '/friends',
   path: '/friends',
@@ -102,6 +108,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/edit-profile': typeof AuthenticatedEditProfileRoute
   '/friends': typeof AuthenticatedFriendsRoute
+  '/goals': typeof AuthenticatedGoalsRoute
   '/group': typeof AuthenticatedGroupRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/leaderboard': typeof AuthenticatedLeaderboardRoute
@@ -116,6 +123,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/edit-profile': typeof AuthenticatedEditProfileRoute
   '/friends': typeof AuthenticatedFriendsRoute
+  '/goals': typeof AuthenticatedGoalsRoute
   '/group': typeof AuthenticatedGroupRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/leaderboard': typeof AuthenticatedLeaderboardRoute
@@ -133,6 +141,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/edit-profile': typeof AuthenticatedEditProfileRoute
   '/_authenticated/friends': typeof AuthenticatedFriendsRoute
+  '/_authenticated/goals': typeof AuthenticatedGoalsRoute
   '/_authenticated/group': typeof AuthenticatedGroupRoute
   '/_authenticated/history': typeof AuthenticatedHistoryRoute
   '/_authenticated/leaderboard': typeof AuthenticatedLeaderboardRoute
@@ -151,6 +160,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/edit-profile'
     | '/friends'
+    | '/goals'
     | '/group'
     | '/history'
     | '/leaderboard'
@@ -165,6 +175,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/edit-profile'
     | '/friends'
+    | '/goals'
     | '/group'
     | '/history'
     | '/leaderboard'
@@ -181,6 +192,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/edit-profile'
     | '/_authenticated/friends'
+    | '/_authenticated/goals'
     | '/_authenticated/group'
     | '/_authenticated/history'
     | '/_authenticated/leaderboard'
@@ -271,6 +283,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedGroupRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/goals': {
+      id: '/_authenticated/goals'
+      path: '/goals'
+      fullPath: '/goals'
+      preLoaderRoute: typeof AuthenticatedGoalsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/friends': {
       id: '/_authenticated/friends'
       path: '/friends'
@@ -305,6 +324,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedEditProfileRoute: typeof AuthenticatedEditProfileRoute
   AuthenticatedFriendsRoute: typeof AuthenticatedFriendsRoute
+  AuthenticatedGoalsRoute: typeof AuthenticatedGoalsRoute
   AuthenticatedGroupRoute: typeof AuthenticatedGroupRoute
   AuthenticatedHistoryRoute: typeof AuthenticatedHistoryRoute
   AuthenticatedLeaderboardRoute: typeof AuthenticatedLeaderboardRoute
@@ -319,6 +339,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedEditProfileRoute: AuthenticatedEditProfileRoute,
   AuthenticatedFriendsRoute: AuthenticatedFriendsRoute,
+  AuthenticatedGoalsRoute: AuthenticatedGoalsRoute,
   AuthenticatedGroupRoute: AuthenticatedGroupRoute,
   AuthenticatedHistoryRoute: AuthenticatedHistoryRoute,
   AuthenticatedLeaderboardRoute: AuthenticatedLeaderboardRoute,
