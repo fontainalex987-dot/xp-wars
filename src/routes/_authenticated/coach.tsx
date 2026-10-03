@@ -50,10 +50,10 @@ function CoachPage() {
 
   useEffect(() => {
     let cancelled = false;
+    // RLS : seule la ligne coach_plans de l'utilisateur est visible.
     supabase
       .from("coach_plans")
       .select("minutes_per_day, season_goal, plan")
-      .eq("user_id", supabase.auth.currentUser?.id ?? "")
       .maybeSingle()
       .then(({ data }) => {
         if (cancelled || !data) return;
