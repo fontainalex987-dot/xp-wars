@@ -46,6 +46,64 @@ export type Database = {
           },
         ]
       }
+      coach_plans: {
+        Row: {
+          minutes_per_day: number
+          plan: Json
+          season_goal: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          minutes_per_day: number
+          plan: Json
+          season_goal: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          minutes_per_day?: number
+          plan?: Json
+          season_goal?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coach_plans_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coach_usage: {
+        Row: {
+          count: number
+          day: string
+          user_id: string
+        }
+        Insert: {
+          count?: number
+          day: string
+          user_id: string
+        }
+        Update: {
+          count?: number
+          day?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coach_usage_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       duels: {
         Row: {
           challenged_id: string
@@ -273,7 +331,6 @@ export type Database = {
           last_task_date: string | null
           level: number
           pseudo: string
-          season_points_baseline: number
           streak: number
           streak_freezes_available: number
           streak_freezes_week_start: string | null
@@ -290,7 +347,6 @@ export type Database = {
           last_task_date?: string | null
           level?: number
           pseudo: string
-          season_points_baseline?: number
           streak?: number
           streak_freezes_available?: number
           streak_freezes_week_start?: string | null
@@ -307,7 +363,6 @@ export type Database = {
           last_task_date?: string | null
           level?: number
           pseudo?: string
-          season_points_baseline?: number
           streak?: number
           streak_freezes_available?: number
           streak_freezes_week_start?: string | null
@@ -379,61 +434,6 @@ export type Database = {
           },
         ]
       }
-      season_results: {
-        Row: {
-          created_at: string
-          group_id: string
-          id: string
-          is_champion: boolean
-          rank: number
-          season_id: string
-          season_points: number
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          group_id: string
-          id?: string
-          is_champion?: boolean
-          rank: number
-          season_id: string
-          season_points: number
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          group_id?: string
-          id?: string
-          is_champion?: boolean
-          rank?: number
-          season_id?: string
-          season_points?: number
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "season_results_group_id_fkey"
-            columns: ["group_id"]
-            isOneToOne: false
-            referencedRelation: "groups"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "season_results_season_id_fkey"
-            columns: ["season_id"]
-            isOneToOne: false
-            referencedRelation: "seasons"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "season_results_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       season_rewards: {
         Row: {
           created_at: string
@@ -484,33 +484,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      seasons: {
-        Row: {
-          created_at: string
-          ends_at: string | null
-          id: string
-          name: string
-          starts_at: string
-          status: string
-        }
-        Insert: {
-          created_at?: string
-          ends_at?: string | null
-          id?: string
-          name: string
-          starts_at?: string
-          status?: string
-        }
-        Update: {
-          created_at?: string
-          ends_at?: string | null
-          id?: string
-          name?: string
-          starts_at?: string
-          status?: string
-        }
-        Relationships: []
       }
       streak_freezes: {
         Row: {
@@ -727,6 +700,7 @@ export type Database = {
           xp: number
         }[]
       }
+      consume_coach_quota: { Args: { _limit?: number }; Returns: number }
       create_duel: {
         Args: { _challenged: string; _duration_days?: number; _group?: string }
         Returns: {
@@ -1012,13 +986,17 @@ export type Database = {
       }
       reject_friend_request: { Args: { _request: string }; Returns: undefined }
       remove_friend: { Args: { _friend: string }; Returns: undefined }
-      reset_season: { Args: never; Returns: string }
+      resolve_all_group_seasons: { Args: never; Returns: undefined }
       resolve_expired_duels: { Args: never; Returns: undefined }
       resolve_group_challenge: {
         Args: { _challenge: string }
         Returns: undefined
       }
       resolve_group_seasons: { Args: { _group: string }; Returns: undefined }
+      resolve_group_seasons_internal: {
+        Args: { _group: string }
+        Returns: undefined
+      }
       safe_tz: { Args: { _tz: string }; Returns: string }
       search_users: {
         Args: { _query: string }
