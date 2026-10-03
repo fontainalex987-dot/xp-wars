@@ -22,6 +22,7 @@ import { Route as AuthenticatedGroupRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedGoalsRouteImport } from './routes/_authenticated/goals'
 import { Route as AuthenticatedFriendsRouteImport } from './routes/_authenticated/friends'
 import { Route as AuthenticatedEditProfileRouteImport } from './routes/_authenticated/edit-profile'
+import { Route as AuthenticatedCoachRouteImport } from './routes/_authenticated/coach'
 import { Route as ApiPublicSendPushRouteImport } from './routes/api/public/send-push'
 import { Route as AuthenticatedMemberMemberIdRouteImport } from './routes/_authenticated/member.$memberId'
 
@@ -91,6 +92,11 @@ const AuthenticatedEditProfileRoute =
     path: '/edit-profile',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedCoachRoute = AuthenticatedCoachRouteImport.update({
+  id: '/coach',
+  path: '/coach',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const ApiPublicSendPushRoute = ApiPublicSendPushRouteImport.update({
   id: '/api/public/send-push',
   path: '/api/public/send-push',
@@ -106,6 +112,7 @@ const AuthenticatedMemberMemberIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/auth': typeof AuthRoute
+  '/coach': typeof AuthenticatedCoachRoute
   '/edit-profile': typeof AuthenticatedEditProfileRoute
   '/friends': typeof AuthenticatedFriendsRoute
   '/goals': typeof AuthenticatedGoalsRoute
@@ -121,6 +128,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
+  '/coach': typeof AuthenticatedCoachRoute
   '/edit-profile': typeof AuthenticatedEditProfileRoute
   '/friends': typeof AuthenticatedFriendsRoute
   '/goals': typeof AuthenticatedGoalsRoute
@@ -139,6 +147,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/coach': typeof AuthenticatedCoachRoute
   '/_authenticated/edit-profile': typeof AuthenticatedEditProfileRoute
   '/_authenticated/friends': typeof AuthenticatedFriendsRoute
   '/_authenticated/goals': typeof AuthenticatedGoalsRoute
@@ -158,6 +167,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/coach'
     | '/edit-profile'
     | '/friends'
     | '/goals'
@@ -173,6 +183,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
+    | '/coach'
     | '/edit-profile'
     | '/friends'
     | '/goals'
@@ -190,6 +201,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/coach'
     | '/_authenticated/edit-profile'
     | '/_authenticated/friends'
     | '/_authenticated/goals'
@@ -304,6 +316,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEditProfileRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/coach': {
+      id: '/_authenticated/coach'
+      path: '/coach'
+      fullPath: '/coach'
+      preLoaderRoute: typeof AuthenticatedCoachRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/public/send-push': {
       id: '/api/public/send-push'
       path: '/api/public/send-push'
@@ -322,6 +341,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedCoachRoute: typeof AuthenticatedCoachRoute
   AuthenticatedEditProfileRoute: typeof AuthenticatedEditProfileRoute
   AuthenticatedFriendsRoute: typeof AuthenticatedFriendsRoute
   AuthenticatedGoalsRoute: typeof AuthenticatedGoalsRoute
@@ -337,6 +357,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedCoachRoute: AuthenticatedCoachRoute,
   AuthenticatedEditProfileRoute: AuthenticatedEditProfileRoute,
   AuthenticatedFriendsRoute: AuthenticatedFriendsRoute,
   AuthenticatedGoalsRoute: AuthenticatedGoalsRoute,
