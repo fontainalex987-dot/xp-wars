@@ -61,7 +61,7 @@ export function BottomNav() {
                 itemRefs.current[index] = el;
               }}
               to={to}
-              className={`relative flex flex-col items-center gap-1 px-2 py-2 transition-colors duration-200 ${
+              className={`relative flex flex-col items-center gap-1 px-1.5 min-[380px]:px-2 py-2 transition-colors duration-200 ${
                 active
                   ? "text-brand"
                   : "text-zinc-400 opacity-60 hover:opacity-100 hover:text-zinc-200"
@@ -89,7 +89,7 @@ export function BottomNav() {
                 />
               </div>
               <span
-                className={`text-[10px] tracking-wide uppercase ${
+                className={`text-[9px] min-[380px]:text-[10px] tracking-wide uppercase whitespace-nowrap ${
                   active ? "font-extrabold" : "font-medium"
                 }`}
               >

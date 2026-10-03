@@ -2,7 +2,7 @@ import { StarterTasks } from "@/components/StarterTasks";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Plus, X } from "lucide-react";
+import { History, Plus, X } from "lucide-react";
 import { motion } from "framer-motion";
 import { AppShell } from "@/components/AppShell";
 import { TaskCard } from "@/components/TaskCard";
@@ -122,31 +122,34 @@ function TasksPage() {
 
   return (
     <AppShell>
-      <header className="px-5 pt-8 pb-4 flex items-center justify-between">
-        <div>
+      <header className="px-5 pt-8 pb-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+        <div className="min-w-0">
           <p className="text-[10px] text-zinc-400 uppercase tracking-widest font-medium">Aujourd'hui</p>
-          <h1 className="text-3xl font-semibold tracking-tight">Mes quêtes</h1>
+          <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight truncate">Mes quêtes</h1>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 shrink-0">
           <Link
             to="/coach"
-            className="text-xs font-semibold uppercase tracking-wide text-brand py-2 px-3 rounded-full ring-1 ring-brand/30"
+            aria-label="Coach IA"
+            className="text-[11px] sm:text-xs font-semibold uppercase tracking-wide text-brand py-2 px-2.5 sm:px-3 rounded-full ring-1 ring-brand/30 whitespace-nowrap"
           >
-            Coach IA
+            Coach
           </Link>
           <Link
             to="/history"
-            className="text-xs font-semibold uppercase tracking-wide text-muted-foreground hover:text-brand py-2 px-3 rounded-full ring-1 ring-white/10"
+            aria-label="Historique"
+            className="flex items-center justify-center size-9 rounded-full ring-1 ring-white/10 text-muted-foreground hover:text-brand shrink-0"
           >
-            Historique
+            <History className="size-4" />
           </Link>
           <button
             onClick={() => setOpen(true)}
             disabled={tasks.length >= 3}
-            className="flex items-center gap-1.5 bg-brand text-primary-foreground text-sm font-bold py-2 px-3 rounded-full active:scale-95 transition-transform disabled:opacity-40 disabled:cursor-not-allowed"
+            aria-label="Ajouter une quête"
+            className="flex items-center gap-1.5 bg-brand text-primary-foreground text-sm font-bold py-2 px-3 rounded-full active:scale-95 transition-transform disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
           >
             <Plus className="size-4" strokeWidth={3} />
-            Ajouter
+            <span className="hidden min-[360px]:inline">Ajouter</span>
           </button>
         </div>
       </header>
