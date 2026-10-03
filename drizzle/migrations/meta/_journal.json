@@ -15,6 +15,13 @@
       "when": 1790989581322,
       "tag": "0001_goals_system",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790989593034,
+      "tag": "0002_goals_validate_soft",
+      "breakpoints": true
     }
   ]
 }
