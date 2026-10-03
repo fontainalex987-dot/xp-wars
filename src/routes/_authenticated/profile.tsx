@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { BarChart3, Bell, Flame, LogOut, Pencil, Target, Trophy, Zap } from "lucide-react";
+import { useState } from "react";
+import { BarChart3, Bell, Flame, LogOut, Pencil, Target, Trophy, Volume2, Zap } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { Avatar } from "@/components/Avatar";
 import { ProfileSkeleton } from "@/components/Skeletons";
@@ -7,6 +8,7 @@ import { XpBar } from "@/components/XpBar";
 import { useAuth, useBadges, useProfile, useTodayTasks, xpToNext } from "@/lib/store";
 import { usePushNotifications } from "@/lib/push-notifications";
 import { TrophyShowcase } from "@/lib/seasons";
+import { isSoundEnabled, setSoundEnabled, playSound } from "@/lib/sounds";
 
 export const Route = createFileRoute("/_authenticated/profile")({
   head: () => ({
@@ -27,6 +29,7 @@ function ProfilePage() {
   const push = usePushNotifications();
   const { signOut } = useAuth();
   const navigate = useNavigate();
+  const [soundOn, setSoundOn] = useState(isSoundEnabled);
   const handleSignOut = async () => {
     await signOut();
     navigate({ to: "/auth", replace: true });
@@ -127,6 +130,40 @@ function ProfilePage() {
               <span
                 className={`absolute top-0.5 size-6 rounded-full bg-white transition-transform ${
                   push.enabled ? "translate-x-[22px]" : "translate-x-0.5"
+                }`}
+              />
+            </button>
+          </div>
+        </div>
+
+        <div className="p-4 rounded-[20px] bg-card ring-1 ring-white/5">
+          <div className="flex items-center gap-3">
+            <div className={`size-10 rounded-full flex items-center justify-center ${soundOn ? "bg-brand/20 text-brand xp-glow" : "bg-zinc-800 text-muted-foreground"}`}>
+              <Volume2 className="size-5" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold">Sons des récompenses</p>
+              <p className="text-xs text-muted-foreground">
+                Un petit jingle quand tu valides une quête, un badge ou un niveau
+              </p>
+            </div>
+            <button
+              role="switch"
+              aria-checked={soundOn}
+              aria-label="Sons des récompenses"
+              onClick={() => {
+                const next = !soundOn;
+                setSoundEnabled(next);
+                setSoundOn(next);
+                if (next) playSound("quest");
+              }}
+              className={`relative w-12 h-7 rounded-full transition-colors shrink-0 ${
+                soundOn ? "bg-brand" : "bg-zinc-700"
+              }`}
+            >
+              <span
+                className={`absolute top-0.5 size-6 rounded-full bg-white transition-transform ${
+                  soundOn ? "translate-x-[22px]" : "translate-x-0.5"
                 }`}
               />
             </button>
