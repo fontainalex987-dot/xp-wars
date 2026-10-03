@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef, useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { Home, ListChecks, Trophy, Users, User } from "lucide-react";
+import { useAuth } from "@/lib/store";
 
 const items = [
   { to: "/", label: "Accueil", icon: Home },
@@ -12,6 +13,7 @@ const items = [
 ] as const;
 
 export function BottomNav() {
+  const { userId } = useAuth();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const containerRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLAnchorElement | null)[]>([]);
@@ -32,7 +34,8 @@ export function BottomNav() {
     }
   }, [pathname]);
 
-  if (pathname.startsWith("/auth")) return null;
+  if (!userId || pathname.startsWith("/auth") || pathname.startsWith("/onboarding"))
+    return null;
 
   return (
     <nav className="fixed bottom-0 inset-x-0 z-40 bg-background/85 backdrop-blur-lg border-t border-white/5 px-4 pt-3 pb-6">
