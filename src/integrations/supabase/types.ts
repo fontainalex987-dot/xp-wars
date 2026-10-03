@@ -353,6 +353,32 @@ export type Database = {
           },
         ]
       }
+      season_resolutions: {
+        Row: {
+          group_id: string
+          resolved_at: string
+          season: string
+        }
+        Insert: {
+          group_id: string
+          resolved_at?: string
+          season: string
+        }
+        Update: {
+          group_id?: string
+          resolved_at?: string
+          season?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "season_resolutions_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       season_results: {
         Row: {
           created_at: string
@@ -401,6 +427,57 @@ export type Database = {
           },
           {
             foreignKeyName: "season_results_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      season_rewards: {
+        Row: {
+          created_at: string
+          group_id: string
+          id: string
+          points: number
+          rank: number
+          season: string
+          seen_at: string | null
+          user_id: string
+          xp_awarded: number
+        }
+        Insert: {
+          created_at?: string
+          group_id: string
+          id?: string
+          points: number
+          rank: number
+          season: string
+          seen_at?: string | null
+          user_id: string
+          xp_awarded: number
+        }
+        Update: {
+          created_at?: string
+          group_id?: string
+          id?: string
+          points?: number
+          rank?: number
+          season?: string
+          seen_at?: string | null
+          user_id?: string
+          xp_awarded?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "season_rewards_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "season_rewards_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -816,6 +893,18 @@ export type Database = {
           xp: number
         }[]
       }
+      group_season_podiums: {
+        Args: { _group: string }
+        Returns: {
+          avatar: string
+          points: number
+          pseudo: string
+          rank: number
+          season: string
+          user_id: string
+          xp_awarded: number
+        }[]
+      }
       is_group_member: {
         Args: { _group: string; _user: string }
         Returns: boolean
@@ -835,6 +924,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      mark_season_rewards_seen: {
+        Args: { _ids?: string[] }
+        Returns: undefined
       }
       my_duels: {
         Args: never
@@ -901,6 +994,18 @@ export type Database = {
           user_id: string
         }[]
       }
+      my_unseen_season_rewards: {
+        Args: never
+        Returns: {
+          group_id: string
+          group_name: string
+          id: string
+          points: number
+          rank: number
+          season: string
+          xp_awarded: number
+        }[]
+      }
       normalize_level: {
         Args: { _level: number; _xp: number }
         Returns: Record<string, unknown>
@@ -913,6 +1018,7 @@ export type Database = {
         Args: { _challenge: string }
         Returns: undefined
       }
+      resolve_group_seasons: { Args: { _group: string }; Returns: undefined }
       safe_tz: { Args: { _tz: string }; Returns: string }
       search_users: {
         Args: { _query: string }
@@ -1021,6 +1127,18 @@ export type Database = {
         }[]
       }
       user_today: { Args: { _user: string }; Returns: string }
+      user_trophies: {
+        Args: { _user: string }
+        Returns: {
+          group_id: string
+          group_name: string
+          id: string
+          points: number
+          rank: number
+          season: string
+          xp_awarded: number
+        }[]
+      }
       user_tz: { Args: { _user: string }; Returns: string }
       xp_to_next: { Args: { _level: number }; Returns: number }
     }
