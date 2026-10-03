@@ -74,7 +74,7 @@ function HomePage() {
       </header>
 
       <section className="px-5 py-4">
-        <div className="relative p-6 rounded-[24px] bg-card ring-1 ring-white/5 overflow-hidden">
+        <div className="relative p-6 rounded-[24px] bg-gradient-to-b from-white/[0.06] to-card bg-card ring-1 ring-white/10 overflow-hidden">
           {doneCount >= 2 && (
             <div className="absolute top-4 right-4">
               <div className="combo-glow px-3 py-1 bg-brand text-primary-foreground text-xs font-bold rounded-full rotate-3">
@@ -96,7 +96,7 @@ function HomePage() {
             </div>
             <Link
               to="/tasks"
-              className="flex items-center bg-zinc-50 text-zinc-950 text-sm font-semibold py-2.5 pr-4 pl-3 rounded-full transition-transform active:scale-95 shrink-0"
+              className="flex items-center bg-brand text-primary-foreground xp-glow text-sm font-semibold py-2.5 pr-4 pl-3 rounded-full transition-transform active:scale-95 shrink-0"
             >
               {total >= 3 ? (
                 "MES QUÊTES →"

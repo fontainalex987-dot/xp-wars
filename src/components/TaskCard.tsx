@@ -23,7 +23,7 @@ export function CategoryChip({ category, muted = false }: { category: Task["cate
   const c = CATEGORIES[category];
   return (
     <span
-      className={`text-[10px] px-2 py-0.5 rounded-full font-bold ring-1 tracking-wide ${
+      className={`whitespace-nowrap text-[10px] px-2 py-0.5 rounded-full font-semibold ring-1 ${
         muted ? "bg-zinc-800 text-zinc-400 ring-transparent" : "bg-sky-500/10 text-sky-300 ring-sky-500/20"
       }`}
       title={c.label}
@@ -48,12 +48,12 @@ export function TaskCard({
     return (
       <div className="p-4 rounded-[18px] bg-card/40 ring-1 ring-white/5 flex items-center gap-4 opacity-60">
         <div className="flex-1 min-w-0">
-          <div className="flex gap-2 mb-1">
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400 font-bold uppercase tracking-wide">
+          <div className="flex flex-wrap items-center gap-1.5 mb-1">
+            <span className="whitespace-nowrap text-[10px] px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400 font-semibold capitalize">
               {task.difficulty}
             </span>
             <CategoryChip category={task.category} muted />
-            <span className="text-[10px] text-brand font-medium">+{task.points} pts</span>
+            <span className="whitespace-nowrap text-[10px] text-brand font-medium">+{task.points} pts</span>
           </div>
           <h3 className="text-base font-medium line-through decoration-zinc-600 truncate">{task.title}</h3>
           <GoalChip goalId={task.goalId} />
@@ -69,17 +69,18 @@ export function TaskCard({
     <div className="group p-4 rounded-[18px] bg-card ring-1 ring-white/5 flex items-center gap-3 transition-colors duration-150 active:bg-zinc-800/60">
 
       <div className="flex-1 min-w-0">
-        <div className="flex gap-2 mb-1">
-          <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ring-1 uppercase tracking-wide ${diffStyles[task.difficulty]}`}>
+        <div className="flex flex-wrap items-center gap-1.5 mb-1.5">
+          <span className={`inline-flex items-center gap-1 whitespace-nowrap text-[10px] px-2 py-0.5 rounded-full font-semibold ring-1 capitalize ${diffStyles[task.difficulty]}`}>
+            <span className="size-1.5 rounded-full bg-current" />
             {task.difficulty}
           </span>
           <CategoryChip category={task.category} />
-          <span className="text-[10px] text-zinc-500 font-medium">+{task.points} pts</span>
+          <span className="whitespace-nowrap text-[10px] text-brand font-semibold">+{task.points} pts</span>
           {task.templateId && (
-            <span className="text-[10px] text-zinc-500 font-medium uppercase tracking-wide">quotidienne</span>
+            <span className="whitespace-nowrap text-[10px] text-zinc-500 font-medium">↻ Quotidienne</span>
           )}
         </div>
-        <h3 className="text-base font-medium truncate">{task.title}</h3>
+        <h3 className="text-base font-medium leading-snug line-clamp-2 break-words">{task.title}</h3>
         {task.goalId && <div className="mt-1"><GoalChip goalId={task.goalId} /></div>}
         {task.description && <p className="text-sm text-muted-foreground text-pretty line-clamp-2">{task.description}</p>}
       </div>

@@ -1,8 +1,22 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Sparkles, Clock, Plus, CalendarCheck } from "lucide-react";
+import { Sparkles, Clock, Plus, CalendarCheck, ArrowLeft } from "lucide-react";
+
+const DIFF_PILL = {
+  facile: "bg-emerald-500/10 text-emerald-400 ring-emerald-500/20",
+  moyenne: "bg-amber-500/10 text-amber-400 ring-amber-500/20",
+  difficile: "bg-orange-500/10 text-orange-400 ring-orange-500/20",
+} as const;
+
+function DiffPill({ d }: { d: keyof typeof DIFF_PILL }) {
+  return (
+    <span className={`inline-flex items-center gap-1 whitespace-nowrap px-2 py-0.5 rounded-full ring-1 font-semibold capitalize ${DIFF_PILL[d] ?? DIFF_PILL.moyenne}`}>
+      <span className="size-1.5 rounded-full bg-current" />{d}
+    </span>
+  );
+}
 import { AppShell } from "@/components/AppShell";
 import { generateCoachPlan, generateWeeklyReview, type CoachPlan, type WeeklyReview } from "@/lib/coach.functions";
 import { useAddTask, useMyGroup, useTodayTasks, CATEGORIES, DIFFICULTY_POINTS, type Category } from "@/lib/store";
@@ -77,20 +91,26 @@ function CoachPage() {
 
   return (
     <AppShell>
-      <header className="px-5 pt-8 pb-4">
-        <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium">Coach IA</p>
-        <h1 className="text-3xl font-semibold tracking-tight">Ton plan de saison</h1>
+      <header className="px-5 pt-8 pb-4 flex items-center gap-3">
+        <Link to="/tasks" aria-label="Retour aux quêtes"
+          className="size-10 shrink-0 rounded-full bg-card ring-1 ring-white/10 flex items-center justify-center text-muted-foreground active:scale-90 transition-transform">
+          <ArrowLeft className="size-4" />
+        </Link>
+        <div className="min-w-0">
+          <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium">Coach IA</p>
+          <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight truncate">Ton plan de saison</h1>
+        </div>
       </header>
 
       <form onSubmit={submit} className="px-5 space-y-4">
         <div className="p-4 rounded-2xl bg-card ring-1 ring-white/5 space-y-4">
           <div>
             <label className="text-xs uppercase tracking-widest text-muted-foreground">Temps dispo par jour</label>
-            <div className="mt-2 grid grid-cols-6 gap-1.5">
+            <div className="mt-2 grid grid-cols-3 gap-2">
               {TIMES.map((t) => (
                 <button type="button" key={t} onClick={() => setMinutes(t)}
-                  className={`py-2 rounded-xl text-xs font-semibold transition-all ${minutes === t ? "bg-brand text-primary-foreground" : "bg-black/40 text-muted-foreground ring-1 ring-white/10"}`}>
-                  {t < 60 ? `${t}m` : `${t / 60}h`}
+                  className={`py-2.5 rounded-xl text-sm font-semibold transition-all active:scale-95 ${minutes === t ? "bg-brand text-primary-foreground" : "bg-black/40 text-muted-foreground ring-1 ring-white/10"}`}>
+                  {t < 60 ? `${t} min` : `${t / 60} h`}
                 </button>
               ))}
             </div>
@@ -118,18 +138,18 @@ function CoachPage() {
             const cat = CATEGORIES[q.category as Category] ?? CATEGORIES.autre;
             return (
               <div key={i} className="p-4 rounded-2xl bg-card ring-1 ring-white/5 flex gap-3 items-start">
-                <span className="text-xl leading-none mt-0.5">{cat.icon}</span>
+                <span className="size-10 shrink-0 rounded-xl bg-black/30 ring-1 ring-white/10 flex items-center justify-center text-lg">{cat.icon}</span>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold">{q.title}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{q.description}</p>
-                  <div className="mt-2 flex gap-3 text-[11px] text-muted-foreground">
-                    <span className="flex items-center gap-1"><Clock className="size-3" />{q.minutes} min</span>
-                    <span className="uppercase">{q.difficulty}</span>
-                    <span className="text-brand font-semibold">+{DIFFICULTY_POINTS[q.difficulty]} pts</span>
+                  <p className="font-semibold leading-snug break-words">{q.title}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5 break-words">{q.description}</p>
+                  <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground">
+                    <span className="inline-flex items-center gap-1 whitespace-nowrap px-2 py-0.5 rounded-full bg-black/30 ring-1 ring-white/10"><Clock className="size-3" />{q.minutes} min</span>
+                    <DiffPill d={q.difficulty} />
+                    <span className="whitespace-nowrap text-brand font-semibold">+{DIFFICULTY_POINTS[q.difficulty]} pts</span>
                   </div>
                 </div>
                 <button onClick={() => add(q)} disabled={addTask.isPending || tasks.length >= 3} aria-label="Ajouter"
-                  className="size-9 shrink-0 rounded-full bg-brand text-primary-foreground flex items-center justify-center disabled:opacity-40">
+                  className="size-10 shrink-0 rounded-full bg-brand text-primary-foreground flex items-center justify-center active:scale-90 transition-transform disabled:opacity-40">
                   <Plus className="size-4" strokeWidth={3} />
                 </button>
               </div>
@@ -250,7 +270,7 @@ function WeeklyReviewSection({ minutes, goal, groupId, onAdd, canAdd }: {
                 {a.quest && <p className="text-xs text-muted-foreground">{a.quest.description}</p>}
                 <p className="text-xs text-muted-foreground mt-1 italic">{a.reason}</p>
                 {a.quest && (
-                  <div className="mt-2 flex gap-3 text-[11px] text-muted-foreground">
+                  <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
                     <span className="flex items-center gap-1"><Clock className="size-3" />{a.quest.minutes} min</span>
                     <span className="text-brand font-semibold">+{DIFFICULTY_POINTS[a.quest.difficulty]} pts</span>
                   </div>
