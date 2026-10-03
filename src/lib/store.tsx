@@ -668,9 +668,9 @@ export function useCreateGroup() {
       if (error) throw error;
       return data as unknown as Group;
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["myGroup"] });
-      qc.invalidateQueries({ queryKey: ["members"] });
+    onSuccess: async (g) => {
+      await qc.invalidateQueries({ queryKey: ["myGroups"] });
+      setActive(g.id);
     },
   });
 }
@@ -678,16 +678,17 @@ export function useCreateGroup() {
 export function useJoinGroup() {
   const { userId } = useAuth();
   const qc = useQueryClient();
+  const setActive = useSetActiveGroup();
   return useMutation({
     mutationFn: async (code: string): Promise<Group> => {
       if (!userId) throw new Error("Not authenticated");
       const { data, error } = await supabase.rpc("join_group", { _code: code.trim().toUpperCase() });
-      if (error) throw error;
+      if (error) throw new Error(error.message);
       return data as unknown as Group;
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["myGroup"] });
-      qc.invalidateQueries({ queryKey: ["members"] });
+    onSuccess: async (g) => {
+      await qc.invalidateQueries({ queryKey: ["myGroups"] });
+      setActive(g.id);
     },
   });
 }
@@ -696,15 +697,21 @@ export function useJoinGroup() {
 export function useLeaveGroup() {
   const { userId } = useAuth();
   const qc = useQueryClient();
+  const setActive = useSetActiveGroup();
+  const { data: active } = useMyGroup();
+  const { data: groups = [] } = useMyGroups();
   return useMutation({
     mutationFn: async () => {
       if (!userId) throw new Error("Not authenticated");
-      const { error } = await supabase.from("group_members").delete().eq("user_id", userId);
+      if (!active) throw new Error("Aucun groupe actif");
+      const { error } = await supabase.from("group_members").delete().eq("user_id", userId).eq("group_id", active.id);
       if (error) throw error;
+      return active.id;
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["myGroup"] });
-      qc.invalidateQueries({ queryKey: ["members"] });
+    onSuccess: async (leftId) => {
+      const next = groups.find((g) => g.id !== leftId);
+      setActive(next?.id ?? null);
+      await qc.invalidateQueries({ queryKey: ["myGroups"] });
     },
   });
 }
