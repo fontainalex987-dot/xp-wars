@@ -65,7 +65,7 @@ export function BadgeUnlockProvider({ children }: { children: ReactNode }) {
 
     // Chaque nouveau badge a droit à sa célébration plein écran (affichées à la suite).
     fresh.forEach((b) => {
-      celebrate({ kind: "badge", icon: b.icon, label: b.label, description: b.description, medal: b.medal });
+      celebrate({ kind: "badge", icon: b.icon, label: b.label, description: b.description, medal: b.medal, emblem: b.emblem });
       celebrated.add(b.id);
     });
     writeSet(userId, celebrated);

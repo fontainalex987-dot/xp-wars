@@ -5,7 +5,9 @@ import { AppShell } from "@/components/AppShell";
 import { Avatar } from "@/components/Avatar";
 import { ProfileSkeleton } from "@/components/Skeletons";
 import { XpBar } from "@/components/XpBar";
-import { useAuth, useBadges, useProfile, useTodayTasks, xpToNext } from "@/lib/store";
+import { BadgeEmblem, ICON_CREDIT } from "@/components/BadgeEmblem";
+import { celebrate } from "@/lib/celebrations";
+import { useAuth, useBadges, useProfile, useTodayTasks, xpToNext, type Badge } from "@/lib/store";
 import { usePushNotifications } from "@/lib/push-notifications";
 import { TrophyShowcase } from "@/lib/seasons";
 import { isSoundEnabled, setSoundEnabled, playSound } from "@/lib/sounds";
@@ -22,14 +24,20 @@ export const Route = createFileRoute("/_authenticated/profile")({
   component: ProfilePage,
 });
 
+const TESTER_IDS = ["010178ce-5033-4dc7-a8c8-0398100646dd", "0d437e75-48e8-4fcc-8151-b88df08f8fe0"];
+
 function ProfilePage() {
   const { data: profile } = useProfile();
   const { data: tasks = [] } = useTodayTasks();
   const badges = useBadges();
   const push = usePushNotifications();
-  const { signOut } = useAuth();
+  const { signOut, userId } = useAuth();
   const navigate = useNavigate();
   const [soundOn, setSoundOn] = useState(isSoundEnabled);
+  const isTester = !!userId && TESTER_IDS.includes(userId);
+  const replay = (b: Badge) =>
+    celebrate({ kind: "badge", icon: b.icon, label: b.label, description: b.description, emblem: b.emblem });
+  const replayAll = () => badges.forEach(replay);
   const handleSignOut = async () => {
     await signOut();
     navigate({ to: "/auth", replace: true });
@@ -174,23 +182,38 @@ function ProfilePage() {
 
 
       <section className="px-5 py-4">
-        <h2 className="text-lg font-medium mb-3">Badges</h2>
+        <div className="flex items-end justify-between mb-3">
+          <h2 className="text-lg font-medium">Badges</h2>
+          {isTester && (
+            <button
+              type="button"
+              onClick={replayAll}
+              className="text-xs font-semibold text-brand bg-brand/10 ring-1 ring-brand/30 px-3 py-1.5 rounded-full active:scale-95"
+            >
+              Rejouer tout (test)
+            </button>
+          )}
+        </div>
         <div className="grid grid-cols-3 gap-3">
           {badges.map((b) => (
-            <div
+            <button
               key={b.id}
-              className={`p-3 rounded-[20px] ring-1 flex flex-col items-center text-center gap-2 ${
-                b.unlocked ? "bg-card ring-brand/30" : "bg-card/40 ring-white/5 opacity-40"
+              type="button"
+              onClick={() => b.unlocked && replay(b)}
+              disabled={!b.unlocked}
+              aria-label={b.unlocked ? `Revoir le badge ${b.label}` : `${b.label} (verrouillé)`}
+              className={`p-3 rounded-[20px] ring-1 flex flex-col items-center text-center gap-1.5 bg-card ${
+                b.unlocked ? "ring-white/10 active:scale-95 transition-transform" : "ring-white/5"
               }`}
             >
-              <div className={`size-12 rounded-full flex items-center justify-center text-2xl ${b.unlocked ? "bg-brand/10 xp-glow" : "bg-zinc-800"}`}>
-                {b.icon}
-              </div>
-              <p className="text-xs font-semibold leading-tight">{b.label}</p>
+              <BadgeEmblem emblem={b.emblem} locked={!b.unlocked} size={72} />
+              <p className={`text-xs font-semibold leading-tight ${b.unlocked ? "" : "text-muted-foreground"}`}>{b.label}</p>
               <p className="text-[11px] text-muted-foreground leading-tight">{b.description}</p>
-            </div>
+            </button>
           ))}
         </div>
+        <p className="mt-3 text-[11px] text-text-subtle text-center">Touche un badge débloqué pour revoir son animation.</p>
+        <p className="mt-2 text-[10px] text-text-subtle/70 text-center">{ICON_CREDIT}</p>
       </section>
 
       <section className="px-5 py-4">

@@ -3,9 +3,10 @@
 // éviter les imports circulaires.
 
 import type { Medal } from "@/components/BadgeMedal";
+import type { Emblem } from "@/components/BadgeEmblem";
 
 export type Celebration =
-  | { kind: "badge"; icon: string; label: string; description: string; medal?: Medal }
+  | { kind: "badge"; icon: string; label: string; description: string; medal?: Medal; emblem?: Emblem }
   | { kind: "level"; level: number };
 
 type Listener = (c: Celebration) => void;

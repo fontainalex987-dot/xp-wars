@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { haptics } from "@/lib/haptics";
 import { celebrate } from "@/lib/celebrations";
 import { toast } from "sonner";
+import { BADGE_EMBLEMS, type Emblem } from "@/components/BadgeEmblem";
 import type { Medal } from "@/components/BadgeMedal";
 
 export type Difficulty = "facile" | "moyenne" | "difficile";
@@ -90,7 +91,7 @@ export type Friend = {
 
 export type Group = { id: string; name: string; code: string; owner_id: string };
 
-export type Badge = { id: string; label: string; description: string; unlocked: boolean; icon: string; medal: Medal };
+export type Badge = { id: string; label: string; description: string; unlocked: boolean; icon: string; medal: Medal; emblem: Emblem };
 
 // ------- Auth ---------
 type AuthCtx = { userId: string | null; email: string | null; loading: boolean; signOut: () => Promise<void> };
@@ -1257,7 +1258,7 @@ export function useBadges(): Badge[] {
   const m = (big: string, unit: string, tier: Medal["tier"], glyph: Medal["glyph"], current: number, target: number): Medal => ({
     big, unit, tier, glyph, current, target,
   });
-  return [
+  const list: Omit<Badge, "emblem">[] = [
     // Premiers pas
     { id: "b1", label: "Première quête", description: "Termine ta première tâche", unlocked: total >= 10, icon: "🎯", medal: m("1", "QUÊTE", "bronze", "target", total >= 10 ? 1 : 0, 1) },
     { id: "b2", label: "Combo x3", description: "3 tâches en une journée", unlocked: doneToday >= 3, icon: "⚡", medal: m("3", "EN 1 JOUR", "bronze", "bolt", doneToday, 3) },
@@ -1279,6 +1280,7 @@ export function useBadges(): Badge[] {
     { id: "p2500", label: "2 500 pts", description: "2 500 points cumulés", unlocked: total >= 2500, icon: "🚀", medal: m("2,5K", "POINTS", "or", "star", total, 2500) },
     { id: "p5000", label: "5 000 pts", description: "5 000 points cumulés", unlocked: total >= 5000, icon: "🌟", medal: m("5K", "POINTS", "diamant", "star", total, 5000) },
   ];
+  return list.map((b) => ({ ...b, emblem: BADGE_EMBLEMS[b.id] }));
 }
 
 // ------- Goals ---------
