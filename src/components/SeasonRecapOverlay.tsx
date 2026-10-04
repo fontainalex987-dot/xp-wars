@@ -120,17 +120,18 @@ export function SeasonRecapOverlay() {
   useEffect(() => {
     if (!current) return;
     setCanClose(false);
-    const timers = reveal.map((p) =>
-      setTimeout(() => {
-        if (p.rank === 1) {
-          playSound("badge");
-          haptics.levelUp();
-        } else {
-          playSound("quest");
-          haptics.light();
-        }
-      }, p.at * 1000 + 250),
-    );
+    // Une seule musique accompagne toute la montée du podium (démarre avec la première marche).
+    const startAt = reveal.length > 0 ? Math.min(...reveal.map((p) => p.at)) : 0.9;
+    const timers = [setTimeout(() => playSound("podium"), startAt * 1000)];
+    // Les vibrations restent calées sur chaque marche.
+    for (const p of reveal) {
+      timers.push(
+        setTimeout(() => {
+          if (p.rank === 1) haptics.levelUp();
+          else haptics.light();
+        }, p.at * 1000 + 250),
+      );
+    }
     timers.push(setTimeout(() => setCanClose(true), (cardAt + 0.6) * 1000));
     return () => timers.forEach(clearTimeout);
   }, [current, reveal, cardAt]);
