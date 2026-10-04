@@ -46,6 +46,27 @@ export type Database = {
           },
         ]
       }
+      app_badge_icons: {
+        Row: {
+          d: string
+          key: string
+          source: string
+          viewbox: number
+        }
+        Insert: {
+          d: string
+          key: string
+          source?: string
+          viewbox?: number
+        }
+        Update: {
+          d?: string
+          key?: string
+          source?: string
+          viewbox?: number
+        }
+        Relationships: []
+      }
       app_sounds: {
         Row: {
           data_b64: string
