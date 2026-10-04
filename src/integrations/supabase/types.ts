@@ -532,6 +532,42 @@ export type Database = {
           },
         ]
       }
+      season_recap_views: {
+        Row: {
+          group_id: string
+          season: string
+          seen_at: string
+          user_id: string
+        }
+        Insert: {
+          group_id: string
+          season: string
+          seen_at?: string
+          user_id: string
+        }
+        Update: {
+          group_id?: string
+          season?: string
+          seen_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "season_recap_views_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "season_recap_views_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       season_resolutions: {
         Row: {
           group_id: string
@@ -1024,6 +1060,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      mark_season_recap_seen: {
+        Args: { _group: string; _season: string }
+        Returns: undefined
+      }
       mark_season_rewards_seen: {
         Args: { _ids?: string[] }
         Returns: undefined
@@ -1093,6 +1133,7 @@ export type Database = {
           user_id: string
         }[]
       }
+      my_pending_season_recaps: { Args: never; Returns: Json }
       my_unseen_season_rewards: {
         Args: never
         Returns: {
