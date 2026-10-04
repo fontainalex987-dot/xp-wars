@@ -128,7 +128,7 @@ function ProfilePage() {
               }`}
             >
               <span
-                className={`absolute top-0.5 size-6 rounded-full bg-white transition-transform ${
+                className={`absolute top-0.5 left-0 size-6 rounded-full bg-white transition-transform ${
                   push.enabled ? "translate-x-[22px]" : "translate-x-0.5"
                 }`}
               />
@@ -162,7 +162,7 @@ function ProfilePage() {
               }`}
             >
               <span
-                className={`absolute top-0.5 size-6 rounded-full bg-white transition-transform ${
+                className={`absolute top-0.5 left-0 size-6 rounded-full bg-white transition-transform ${
                   soundOn ? "translate-x-[22px]" : "translate-x-0.5"
                 }`}
               />
