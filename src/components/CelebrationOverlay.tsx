@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { haptics } from "@/lib/haptics";
-import { BadgeMedal } from "@/components/BadgeMedal";
 import { subscribeCelebrations, type Celebration } from "@/lib/celebrations";
 
 /**

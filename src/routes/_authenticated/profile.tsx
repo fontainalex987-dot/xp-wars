@@ -8,7 +8,6 @@ import { XpBar } from "@/components/XpBar";
 import { useAuth, useBadges, useProfile, useTodayTasks, xpToNext } from "@/lib/store";
 import { usePushNotifications } from "@/lib/push-notifications";
 import { TrophyShowcase } from "@/lib/seasons";
-import { BadgeMedal } from "@/components/BadgeMedal";
 import { isSoundEnabled, setSoundEnabled, playSound } from "@/lib/sounds";
 
 export const Route = createFileRoute("/_authenticated/profile")({
