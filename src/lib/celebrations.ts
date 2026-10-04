@@ -2,8 +2,10 @@
 // passage de niveau). Volontairement sans dépendance vers le store pour
 // éviter les imports circulaires.
 
+import type { Medal } from "@/components/BadgeMedal";
+
 export type Celebration =
-  | { kind: "badge"; icon: string; label: string; description: string }
+  | { kind: "badge"; icon: string; label: string; description: string; medal?: Medal }
   | { kind: "level"; level: number };
 
 type Listener = (c: Celebration) => void;
