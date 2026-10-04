@@ -82,9 +82,7 @@ export function CelebrationOverlay() {
                 animate={reduce ? { opacity: 1, scale: 1 } : { opacity: 1, scale: 1, rotateY: 720 }}
                 transition={{ duration: reduce ? 0.3 : 1.4, ease: [0.16, 1, 0.3, 1] }}
               >
-                {current.kind === "badge" && current.medal ? (
-                  <BadgeMedal medal={current.medal} unlocked size={128} />
-                ) : current.kind === "badge" ? (
+                {current.kind === "badge" ? (
                   <span className="text-7xl">{current.icon}</span>
                 ) : (
                   <span className="text-6xl font-extrabold text-brand combo-glow">{current.level}</span>

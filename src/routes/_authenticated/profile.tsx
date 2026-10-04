@@ -181,17 +181,14 @@ function ProfilePage() {
             <div
               key={b.id}
               className={`p-3 rounded-[20px] ring-1 flex flex-col items-center text-center gap-2 ${
-                b.unlocked ? "bg-card ring-brand/30" : "bg-card/40 ring-white/5"
+                b.unlocked ? "bg-card ring-brand/30" : "bg-card/40 ring-white/5 opacity-40"
               }`}
             >
-              <BadgeMedal medal={b.medal} unlocked={b.unlocked} size={76} />
-              <p className={`text-xs font-semibold leading-tight ${!b.unlocked ? "text-muted-foreground" : ""}`}>{b.label}</p>
+              <div className={`size-12 rounded-full flex items-center justify-center text-2xl ${b.unlocked ? "bg-brand/10 xp-glow" : "bg-zinc-800"}`}>
+                {b.icon}
+              </div>
+              <p className="text-xs font-semibold leading-tight">{b.label}</p>
               <p className="text-[11px] text-muted-foreground leading-tight">{b.description}</p>
-              {!b.unlocked && (
-                <p className="text-[11px] font-display tabular-nums text-muted-foreground">
-                  {Math.min(b.medal.current, b.medal.target)} / {b.medal.target}
-                </p>
-              )}
             </div>
           ))}
         </div>
