@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 const SR = 44100;
 const STORAGE_KEY = "questlog.sound";
 
-export type SoundName = "quest" | "badge" | "level";
+export type SoundName = "quest" | "badge" | "level" | "podium";
 
 /* ---------- préférence ---------- */
 
@@ -147,7 +147,7 @@ export function initSounds() {
     src.buffer = c.createBuffer(1, 1, SR);
     src.connect(c.destination);
     src.start(0);
-    (["quest", "badge", "level"] as SoundName[]).forEach((n) => void load(c, n));
+    (["quest", "badge", "level", "podium"] as SoundName[]).forEach((n) => void load(c, n));
     window.removeEventListener("pointerdown", unlock);
     window.removeEventListener("touchend", unlock);
     window.removeEventListener("keydown", unlock);
