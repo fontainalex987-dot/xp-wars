@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { haptics } from "@/lib/haptics";
 import { celebrate } from "@/lib/celebrations";
 import { toast } from "sonner";
+import type { Medal } from "@/components/BadgeMedal";
 
 export type Difficulty = "facile" | "moyenne" | "difficile";
 
@@ -89,7 +90,7 @@ export type Friend = {
 
 export type Group = { id: string; name: string; code: string; owner_id: string };
 
-export type Badge = { id: string; label: string; description: string; unlocked: boolean; icon: string };
+export type Badge = { id: string; label: string; description: string; unlocked: boolean; icon: string; medal: Medal };
 
 // ------- Auth ---------
 type AuthCtx = { userId: string | null; email: string | null; loading: boolean; signOut: () => Promise<void> };
@@ -1253,27 +1254,30 @@ export function useBadges(): Badge[] {
   const total = profile?.totalPoints ?? 0;
   const level = profile?.level ?? 1;
   const streak = profile?.streak ?? 0;
+  const m = (big: string, unit: string, tier: Medal["tier"], glyph: Medal["glyph"], current: number, target: number): Medal => ({
+    big, unit, tier, glyph, current, target,
+  });
   return [
     // Premiers pas
-    { id: "b1", label: "Première quête", description: "Termine ta première tâche", unlocked: total >= 10, icon: "🎯" },
-    { id: "b2", label: "Combo x3", description: "3 tâches en une journée", unlocked: doneToday >= 3, icon: "⚡" },
+    { id: "b1", label: "Première quête", description: "Termine ta première tâche", unlocked: total >= 10, icon: "🎯", medal: m("1", "QUÊTE", "bronze", "target", total >= 10 ? 1 : 0, 1) },
+    { id: "b2", label: "Combo x3", description: "3 tâches en une journée", unlocked: doneToday >= 3, icon: "⚡", medal: m("3", "EN 1 JOUR", "bronze", "bolt", doneToday, 3) },
     // Régularité : la constance avant tout
-    { id: "s3", label: "Lancé", description: "Série de 3 jours", unlocked: streak >= 3, icon: "🔥" },
-    { id: "s7", label: "Semaine tenue", description: "Série de 7 jours", unlocked: streak >= 7, icon: "📅" },
-    { id: "s14", label: "Deux semaines", description: "Série de 14 jours", unlocked: streak >= 14, icon: "💪" },
-    { id: "s30", label: "Un mois de constance", description: "Série de 30 jours", unlocked: streak >= 30, icon: "🌳" },
-    { id: "s100", label: "Inarrêtable", description: "Série de 100 jours", unlocked: streak >= 100, icon: "💎" },
+    { id: "s3", label: "Lancé", description: "Série de 3 jours", unlocked: streak >= 3, icon: "🔥", medal: m("3", "JOURS", "bronze", "flame", streak, 3) },
+    { id: "s7", label: "Semaine tenue", description: "Série de 7 jours", unlocked: streak >= 7, icon: "📅", medal: m("7", "JOURS", "argent", "calendar", streak, 7) },
+    { id: "s14", label: "Deux semaines", description: "Série de 14 jours", unlocked: streak >= 14, icon: "💪", medal: m("14", "JOURS", "argent", "flame", streak, 14) },
+    { id: "s30", label: "Un mois de constance", description: "Série de 30 jours", unlocked: streak >= 30, icon: "🌳", medal: m("30", "JOURS", "or", "mountain", streak, 30) },
+    { id: "s100", label: "Inarrêtable", description: "Série de 100 jours", unlocked: streak >= 100, icon: "💎", medal: m("100", "JOURS", "diamant", "gem", streak, 100) },
     // Progression
-    { id: "l3", label: "Niveau 3", description: "Atteins le niveau 3", unlocked: level >= 3, icon: "🌱" },
-    { id: "b5", label: "Niveau 5", description: "Atteins le niveau 5", unlocked: level >= 5, icon: "👑" },
-    { id: "b6", label: "Niveau 10", description: "Atteins le niveau 10", unlocked: level >= 10, icon: "🏆" },
-    { id: "l20", label: "Niveau 20", description: "Atteins le niveau 20", unlocked: level >= 20, icon: "🐉" },
+    { id: "l3", label: "Niveau 3", description: "Atteins le niveau 3", unlocked: level >= 3, icon: "🌱", medal: m("3", "NIVEAU", "bronze", "crown", level, 3) },
+    { id: "b5", label: "Niveau 5", description: "Atteins le niveau 5", unlocked: level >= 5, icon: "👑", medal: m("5", "NIVEAU", "argent", "crown", level, 5) },
+    { id: "b6", label: "Niveau 10", description: "Atteins le niveau 10", unlocked: level >= 10, icon: "🏆", medal: m("10", "NIVEAU", "or", "crown", level, 10) },
+    { id: "l20", label: "Niveau 20", description: "Atteins le niveau 20", unlocked: level >= 20, icon: "🐉", medal: m("20", "NIVEAU", "diamant", "crown", level, 20) },
     // Points cumulés
-    { id: "p100", label: "100 pts", description: "100 points cumulés", unlocked: total >= 100, icon: "✨" },
-    { id: "b3", label: "500 pts", description: "500 points cumulés", unlocked: total >= 500, icon: "💯" },
-    { id: "b4", label: "1000 pts", description: "1000 points cumulés", unlocked: total >= 1000, icon: "🔺" },
-    { id: "p2500", label: "2 500 pts", description: "2 500 points cumulés", unlocked: total >= 2500, icon: "🚀" },
-    { id: "p5000", label: "5 000 pts", description: "5 000 points cumulés", unlocked: total >= 5000, icon: "🌟" },
+    { id: "p100", label: "100 pts", description: "100 points cumulés", unlocked: total >= 100, icon: "✨", medal: m("100", "POINTS", "bronze", "star", total, 100) },
+    { id: "b3", label: "500 pts", description: "500 points cumulés", unlocked: total >= 500, icon: "💯", medal: m("500", "POINTS", "argent", "star", total, 500) },
+    { id: "b4", label: "1000 pts", description: "1000 points cumulés", unlocked: total >= 1000, icon: "🔺", medal: m("1K", "POINTS", "or", "star", total, 1000) },
+    { id: "p2500", label: "2 500 pts", description: "2 500 points cumulés", unlocked: total >= 2500, icon: "🚀", medal: m("2,5K", "POINTS", "or", "star", total, 2500) },
+    { id: "p5000", label: "5 000 pts", description: "5 000 points cumulés", unlocked: total >= 5000, icon: "🌟", medal: m("5K", "POINTS", "diamant", "star", total, 5000) },
   ];
 }
 
