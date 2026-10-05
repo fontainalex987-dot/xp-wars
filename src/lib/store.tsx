@@ -6,6 +6,7 @@ import { celebrate } from "@/lib/celebrations";
 import { toast } from "sonner";
 import { BADGE_EMBLEMS, type Emblem } from "@/components/BadgeEmblem";
 import type { Medal } from "@/components/BadgeMedal";
+import { useUserBadgeIds } from "@/lib/player";
 
 export type Difficulty = "facile" | "moyenne" | "difficile";
 
@@ -345,6 +346,7 @@ export function useCompleteTask() {
       qc.invalidateQueries({ queryKey: ["challenge"] });
       qc.invalidateQueries({ queryKey: ["activity"] });
       qc.invalidateQueries({ queryKey: ["goals"] });
+      qc.invalidateQueries({ queryKey: ["user-badges"] });
       if (result?.goal) celebrate({ kind: "badge", icon: result.goal.emoji, label: "Objectif atteint", description: result.goal.title });
       await qc.invalidateQueries({ queryKey: ["profile"] });
       const nextLevel = (qc.getQueryData(["profile", userId]) as Profile | null | undefined)?.level ?? null;
@@ -1249,6 +1251,8 @@ export function useMyDuels() {
 
 // ------- Badges (derived, local) ---------
 export function useBadges(): Badge[] {
+  const { userId } = useAuth();
+  const { data: saved } = useUserBadgeIds(userId);
   const { data: profile } = useProfile();
   const { data: tasks } = useTodayTasks();
   const doneToday = (tasks ?? []).filter((t) => t.done).length;
@@ -1280,7 +1284,7 @@ export function useBadges(): Badge[] {
     { id: "p2500", label: "2 500 pts", description: "2 500 points cumulés", unlocked: total >= 2500, icon: "🚀", medal: m("2,5K", "POINTS", "or", "star", total, 2500) },
     { id: "p5000", label: "5 000 pts", description: "5 000 points cumulés", unlocked: total >= 5000, icon: "🌟", medal: m("5K", "POINTS", "diamant", "star", total, 5000) },
   ];
-  return list.map((b) => ({ ...b, emblem: BADGE_EMBLEMS[b.id] }));
+  return list.map((b) => ({ ...b, unlocked: b.unlocked || !!saved?.has(b.id), emblem: BADGE_EMBLEMS[b.id] }));
 }
 
 // ------- Goals ---------

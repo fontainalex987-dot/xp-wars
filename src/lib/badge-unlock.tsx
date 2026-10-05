@@ -1,6 +1,7 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import { useAuth, useBadges } from "@/lib/store";
 import { celebrate } from "@/lib/celebrations";
+import { useUserBadgeIds } from "@/lib/player";
 
 const KEY_PREFIX = "taskbattle.celebratedBadges";
 
@@ -31,10 +32,13 @@ function writeSet(userId: string, ids: Set<string>) {
  * Célèbre le déblocage d'un badge (toast + haptique) une seule fois par badge.
  * Au premier lancement pour un utilisateur, les badges déjà débloqués sont
  * enregistrés silencieusement (pas de célébration rétroactive).
+ * On attend que les badges sauvegardés côté serveur soient chargés, sinon des
+ * badges déjà gagnés seraient célébrés une seconde fois.
  */
 export function BadgeUnlockProvider({ children }: { children: ReactNode }) {
   const { userId } = useAuth();
   const badges = useBadges();
+  const { isSuccess: savedReady } = useUserBadgeIds(userId);
   const initializedFor = useRef<string | null>(null);
 
   const unlockedKey = badges
@@ -47,6 +51,7 @@ export function BadgeUnlockProvider({ children }: { children: ReactNode }) {
       initializedFor.current = null;
       return;
     }
+    if (!savedReady) return;
     const unlocked = badges.filter((b) => b.unlocked);
     const stored = readSet(userId);
 
@@ -70,7 +75,7 @@ export function BadgeUnlockProvider({ children }: { children: ReactNode }) {
     });
     writeSet(userId, celebrated);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userId, unlockedKey]);
+  }, [userId, unlockedKey, savedReady]);
 
   return <>{children}</>;
 }

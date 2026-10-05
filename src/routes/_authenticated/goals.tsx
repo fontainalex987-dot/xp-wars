@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Plus, Trash2, X } from "lucide-react";
+import { Eye, Lock, Plus, Trash2, X } from "lucide-react";
+import { useGoalPrivacy, useSetGoalPrivate } from "@/lib/player";
 import { AppShell } from "@/components/AppShell";
 import { GoalCard } from "@/components/GoalCard";
 import { GOAL_EMOJIS, isGoalActive, useAuth, useCreateGoal, useDeleteGoal, useMyGoals, useMyGroup, type Goal } from "@/lib/store";
@@ -33,11 +34,32 @@ function GoalsPage() {
     try { await del.mutateAsync(g.id); toast.success("Objectif supprimé"); }
     catch (e) { toast.error(e instanceof Error ? e.message : "Erreur"); }
   };
-  const action = (g: Goal) => canDelete(g) ? (
-    <button onClick={() => remove(g)} aria-label="Supprimer" className="size-8 rounded-lg bg-black/30 ring-1 ring-white/10 flex items-center justify-center text-muted-foreground">
-      <Trash2 className="size-4" />
-    </button>
-  ) : null;
+  const { data: privacy } = useGoalPrivacy(userId);
+  const setPrivate = useSetGoalPrivate();
+  const togglePrivate = async (g: Goal) => {
+    const next = !privacy?.get(g.id);
+    try {
+      await setPrivate.mutateAsync({ id: g.id, isPrivate: next });
+      toast.success(next ? "Objectif privé : visible par toi seul" : "Objectif visible par tes amis et ton groupe");
+    } catch (e) { toast.error(e instanceof Error ? e.message : "Erreur"); }
+  };
+  const action = (g: Goal) => {
+    const mine = g.userId === userId && !g.groupId;
+    const isPriv = !!privacy?.get(g.id);
+    const privacyBtn = mine ? (
+      <button onClick={() => togglePrivate(g)} aria-label={isPriv ? "Rendre visible" : "Rendre privé"} title={isPriv ? "Privé : visible par toi seul" : "Visible par tes amis et ton groupe"}
+        className={`size-8 rounded-lg ring-1 flex items-center justify-center ${isPriv ? "bg-brand/15 ring-brand/40 text-brand" : "bg-black/30 ring-white/10 text-muted-foreground"}`}>
+        {isPriv ? <Lock className="size-4" /> : <Eye className="size-4" />}
+      </button>
+    ) : null;
+    const delBtn = canDelete(g) ? (
+      <button onClick={() => remove(g)} aria-label="Supprimer" className="size-8 rounded-lg bg-black/30 ring-1 ring-white/10 flex items-center justify-center text-muted-foreground">
+        <Trash2 className="size-4" />
+      </button>
+    ) : null;
+    if (!privacyBtn && !delBtn) return null;
+    return <div className="flex items-center gap-1.5">{privacyBtn}{delBtn}</div>;
+  };
 
   return (
     <AppShell>

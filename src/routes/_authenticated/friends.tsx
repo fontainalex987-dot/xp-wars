@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { DuelDurationPicker } from "@/components/DuelDurationPicker";
@@ -124,6 +124,7 @@ function FriendsPage() {
                 <div
                   className="p-4 rounded-[20px] bg-card ring-1 ring-white/5 flex items-center gap-3"
                 >
+                  <Link to="/member/$memberId" params={{ memberId: f.id }} className="flex items-center gap-3 flex-1 min-w-0">
                   <div className="size-12 rounded-full bg-zinc-800 flex items-center justify-center text-2xl shrink-0">
                     <Avatar value={f.avatar} />
                   </div>
@@ -133,6 +134,7 @@ function FriendsPage() {
                       Niv. {f.level} · {f.totalPoints.toLocaleString()} pts · 🔥 {f.streak}j
                     </p>
                   </div>
+                  </Link>
 
                   {activeDuel ? (
                     <span className="text-xs font-bold text-brand bg-brand/10 px-3 py-2 rounded-xl ring-1 ring-brand/20">
