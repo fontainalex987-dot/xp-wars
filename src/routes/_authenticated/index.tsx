@@ -6,7 +6,7 @@ import { HomeSkeleton } from "@/components/Skeletons";
 import { XpBar } from "@/components/XpBar";
 import { Avatar } from "@/components/Avatar";
 import { GoalCard } from "@/components/GoalCard";
-import { isGoalActive, useGroupMembers, useMyGoals, useMyGroup, useProfile, useTodayTasks, xpToNext } from "@/lib/store";
+import { isGoalActive, useAuth, useGroupMembers, useMyGoals, useMyGroup, useProfile, useTodayTasks, xpToNext } from "@/lib/store";
 
 export const Route = createFileRoute("/_authenticated/")({
   head: () => ({
@@ -21,6 +21,7 @@ export const Route = createFileRoute("/_authenticated/")({
 });
 
 function HomePage() {
+  const { userId } = useAuth();
   const { data: profile } = useProfile();
   const { data: tasks = [] } = useTodayTasks();
   const { data: group } = useMyGroup();
@@ -250,14 +251,15 @@ function HomePage() {
                 const isFirst = rank === 1;
                 const heights = { 1: "h-20", 2: "h-12", 3: "h-8" } as const;
                 return (
-                  <div key={f.id} className="flex flex-col items-center gap-2">
+                  <Link key={f.id} {...(f.id === userId ? { to: "/profile" as const } : { to: "/member/$memberId" as const, params: { memberId: f.id } })} className="flex flex-col items-center gap-2 active:scale-95 transition-transform">
                     <div className={`rounded-full p-1 ring-2 ${isFirst ? "ring-brand size-16" : rank === 2 ? "ring-zinc-500/40 size-12" : "ring-orange-900/40 size-12"}`}>
                       <div className="size-full rounded-full bg-zinc-800 flex items-center justify-center text-2xl"><Avatar value={f.avatar} /></div>
                     </div>
                     <div className={`w-14 rounded-t-lg flex items-center justify-center font-bold ${heights[rank]} ${isFirst ? "bg-brand text-primary-foreground text-xl" : "bg-zinc-800/80 text-text-subtle"}`}>
                       {rank}
                     </div>
-                  </div>
+                    <span className="text-[11px] text-muted-foreground truncate max-w-[80px]">{f.pseudo}</span>
+                  </Link>
                 );
               })}
             </div>

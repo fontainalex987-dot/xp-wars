@@ -149,7 +149,7 @@ function LeaderboardPage() {
               const isFirst = rank === 1;
               const heights = { 1: "h-24", 2: "h-16", 3: "h-10" } as const;
               return (
-                <div key={f.id} className="flex flex-col items-center gap-2 flex-1">
+                <Link key={f.id} {...(f.id === profile?.id ? { to: "/profile" as const } : { to: "/member/$memberId" as const, params: { memberId: f.id } })} className="flex flex-col items-center gap-2 flex-1 active:scale-95 transition-transform">
                   <span className="text-[11px] text-muted-foreground font-bold truncate">{f.pseudo}</span>
                   <div className={`rounded-full p-1 ring-2 ${isFirst ? "ring-brand size-20" : rank === 2 ? "ring-zinc-500/40 size-14" : "ring-orange-900/40 size-14"}`}>
                     <div className="size-full rounded-full bg-zinc-800 flex items-center justify-center text-3xl"><Avatar value={f.avatar} /></div>
@@ -158,7 +158,7 @@ function LeaderboardPage() {
                     <span className="text-2xl">{medals[rank - 1]}</span>
                     <span className="text-xs font-display tabular-nums">{pick(f, range)} pts</span>
                   </div>
-                </div>
+                </Link>
               );
             })}
           </div>

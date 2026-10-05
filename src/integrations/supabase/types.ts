@@ -249,6 +249,7 @@ export type Database = {
           ends_on: string
           group_id: string | null
           id: string
+          is_private: boolean
           starts_on: string
           target_count: number
           title: string
@@ -261,6 +262,7 @@ export type Database = {
           ends_on: string
           group_id?: string | null
           id?: string
+          is_private?: boolean
           starts_on?: string
           target_count: number
           title: string
@@ -273,6 +275,7 @@ export type Database = {
           ends_on?: string
           group_id?: string | null
           id?: string
+          is_private?: boolean
           starts_on?: string
           target_count?: number
           title?: string
@@ -823,6 +826,32 @@ export type Database = {
           },
         ]
       }
+      user_badges: {
+        Row: {
+          badge_id: string
+          unlocked_at: string
+          user_id: string
+        }
+        Insert: {
+          badge_id: string
+          unlocked_at?: string
+          user_id: string
+        }
+        Update: {
+          badge_id?: string
+          unlocked_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_badges_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -868,6 +897,8 @@ export type Database = {
         }
       }
       apply_streak_freezes: { Args: never; Returns: undefined }
+      award_badges: { Args: { _user: string }; Returns: undefined }
+      best_streak: { Args: { _user: string }; Returns: number }
       cancel_duel: {
         Args: { _duel: string }
         Returns: {
@@ -1107,6 +1138,15 @@ export type Database = {
         Args: { _ids?: string[] }
         Returns: undefined
       }
+      member_week_summary: {
+        Args: { _user: string }
+        Returns: {
+          active_days: number
+          categories: Json
+          points: number
+          quests_done: number
+        }[]
+      }
       my_duels: {
         Args: never
         Returns: {
@@ -1189,6 +1229,23 @@ export type Database = {
         Args: { _level: number; _xp: number }
         Returns: Record<string, unknown>
       }
+      player_profile: {
+        Args: { _user: string }
+        Returns: {
+          avatar: string
+          goal: string
+          id: string
+          is_friend: boolean
+          level: number
+          my_points_week: number
+          points_week: number
+          pseudo: string
+          shared_group: string
+          streak: number
+          total_points: number
+          xp: number
+        }[]
+      }
       push_notify: {
         Args: {
           _body: string
@@ -1266,6 +1323,13 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      user_badges_of: {
+        Args: { _user: string }
+        Returns: {
+          badge_id: string
+          unlocked_at: string
+        }[]
       }
       user_date_at: { Args: { _ts: string; _user: string }; Returns: string }
       user_goals: {
