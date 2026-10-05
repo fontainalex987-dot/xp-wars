@@ -4,11 +4,12 @@
 //   (base64), chargés une fois puis gardés en mémoire.
 // Le son peut être coupé par l'utilisateur (préférence stockée sur l'appareil).
 import { supabase } from "@/integrations/supabase/client";
+import { buildFreezeSound } from "@/lib/freezeSound";
 
 const SR = 44100;
 const STORAGE_KEY = "questlog.sound";
 
-export type SoundName = "quest" | "badge" | "level" | "podium";
+export type SoundName = "quest" | "badge" | "level" | "podium" | "freeze";
 
 /* ---------- préférence ---------- */
 
@@ -114,6 +115,10 @@ function load(c: AudioContext, name: SoundName): Promise<AudioBuffer | null> {
         const data = buildQuest();
         buf = c.createBuffer(1, data.length, SR);
         buf.getChannelData(0).set(data);
+      } else if (name === "freeze") {
+        const data = buildFreezeSound(c.sampleRate);
+        buf = c.createBuffer(1, data.length, c.sampleRate);
+        buf.getChannelData(0).set(data);
       } else {
         const { data, error } = await supabase.from("app_sounds").select("data_b64").eq("name", name).maybeSingle();
         if (error || !data?.data_b64) return null;
@@ -172,5 +177,15 @@ export function playSound(name: SoundName) {
     });
   } catch {
     // ignore : le son est un bonus, jamais bloquant
+  }
+}
+
+/** Prépare un son à l'avance (sans le jouer) pour qu'il parte sans latence. */
+export function primeSound(name: SoundName) {
+  try {
+    const c = getCtx();
+    if (c) void load(c, name);
+  } catch {
+    // ignore
   }
 }

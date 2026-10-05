@@ -6,6 +6,7 @@ import { Avatar } from "@/components/Avatar";
 import { ProfileSkeleton } from "@/components/Skeletons";
 import { XpBar } from "@/components/XpBar";
 import { BadgeEmblem, ICON_CREDIT } from "@/components/BadgeEmblem";
+import { showFreezeOverlay } from "@/components/FreezeOverlay";
 import { celebrate } from "@/lib/celebrations";
 import { useAuth, useBadges, useProfile, useTodayTasks, xpToNext, type Badge } from "@/lib/store";
 import { usePushNotifications } from "@/lib/push-notifications";
@@ -185,13 +186,22 @@ function ProfilePage() {
         <div className="flex items-end justify-between mb-3">
           <h2 className="text-lg font-medium">Badges</h2>
           {isTester && (
-            <button
-              type="button"
-              onClick={replayAll}
-              className="text-xs font-semibold text-brand bg-brand/10 ring-1 ring-brand/30 px-3 py-1.5 rounded-full active:scale-95"
-            >
-              Rejouer tout (test)
-            </button>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={replayAll}
+                className="text-xs font-semibold text-brand bg-brand/10 ring-1 ring-brand/30 px-3 py-1.5 rounded-full active:scale-95"
+              >
+                Rejouer tout (test)
+              </button>
+              <button
+                type="button"
+                onClick={showFreezeOverlay}
+                className="text-xs font-semibold text-streak-freeze bg-streak-freeze/10 ring-1 ring-streak-freeze/30 px-3 py-1.5 rounded-full active:scale-95"
+              >
+                Rejouer le gel (test)
+              </button>
+            </div>
           )}
         </div>
         <div className="grid grid-cols-3 gap-3">

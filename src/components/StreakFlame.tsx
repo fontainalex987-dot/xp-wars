@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Flame, Snowflake } from "lucide-react";
-import { toast } from "sonner";
-import { haptics } from "@/lib/haptics";
+import { showFreezeOverlay } from "@/components/FreezeOverlay";
 import { useAuth, useProfile, useRecentStreakFreeze, todayLocal } from "@/lib/store";
 
 const MAX_FREEZES = 2;
@@ -57,11 +56,7 @@ export function StreakFlame() {
 
     celebratedFor.current = freezeDate;
     setFrozen(true);
-    haptics.badgeUnlock();
-    toast.success("🧊 Ta série est protégée !", {
-      description: "Tu n'as rien fait hier, un gel a été utilisé automatiquement. Aucun souci, on continue !",
-      duration: 6000,
-    });
+    showFreezeOverlay();
     seen.add(freezeDate);
     writeSeen(userId, seen);
 
