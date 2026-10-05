@@ -20,6 +20,7 @@ import { BadgeUnlockProvider } from "@/lib/badge-unlock";
 import { BottomNav } from "@/components/BottomNav";
 import { PointsBurst } from "@/components/PointsBurst";
 import { CelebrationOverlay } from "@/components/CelebrationOverlay";
+import { FreezeOverlay } from "@/components/FreezeOverlay";
 import { SeasonRecapOverlay } from "@/components/SeasonRecapOverlay";
 import { Toaster } from "sonner";
 
@@ -153,6 +154,7 @@ function RootComponent() {
             <BottomNav />
             <PointsBurst />
             <CelebrationOverlay />
+            <FreezeOverlay />
             <SeasonRecapOverlay />
             <Toaster theme="dark" position="top-center" richColors />
             </BadgeUnlockProvider>

@@ -67,6 +67,24 @@ export type Database = {
         }
         Relationships: []
       }
+      app_sound_chunks: {
+        Row: {
+          data: string
+          idx: number
+          name: string
+        }
+        Insert: {
+          data: string
+          idx: number
+          name: string
+        }
+        Update: {
+          data?: string
+          idx?: number
+          name?: string
+        }
+        Relationships: []
+      }
       app_sounds: {
         Row: {
           data_b64: string
