@@ -25,7 +25,7 @@ export const Route = createFileRoute("/_authenticated/profile")({
   component: ProfilePage,
 });
 
-const TESTER_IDS = ["010178ce-5033-4dc7-a8c8-0398100646dd", "0d437e75-48e8-4fcc-8151-b88df08f8fe0"];
+const TESTER_IDS = ["010178ce-5033-4dc7-a8c8-0398100646dd"];
 
 function ProfilePage() {
   const { data: profile } = useProfile();
