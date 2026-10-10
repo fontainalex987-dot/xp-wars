@@ -117,7 +117,7 @@ function AuthPage() {
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <Logo size={64} className="mx-auto mb-4" />
-          <h1 className="text-3xl font-display font-bold tracking-tight">XP Wars</h1>
+          <h1 className="text-3xl font-display font-bold tracking-tight">XP Wars — Connexion et Inscription</h1>
           <p className="text-sm text-muted-foreground mt-1">Défie tes amis. Gagne l'XP.</p>
         </div>
 

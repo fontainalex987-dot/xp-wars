@@ -232,7 +232,7 @@ function NewTaskSheet({
       >
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold">Nouvelle quête</h2>
-          <button type="button" onClick={onClose} className="size-8 rounded-full bg-zinc-800 flex items-center justify-center">
+          <button type="button" onClick={onClose} aria-label="Fermer" className="size-8 rounded-full bg-zinc-800 flex items-center justify-center">
             <X className="size-4" />
           </button>
         </div>
@@ -364,7 +364,7 @@ function EditTaskSheet({
       >
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold">Modifier la quête</h2>
-          <button type="button" onClick={onClose} className="size-8 rounded-full bg-zinc-800 flex items-center justify-center">
+          <button type="button" onClick={onClose} aria-label="Fermer" className="size-8 rounded-full bg-zinc-800 flex items-center justify-center">
             <X className="size-4" />
           </button>
         </div>
