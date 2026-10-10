@@ -135,6 +135,36 @@ function AuthPage() {
           ))}
         </div>
 
+        <div className="space-y-3 mb-4">
+          <button
+            type="button"
+            onClick={() => signInWith("apple")}
+            disabled={oauthLoading}
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-black text-white font-semibold ring-1 ring-white/15 active:scale-95 transition-transform disabled:opacity-50"
+          >
+            <AppleIcon />
+            Continuer avec Apple
+          </button>
+          <button
+            type="button"
+            onClick={() => signInWith("google")}
+            disabled={oauthLoading}
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-white text-black font-semibold active:scale-95 transition-transform disabled:opacity-50"
+          >
+            <GoogleIcon />
+            Continuer avec Google
+          </button>
+        </div>
+
+        <div className="flex items-center gap-3 mb-2">
+          <div className="h-px flex-1 bg-white/10" />
+          <span className="text-xs text-muted-foreground">ou</span>
+          <div className="h-px flex-1 bg-white/10" />
+        </div>
+        <p className="text-xs text-muted-foreground text-center mb-4">
+          Déjà un compte avec ton email ? Continue avec ton email habituel pour retrouver ta progression.
+        </p>
+
         <form onSubmit={submit} className="space-y-4">
           <div>
             <label className="text-xs uppercase tracking-widest text-muted-foreground">Email</label>
