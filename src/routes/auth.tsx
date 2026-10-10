@@ -44,8 +44,43 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState(false);
   const navigate = useNavigate();
   const { userId } = useAuth();
+
+  const signInWith = async (provider: "apple" | "google") => {
+    setOauthLoading(true);
+    try {
+      const result = await lovable.auth.signInWithOAuth(provider, {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) {
+        toast.error(result.error.message ?? "Une erreur est survenue");
+        setOauthLoading(false);
+        return;
+      }
+      if (result.redirected) return;
+      setOauthLoading(false);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Une erreur est survenue");
+      setOauthLoading(false);
+    }
+  };
+
+  const resetPassword = async () => {
+    if (!email) {
+      toast.error("Entre d'abord ton email");
+      return;
+    }
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Email envoyé : ouvre le lien pour choisir un nouveau mot de passe");
+  };
 
   useEffect(() => {
     if (userId) navigate({ to: "/", replace: true });
