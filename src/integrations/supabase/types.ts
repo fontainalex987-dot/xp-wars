@@ -852,6 +852,21 @@ export type Database = {
           },
         ]
       }
+      xp_rules: {
+        Row: {
+          difficulty: Database["public"]["Enums"]["difficulty"]
+          points: number
+        }
+        Insert: {
+          difficulty: Database["public"]["Enums"]["difficulty"]
+          points: number
+        }
+        Update: {
+          difficulty?: Database["public"]["Enums"]["difficulty"]
+          points?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -1397,6 +1412,10 @@ export type Database = {
         }[]
       }
       user_tz: { Args: { _user: string }; Returns: string }
+      xp_for: {
+        Args: { _d: Database["public"]["Enums"]["difficulty"] }
+        Returns: number
+      }
       xp_to_next: { Args: { _level: number }; Returns: number }
     }
     Enums: {
