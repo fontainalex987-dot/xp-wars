@@ -331,14 +331,15 @@ export function useCompleteTask() {
       if (!userId) throw new Error("Not authenticated");
       const prevLevel = (qc.getQueryData(["profile", userId]) as Profile | null | undefined)?.level ?? null;
       // Atomic server-side completion: handles XP, level, total_points and streak in a single transaction.
-      const { error } = await supabase.rpc("complete_task", { _task_id: task.id });
+      const { data: done, error } = await supabase.rpc("complete_task", { _task_id: task.id });
       if (error) throw error;
+      const bonus = Number(((done as unknown) as Array<{ bonus?: number }> | null)?.[0]?.bonus ?? 0);
       let goal: { emoji: string; title: string } | null = null;
       if (task.goalId) {
         const { data: g } = await supabase.from("goals").select("emoji,title,completed_at").eq("id", task.goalId).maybeSingle();
         if (g?.completed_at && Date.now() - new Date(g.completed_at).getTime() < 15000) goal = { emoji: g.emoji, title: g.title };
       }
-      return { prevLevel, goal };
+      return { prevLevel, goal, bonus };
     },
     onSuccess: async (result) => {
       qc.invalidateQueries({ queryKey: ["tasks"] });
@@ -348,6 +349,7 @@ export function useCompleteTask() {
       qc.invalidateQueries({ queryKey: ["goals"] });
       qc.invalidateQueries({ queryKey: ["user-badges"] });
       if (result?.goal) celebrate({ kind: "badge", icon: result.goal.emoji, label: "Objectif atteint", description: result.goal.title });
+      if (result?.bonus && result.bonus > 0) toast.success(`🎂 Boost d'anniversaire : +${result.bonus} XP bonus`);
       await qc.invalidateQueries({ queryKey: ["profile"] });
       const nextLevel = (qc.getQueryData(["profile", userId]) as Profile | null | undefined)?.level ?? null;
       if (result?.prevLevel != null && nextLevel != null && nextLevel > result.prevLevel) {

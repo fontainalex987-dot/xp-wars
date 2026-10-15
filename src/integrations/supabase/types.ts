@@ -687,6 +687,62 @@ export type Database = {
           },
         ]
       }
+      special_gifts: {
+        Row: {
+          badge_description: string | null
+          badge_emoji: string | null
+          badge_label: string | null
+          boost_label: string | null
+          created_at: string
+          highlight_until: string | null
+          id: string
+          message: string | null
+          seen_at: string | null
+          signature: string | null
+          stats: Json
+          title: string
+          user_id: string
+        }
+        Insert: {
+          badge_description?: string | null
+          badge_emoji?: string | null
+          badge_label?: string | null
+          boost_label?: string | null
+          created_at?: string
+          highlight_until?: string | null
+          id?: string
+          message?: string | null
+          seen_at?: string | null
+          signature?: string | null
+          stats?: Json
+          title: string
+          user_id: string
+        }
+        Update: {
+          badge_description?: string | null
+          badge_emoji?: string | null
+          badge_label?: string | null
+          boost_label?: string | null
+          created_at?: string
+          highlight_until?: string | null
+          id?: string
+          message?: string | null
+          seen_at?: string | null
+          signature?: string | null
+          stats?: Json
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "special_gifts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       streak_freezes: {
         Row: {
           created_at: string
@@ -852,6 +908,53 @@ export type Database = {
           },
         ]
       }
+      valid_timezones: {
+        Row: {
+          name: string
+        }
+        Insert: {
+          name: string
+        }
+        Update: {
+          name?: string
+        }
+        Relationships: []
+      }
+      xp_boosts: {
+        Row: {
+          ends_at: string
+          id: string
+          multiplier: number
+          reason: string | null
+          starts_at: string
+          user_id: string
+        }
+        Insert: {
+          ends_at: string
+          id?: string
+          multiplier: number
+          reason?: string | null
+          starts_at: string
+          user_id: string
+        }
+        Update: {
+          ends_at?: string
+          id?: string
+          multiplier?: number
+          reason?: string | null
+          starts_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "xp_boosts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       xp_rules: {
         Row: {
           difficulty: Database["public"]["Enums"]["difficulty"]
@@ -939,6 +1042,7 @@ export type Database = {
       complete_task: {
         Args: { _task_id: string }
         Returns: {
+          bonus: number
           level: number
           streak: number
           total_points: number
@@ -986,6 +1090,10 @@ export type Database = {
       }
       dispatch_daily_reminders: { Args: never; Returns: undefined }
       dispatch_overtake_alerts: { Args: never; Returns: undefined }
+      display_pseudo: {
+        Args: { _pseudo: string; _user: string }
+        Returns: string
+      }
       duel_points: {
         Args: { _ends: string; _starts: string; _user: string }
         Returns: number
@@ -1145,6 +1253,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      mark_gift_seen: { Args: { _id: string }; Returns: undefined }
       mark_season_recap_seen: {
         Args: { _group: string; _season: string }
         Returns: undefined
@@ -1315,6 +1424,15 @@ export type Database = {
         }
       }
       shares_group: { Args: { _a: string; _b: string }; Returns: boolean }
+      special_badges_of: {
+        Args: { _user: string }
+        Returns: {
+          badge_description: string
+          badge_emoji: string
+          badge_label: string
+          created_at: string
+        }[]
+      }
       sync_today_tasks: {
         Args: never
         Returns: {

@@ -7,6 +7,7 @@ import { ProfileSkeleton } from "@/components/Skeletons";
 import { XpBar } from "@/components/XpBar";
 import { BadgeEmblem, ICON_CREDIT } from "@/components/BadgeEmblem";
 import { showFreezeOverlay } from "@/components/FreezeOverlay";
+import { SpecialBadges } from "@/components/SpecialBadges";
 import { celebrate } from "@/lib/celebrations";
 import { useAuth, useBadges, useProfile, useTodayTasks, xpToNext, type Badge } from "@/lib/store";
 import { usePushNotifications } from "@/lib/push-notifications";
@@ -179,6 +180,8 @@ function ProfilePage() {
           </div>
         </div>
       </section>
+
+      <SpecialBadges userId={userId} />
 
 
 

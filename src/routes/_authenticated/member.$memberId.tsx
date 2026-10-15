@@ -6,6 +6,7 @@ import { AppShell } from "@/components/AppShell";
 import { Avatar } from "@/components/Avatar";
 import { GoalCard } from "@/components/GoalCard";
 import { BadgeEmblem } from "@/components/BadgeEmblem";
+import { SpecialBadges } from "@/components/SpecialBadges";
 import { DuelDurationPicker } from "@/components/DuelDurationPicker";
 import { TrophyShowcase } from "@/lib/seasons";
 import { haptics } from "@/lib/haptics";
@@ -247,6 +248,8 @@ function PlayerProfilePage() {
           </div>
         </section>
       )}
+
+      <SpecialBadges userId={memberId} />
 
       <section className="px-5 py-4">
         <div className="flex items-baseline justify-between mb-3">
