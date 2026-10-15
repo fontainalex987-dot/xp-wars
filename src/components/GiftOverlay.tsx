@@ -279,9 +279,9 @@ function GiftScene({ gift, onDone }: { gift: Gift; onDone: () => void }) {
     raf = requestAnimationFrame(frame);
 
     const center = (el: Element) => { const r = el.getBoundingClientRect(), s = R.getBoundingClientRect(); return [r.left - s.left + r.width / 2, r.top - s.top + r.height / 2]; };
-    const split = (el: HTMLElement, text: string) => { el.textContent = ""; return [...text].map((ch) => { const s = document.createElement("span"); s.className = "g-ch"; s.textContent = ch === " " ? " " : ch; s.style.opacity = "0"; el.appendChild(s); return s; }); };
+    const split = (el: HTMLElement, text: string) => { el.textContent = ""; return [...text].map((ch) => { const s = document.createElement("span"); s.className = "g-ch"; s.textContent = ch === " " ? String.fromCharCode(160) : ch; s.style.opacity = "0"; el.appendChild(s); return s; }); };
     const countUp = (el: HTMLElement, to: number, ms: number, suffix = "") => new Promise<void>((res) => {
-      const t0 = performance.now(); const fmt = (v: number) => v.toLocaleString("fr-FR").replace(/ | /g, " ") + suffix;
+      const t0 = performance.now(); const fmt = (v: number) => v.toLocaleString("fr-FR").replace(new RegExp("[" + String.fromCharCode(8239, 160) + "]", "g"), String.fromCharCode(8201)) + suffix;
       const step = (t: number) => { if (!alive) return res(); const k = Math.min(1, (t - t0) / ms); const e = k === 1 ? 1 : 1 - Math.pow(2, -10 * k); el.textContent = fmt(Math.round(to * e)); if (k < 1) requestAnimationFrame(step); else res(); };
       requestAnimationFrame(step);
     });
